@@ -1461,15 +1461,22 @@
       box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
     }
 
-    /* CAJA LAYOUT */
+    /* CAJA LAYOUT & INFORMES LAYOUT */
     .caja-layout {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr;
       gap: 1.5rem;
     }
 
+    .informes-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
     @media (max-width: 1024px) {
-      .caja-layout {
+      .informes-layout {
         grid-template-columns: 1fr;
       }
     }
@@ -3109,89 +3116,6 @@
             <!-- Renderizado de mesas con opciones de cobro y cierre -->
           </div>
         </div>
-
-        <!-- PANEL LATERAL FINANCIERO -->
-        <div class="sidebar-card">
-          <h3>📊 Ventas del Día</h3>
-          
-          <div class="stat-row">
-            <span class="stat-label">Tipo de Cambio</span>
-            <span class="stat-val" style="color: #0369a1;">₡<span id="cajaExchangeRateVal">510</span></span>
-          </div>
-
-          <div class="stat-row">
-            <span class="stat-label">Total Ventas (₡)</span>
-            <span class="stat-val" style="color: #15803d;" id="cajaTotalVentasColones">₡0</span>
-          </div>
-
-          <div class="stat-row">
-            <span class="stat-label">Equivalente en ($)</span>
-            <span class="stat-val" id="cajaTotalVentasDolares">$0.00</span>
-          </div>
-
-          <!-- DETALLE POR MÉTODOS DE PAGO / RUBROS DIRECTO EN LA TARJETA -->
-          <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0.65rem 0.75rem; margin: 0.65rem 0;">
-            <div style="font-size: 0.78rem; font-weight: 800; color: #475569; margin-bottom: 0.4rem; text-transform: uppercase;">
-              Rubros de Cobro / Arqueo
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.3rem;">
-              <span>💵 Efectivo Colones:</span>
-              <strong style="color: #15803d;" id="cajaTotalEfectivoCRC">₡0 (0)</strong>
-              <span id="cajaTotalEfectivo" style="display: none;"></span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.3rem;">
-              <span>💵 Efectivo Dólares:</span>
-              <strong style="color: #0369a1;" id="cajaTotalEfectivoUSD">$0.00 (0)</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.3rem;">
-              <span>💳 Tarjeta:</span>
-              <strong style="color: #0369a1;" id="cajaTotalTarjeta">₡0 (0)</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
-              <span>📱 SINPE Móvil:</span>
-              <strong style="color: #7c3aed;" id="cajaTotalSinpe">₡0 (0)</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-top: 0.45rem; padding-top: 0.45rem; border-top: 1px dashed #cbd5e1;">
-              <span style="color: #4338ca; font-weight: 700;">🧾 Ventas a Crédito (Emitidas):</span>
-              <strong style="color: #4338ca;" id="cajaTotalVentasCreditoCRC">₡0 (0)</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
-              <span style="color: #15803d; font-weight: 700;">💰 Cobro Créditos (Ingresado):</span>
-              <strong style="color: #15803d;" id="cajaTotalCobroCreditosCRC">₡0 (0)</strong>
-            </div>
-          </div>
-
-          <!-- RESUMEN ORIGEN DE COBROS: CAJA VS MESEROS -->
-          <div style="background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0.6rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.82rem;">
-            <div style="font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">
-              Origen de los Cobros
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-              <span style="color: #0369a1; font-weight: 700;">🏢 Directo en Caja:</span>
-              <strong style="color: #0369a1;" id="cajaDirectoTotal">₡0</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span style="color: #b45309; font-weight: 700;">👤 Cobrado por Meseros:</span>
-              <strong style="color: #b45309;" id="cajaMeserosTotal">₡0</strong>
-            </div>
-          </div>
-
-          <div style="margin-top: 0.5rem;">
-            <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">Semicierre por Mesero</h4>
-            <div id="semicierreMeserosList" style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <!-- Resumen dinámico por mesero -->
-            </div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.75rem;">
-            <button class="btn btn-secondary" onclick="app.abrirModalDetalleCobros()" style="font-size: 0.82rem; padding: 0.5rem; font-weight: 700;">
-              📋 Ver Detalle de Cobros Realizados
-            </button>
-            <button class="btn btn-primary" onclick="app.abrirModalSemicierre()" style="font-size: 0.82rem; padding: 0.5rem; font-weight: 700;">
-              📑 Arqueo y Cierre de Caja
-            </button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -3447,7 +3371,10 @@
         </div>
       </div>
 
-      <!-- FRANJA HORIZONTAL DE FECHAS ESTILO CALENDARIO RÁPIDO -->
+      <div class="informes-layout">
+        <!-- COLUMNA PRINCIPAL DE INFORMES Y REPORTES -->
+        <div style="min-width: 0;">
+          <!-- FRANJA HORIZONTAL DE FECHAS ESTILO CALENDARIO RÁPIDO -->
       <div class="informe-date-strip-wrapper">
         <div class="informe-date-pills-scroll" id="informeDatePillsContainer">
           <!-- Generado dinámicamente por renderInformesVentas() -->
@@ -3586,6 +3513,91 @@
                 <!-- Generado dinámicamente -->
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+        </div>
+
+        <!-- PANEL LATERAL FINANCIERO (VENTAS DEL DÍA TRASLADADO DESDE CAJA) -->
+        <div class="sidebar-card" id="informesVentasDiaPanel">
+          <h3>📊 Ventas del Día</h3>
+          
+          <div class="stat-row">
+            <span class="stat-label">Tipo de Cambio</span>
+            <span class="stat-val" style="color: #0369a1;">₡<span id="cajaExchangeRateVal">510</span></span>
+          </div>
+
+          <div class="stat-row">
+            <span class="stat-label">Total Ventas (₡)</span>
+            <span class="stat-val" style="color: #15803d;" id="cajaTotalVentasColones">₡0</span>
+          </div>
+
+          <div class="stat-row">
+            <span class="stat-label">Equivalente en ($)</span>
+            <span class="stat-val" id="cajaTotalVentasDolares">$0.00</span>
+          </div>
+
+          <!-- DETALLE POR MÉTODOS DE PAGO / RUBROS DIRECTO EN LA TARJETA -->
+          <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 0.65rem 0.75rem; margin: 0.65rem 0;">
+            <div style="font-size: 0.78rem; font-weight: 800; color: #475569; margin-bottom: 0.4rem; text-transform: uppercase;">
+              Rubros de Cobro / Arqueo
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.3rem;">
+              <span>💵 Efectivo Colones:</span>
+              <strong style="color: #15803d;" id="cajaTotalEfectivoCRC">₡0 (0)</strong>
+              <span id="cajaTotalEfectivo" style="display: none;"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.3rem;">
+              <span>💵 Efectivo Dólares:</span>
+              <strong style="color: #0369a1;" id="cajaTotalEfectivoUSD">$0.00 (0)</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.3rem;">
+              <span>💳 Tarjeta:</span>
+              <strong style="color: #0369a1;" id="cajaTotalTarjeta">₡0 (0)</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+              <span>📱 SINPE Móvil:</span>
+              <strong style="color: #7c3aed;" id="cajaTotalSinpe">₡0 (0)</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-top: 0.45rem; padding-top: 0.45rem; border-top: 1px dashed #cbd5e1;">
+              <span style="color: #4338ca; font-weight: 700;">🧾 Ventas a Crédito (Emitidas):</span>
+              <strong style="color: #4338ca;" id="cajaTotalVentasCreditoCRC">₡0 (0)</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+              <span style="color: #15803d; font-weight: 700;">💰 Cobro Créditos (Ingresado):</span>
+              <strong style="color: #15803d;" id="cajaTotalCobroCreditosCRC">₡0 (0)</strong>
+            </div>
+          </div>
+
+          <!-- RESUMEN ORIGEN DE COBROS: CAJA VS MESEROS -->
+          <div style="background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0.6rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.82rem;">
+            <div style="font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">
+              Origen de los Cobros
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+              <span style="color: #0369a1; font-weight: 700;">🏢 Directo en Caja:</span>
+              <strong style="color: #0369a1;" id="cajaDirectoTotal">₡0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #b45309; font-weight: 700;">👤 Cobrado por Meseros:</span>
+              <strong style="color: #b45309;" id="cajaMeserosTotal">₡0</strong>
+            </div>
+          </div>
+
+          <div style="margin-top: 0.5rem;">
+            <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">Semicierre por Mesero</h4>
+            <div id="semicierreMeserosList" style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <!-- Resumen dinámico por mesero -->
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.75rem;">
+            <button class="btn btn-secondary" onclick="app.abrirModalDetalleCobros()" style="font-size: 0.82rem; padding: 0.5rem; font-weight: 700;">
+              📋 Ver Detalle de Cobros Realizados
+            </button>
+            <button class="btn btn-primary" onclick="app.abrirModalSemicierre()" style="font-size: 0.82rem; padding: 0.5rem; font-weight: 700;">
+              📑 Arqueo y Cierre de Caja
+            </button>
           </div>
         </div>
       </div>
@@ -5910,6 +5922,7 @@
         } else if (tabId === 'clientes') {
           this.renderClientesCredito();
         } else if (tabId === 'informes') {
+          this.renderCaja();
           this.renderInformesVentas();
           if (this.data.googleSheetsUrl) this.cargarHistorialVentasInforme(false);
         }
