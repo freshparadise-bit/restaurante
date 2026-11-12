@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Fresh Paradise Cocles - Sistema de Pedidos & Punto de Venta</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="POS Fresh">
+  <meta name="theme-color" content="#0369a1">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,7 +118,7 @@
     header {
       background: linear-gradient(135deg, #0369a1 0%, #0f766e 60%, #15803d 100%);
       color: white;
-      padding: 0.85rem 1.5rem;
+      padding: max(0.85rem, env(safe-area-inset-top)) 1.5rem 0.85rem 1.5rem;
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
@@ -416,6 +424,7 @@
 
     .mesa-header {
       padding: 0.85rem 1.2rem;
+      background: var(--color-primary);
       color: white;
       font-weight: 800;
       font-size: 1.15rem;
@@ -428,6 +437,47 @@
     .mesa-2 .mesa-header { background: var(--mesa-2); }
     .mesa-3 .mesa-header { background: var(--mesa-3); }
     .mesa-4 .mesa-header { background: var(--mesa-4); }
+
+    .mesa-chip-btn {
+      padding: 0.4rem 0.75rem;
+      border-radius: 9999px;
+      border: 1.5px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .mesa-chip-btn:hover:not(:disabled) {
+      border-color: #0369a1;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .mesa-chip-btn.selected {
+      border-color: #0369a1;
+      background: #0369a1;
+      color: white;
+    }
+    .mesa-chip-btn.ocupada {
+      opacity: 0.55;
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .mesa-color-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .mesa-color-dot.selected {
+      transform: scale(1.15);
+      border-color: #0f172a;
+      box-shadow: 0 0 0 2px white inset;
+    }
 
     .mesa-status-tag {
       font-size: 0.75rem;
@@ -2518,6 +2568,210 @@
       display: inline-block;
     }
 
+  
+    /* ESTILOS DE INFORMES Y BALANCE DIARIO (ESTILO CALENDARIO + TARJETA BALANCE) */
+    .informe-date-strip-wrapper {
+      background: linear-gradient(90deg, #fde047 0%, #facc15 100%);
+      border-radius: 14px;
+      padding: 0.45rem 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 3px 10px rgba(234, 179, 8, 0.22);
+      border: 1.5px solid #eab308;
+    }
+    .informe-date-pills-scroll {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      flex: 1;
+      padding: 0.15rem 0;
+    }
+    .informe-date-pill {
+      border: none;
+      background: transparent;
+      color: #422006;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+    }
+    .informe-date-pill:hover {
+      background: rgba(255, 255, 255, 0.55);
+      color: #0f172a;
+    }
+    .informe-date-pill.active {
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+    }
+    .btn-informe-calendar {
+      background: #ffffff;
+      color: #0f172a;
+      border: 1.5px solid #ca8a04;
+      border-radius: 10px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+      transition: all 0.18s ease;
+    }
+    .btn-informe-calendar:hover {
+      background: #fefce8;
+      transform: translateY(-1px);
+    }
+    .informe-balance-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 1.25rem 1.4rem;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+      margin-bottom: 1.25rem;
+    }
+    .informe-balance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 1rem;
+    }
+    .informe-balance-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .informe-periodo-pill {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #0369a1;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+    }
+    .informe-balance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    @media (max-width: 520px) {
+      .informe-balance-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
+    }
+    .informe-metric-col {
+      padding: 0.25rem 0.5rem;
+    }
+    .informe-metric-col:first-child {
+      border-right: 1px solid #f1f5f9;
+    }
+    @media (max-width: 520px) {
+      .informe-metric-col:first-child {
+        border-right: none;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 0.75rem;
+      }
+    }
+    .informe-metric-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 0.35rem;
+    }
+    .informe-metric-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.15;
+    }
+    .informe-metric-sub {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+    .informe-balance-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding-top: 0.9rem;
+      margin-top: 0.75rem;
+      border-top: 1px solid #f1f5f9;
+    }
+    .informe-link-action {
+      background: none;
+      border: none;
+      padding: 0.25rem 0.1rem;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .informe-link-download {
+      color: #0f172a;
+    }
+    .informe-link-download:hover {
+      color: #15803d;
+    }
+    .informe-link-detail {
+      color: #0284c7;
+    }
+    .informe-link-detail:hover {
+      color: #0369a1;
+    }
+    .informe-presets-bar {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .btn-informe-preset {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.35rem 0.7rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-informe-preset:hover, .btn-informe-preset.active {
+      background: #0369a1;
+      color: #ffffff;
+      border-color: #0369a1;
+    }
+
   </style>
 </head>
 <body>
@@ -2579,6 +2833,10 @@
           🔑 Iniciar Sesión
         </button>
       </form>
+
+      <button type="button" id="btnInstallPwaLogin" class="btn btn-secondary" onclick="window.instalarAppPWA()" style="display: none; width: 100%; margin-top: 0.75rem; padding: 0.65rem; font-size: 0.88rem; font-weight: 800; color: #0369a1; border-color: #bae6fd; background: #f0f9ff; justify-content: center; align-items: center; gap: 0.4rem;">
+        <span>📲</span> <span>Instalar en iPhone / Celular</span>
+      </button>
     </div>
   </div>
 
@@ -2617,6 +2875,10 @@
         👤 Sesión: <strong>-</strong>
       </div>
 
+      <button type="button" class="btn-nav-switch" id="btnInstallPwaHeader" onclick="window.instalarAppPWA()" title="Instalar como Aplicación" style="display: none; background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.5);">
+        📲 <span class="btn-exit-text">Instalar</span>
+      </button>
+
       <button class="btn-nav-switch" onclick="app.cerrarSesion()" title="Cerrar sesión actual">
         🚪 <span class="btn-exit-text">Salir</span>
       </button>
@@ -2643,6 +2905,9 @@
     <div class="nav-tab-item" id="tab-clientes" role="button" tabindex="0" onclick="app.switchTab('clientes')">
       <span>👥 Clientes Crédito</span>
     </div>
+    <div class="nav-tab-item" id="tab-informes" role="button" tabindex="0" onclick="app.switchTab('informes')">
+      <span>📊 Informes</span><span class="tab-subtext"> (Ventas)</span>
+    </div>
     <div class="nav-tab-item" id="tab-master" role="button" tabindex="0" onclick="app.switchTab('master')">
       <span>⚙️ Máster</span><span class="tab-subtext"> & Ajustes</span>
     </div>
@@ -2663,6 +2928,12 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+          <!-- BOTÓN SUPERIOR: AGREGAR MESA EN SALÓN -->
+          <button type="button" class="btn btn-primary" onclick="app.abrirModalAgregarMesa()" style="padding: 0.55rem 0.95rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 6px rgba(3, 105, 161, 0.22);" title="Crear y abrir una nueva mesa según se necesite">
+            <span>🪑</span>
+            <span>+ Agregar Mesa</span>
+          </button>
+
           <!-- BOTÓN SUPERIOR: ABRIR MESA RÁPIDA (PARA LLEVAR) -->
           <button type="button" class="btn-abrir-rapida" onclick="app.abrirMesaRapida()" title="Abrir una nueva venta rápida para llevar">
             <span>⚡</span>
@@ -2673,7 +2944,7 @@
           <!-- FILTRO DE MESAS OCUPADAS / LIBRES -->
           <div class="mesas-filter-group" id="meseroFilterPills">
             <button type="button" class="btn-filter-mesa active" id="btnFiltroMesaTodas" onclick="app.setFiltroMesas('TODAS')">
-              🍽️ Todas (<span id="countMesaTodas">4</span>)
+              🍽️ Todas (<span id="countMesaTodas">0</span>)
             </button>
             <button type="button" class="btn-filter-mesa" id="btnFiltroMesaOcupadas" onclick="app.setFiltroMesas('OCUPADAS')">
               🔴 Ocupadas (<span id="countMesaOcupadas">0</span>)
@@ -2689,7 +2960,7 @@
       <div id="meseroRapidasSection" style="display: none; margin-bottom: 1.5rem;"></div>
 
       <div class="mesas-grid" id="meseroMesasGrid">
-        <!-- Render dinámico de las 4 mesas -->
+        <!-- Render dinámico de las mesas del salón creadas según se necesiten -->
       </div>
     </div>
 
@@ -2747,18 +3018,25 @@
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
             <h2 style="margin: 0;">Monitoreo de Cuentas y Mesas</h2>
-            <!-- BOTÓN SUPERIOR: ABRIR MESA RÁPIDA (PARA LLEVAR) -->
-            <button type="button" class="btn-abrir-rapida" onclick="app.abrirMesaRapida()" title="Abrir una nueva venta rápida para llevar">
-              <span>⚡</span>
-              <span>Abrir Mesa Rápida</span>
-              <span style="font-size: 0.76rem; background: #fef3c7; color: #92400e; padding: 0.15rem 0.45rem; border-radius: 6px; font-weight: 800;">Para Llevar</span>
-            </button>
-            <!-- BOTÓN: VENTA A CRÉDITO -->
-            <button type="button" class="btn-venta-credito" onclick="app.abrirModalVentaCredito()" title="Iniciar una nueva venta a crédito con cliente">
-              <span>💳</span>
-              <span>Venta a Crédito</span>
-              <span class="badge-credito-cliente">Cliente</span>
-            </button>
+            <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
+              <!-- BOTÓN SUPERIOR: AGREGAR MESA EN SALÓN -->
+              <button type="button" class="btn btn-primary" onclick="app.abrirModalAgregarMesa()" style="padding: 0.52rem 0.9rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.35rem;" title="Crear y abrir una nueva mesa en el salón">
+                <span>🪑</span>
+                <span>+ Agregar Mesa</span>
+              </button>
+              <!-- BOTÓN SUPERIOR: ABRIR MESA RÁPIDA (PARA LLEVAR) -->
+              <button type="button" class="btn-abrir-rapida" onclick="app.abrirMesaRapida()" title="Abrir una nueva venta rápida para llevar">
+                <span>⚡</span>
+                <span>Abrir Mesa Rápida</span>
+                <span style="font-size: 0.76rem; background: #fef3c7; color: #92400e; padding: 0.15rem 0.45rem; border-radius: 6px; font-weight: 800;">Para Llevar</span>
+              </button>
+              <!-- BOTÓN: VENTA A CRÉDITO -->
+              <button type="button" class="btn-venta-credito" onclick="app.abrirModalVentaCredito()" title="Iniciar una nueva venta a crédito con cliente">
+                <span>💳</span>
+                <span>Venta a Crédito</span>
+                <span class="badge-credito-cliente">Cliente</span>
+              </button>
+            </div>
           </div>
 
           <!-- SECCIÓN DE MESAS RÁPIDAS / PARA LLEVAR ACTIVAS EN CAJA -->
@@ -3088,6 +3366,167 @@
       </div>
     </div>
 
+
+    <!-- 7. PANTALLA: INFORMES Y BALANCE DIARIO (EXCLUSIVO MÁSTER) -->
+    <div id="view-informes" class="view-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+          <h2 style="margin: 0; font-size: 1.5rem; color: #0f172a;">📊 Informes de Ventas Diarias</h2>
+          <p style="margin: 0.25rem 0 0 0; font-size: 0.88rem; color: #475569;">Balance por día o rango de fechas, detalle de cobros y exportación</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary" onclick="app.toggleCalendarioInforme()">
+            <span>📅</span> <span>Rango de Fechas</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="app.cargarHistorialVentasInforme(true)">
+            <span>🔄</span> <span>Sincronizar Historial</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- FRANJA HORIZONTAL DE FECHAS ESTILO CALENDARIO RÁPIDO -->
+      <div class="informe-date-strip-wrapper">
+        <div class="informe-date-pills-scroll" id="informeDatePillsContainer">
+          <!-- Generado dinámicamente por renderInformesVentas() -->
+        </div>
+        <button type="button" class="btn-informe-calendar" onclick="app.toggleCalendarioInforme()" title="Seleccionar rango personalizado en calendario">
+          <span>📅</span> <span>Calendario</span>
+        </button>
+      </div>
+
+      <!-- PANEL DESPLEGABLE DEL SELECTOR DE CALENDARIO / RANGO DE FECHAS -->
+      <div id="panelCalendarioInforme" style="display: none; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 1rem 1.15rem; margin-bottom: 1.15rem; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <strong style="color: #0f172a; font-size: 0.95rem;">📆 Seleccionar Período o Rango Personalizado</strong>
+          <button type="button" class="btn btn-secondary" style="font-size: 0.76rem; padding: 0.2rem 0.55rem;" onclick="app.toggleCalendarioInforme(false)">✕ Cerrar</button>
+        </div>
+
+        <div class="informe-presets-bar">
+          <button type="button" class="btn-informe-preset" onclick="app.aplicarPresetRangoInforme('hoy')">Hoy</button>
+          <button type="button" class="btn-informe-preset" onclick="app.aplicarPresetRangoInforme('ayer')">Ayer</button>
+          <button type="button" class="btn-informe-preset" onclick="app.aplicarPresetRangoInforme('7dias')">Últimos 7 días</button>
+          <button type="button" class="btn-informe-preset" onclick="app.aplicarPresetRangoInforme('30dias')">Últimos 30 días</button>
+          <button type="button" class="btn-informe-preset" onclick="app.aplicarPresetRangoInforme('mes')">Este Mes</button>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end;">
+          <div style="flex: 1; min-width: 150px;">
+            <label for="informeFechaDesde" style="font-size: 0.78rem; font-weight: 700; color: #475569; display: block; margin-bottom: 0.25rem;">Desde:</label>
+            <input type="date" id="informeFechaDesde" class="form-control" style="padding: 0.45rem 0.65rem; font-size: 0.9rem; font-weight: 700;">
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <label for="informeFechaHasta" style="font-size: 0.78rem; font-weight: 700; color: #475569; display: block; margin-bottom: 0.25rem;">Hasta:</label>
+            <input type="date" id="informeFechaHasta" class="form-control" style="padding: 0.45rem 0.65rem; font-size: 0.9rem; font-weight: 700;">
+          </div>
+          <div>
+            <button type="button" class="btn btn-success" style="font-weight: 800; padding: 0.55rem 1.15rem;" onclick="app.aplicarRangoPersonalizadoInforme()">
+              <span>✅</span> <span>Aplicar Rango</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TARJETA PRINCIPAL DE BALANCE (INGRESOS / EGRESOS / ACCIONES) -->
+      <div class="informe-balance-card">
+        <div class="informe-balance-header">
+          <div class="informe-balance-title">
+            <span>Balance</span>
+            <span class="informe-periodo-pill" id="informePeriodoBadge">Hoy</span>
+            <span id="informeSyncStatusBadge" style="font-size: 0.74rem; color: #64748b;"></span>
+          </div>
+          <button type="button" class="btn btn-secondary" style="font-size: 0.78rem; padding: 0.32rem 0.7rem; font-weight: 700;" onclick="app.abrirModalRegistrarEgreso()">
+            <span>➕</span> <span>Registrar Egreso</span>
+          </button>
+        </div>
+
+        <div class="informe-balance-grid">
+          <!-- INGRESOS -->
+          <div class="informe-metric-col">
+            <div class="informe-metric-label">
+              <span style="color: #16a34a; font-weight: 800; font-size: 1.05rem;">↗</span>
+              <span>Ingresos</span>
+            </div>
+            <div class="informe-metric-value" id="informeIngresosCRC">₡0</div>
+            <div class="informe-metric-sub" id="informeIngresosSub">0 transacciones &bull; $0.00</div>
+          </div>
+
+          <!-- EGRESOS -->
+          <div class="informe-metric-col">
+            <div class="informe-metric-label">
+              <span style="color: #dc2626; font-weight: 800; font-size: 1.05rem;">↙</span>
+              <span>Egresos</span>
+            </div>
+            <div class="informe-metric-value" id="informeEgresosCRC">₡0</div>
+            <div class="informe-metric-sub" id="informeEgresosSub">0 egresos registrados</div>
+          </div>
+        </div>
+
+        <!-- RESUMEN NETO Y MÉTODOS DE PAGO -->
+        <div id="informeMetodosResumenStrip" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.65rem; padding-top: 0.85rem; font-size: 0.82rem;">
+          <!-- Generado dinámicamente -->
+        </div>
+
+        <!-- PIE DE TARJETA: DESCARGAR REPORTES & VER DETALLE -->
+        <div class="informe-balance-footer">
+          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <button type="button" class="informe-link-action informe-link-download" onclick="app.descargarReporteCSV()">
+              <span>Descargar Reportes</span>
+            </button>
+            <button type="button" class="btn btn-secondary" style="font-size: 0.76rem; padding: 0.25rem 0.6rem; font-weight: 700;" onclick="app.imprimirReporteVentas()">
+              🖨️ Imprimir
+            </button>
+          </div>
+          <button type="button" class="informe-link-action informe-link-detail" id="btnToggleDetalleInforme" onclick="app.toggleDetalleInforme()">
+            Ver detalle ▾
+          </button>
+        </div>
+      </div>
+
+      <!-- SECCIÓN DE DETALLE COMPLETO (DESPLEGABLE AL PULSAR "VER DETALLE") -->
+      <div id="informeDetallePanel" style="display: none;">
+        <!-- Desglose por Método de Pago -->
+        <div id="informeDesgloseMetodosGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 1.15rem;"></div>
+
+        <!-- Resumen de Productos & Personal -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+          <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem;">
+            <h4 style="margin: 0 0 0.65rem 0; font-size: 0.95rem; color: #0f172a;">🏆 Productos Más Vendidos</h4>
+            <div id="informeTopProductosList" style="max-height: 220px; overflow-y: auto; font-size: 0.84rem;"></div>
+          </div>
+          <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem;">
+            <h4 style="margin: 0 0 0.65rem 0; font-size: 0.95rem; color: #0f172a;">👥 Ventas por Personal</h4>
+            <div id="informePersonalList" style="max-height: 220px; overflow-y: auto; font-size: 0.84rem;"></div>
+          </div>
+        </div>
+
+        <!-- Listado Detallado de Movimientos (Ingresos y Egresos) -->
+        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h4 style="margin: 0; font-size: 0.98rem; color: #0f172a;">🧾 Movimientos del Período</h4>
+            <input type="search" id="informeBuscarInput" class="form-control" placeholder="🔍 Buscar mesa, cliente, producto..." oninput="app.renderInformesVentas()" style="max-width: 260px; padding: 0.35rem 0.65rem; font-size: 0.84rem;">
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.83rem;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; color: #334155;">
+                  <th style="padding: 0.55rem 0.65rem;">Fecha / Hora</th>
+                  <th style="padding: 0.55rem 0.65rem;">Tipo</th>
+                  <th style="padding: 0.55rem 0.65rem;">Mesa / Concepto</th>
+                  <th style="padding: 0.55rem 0.65rem;">Responsable</th>
+                  <th style="padding: 0.55rem 0.65rem;">Método</th>
+                  <th style="padding: 0.55rem 0.65rem;">Detalle</th>
+                  <th style="padding: 0.55rem 0.65rem; text-align: right;">Monto (₡)</th>
+                </tr>
+              </thead>
+              <tbody id="informeMovimientosTbody">
+                <!-- Generado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- ==================== MODALES DEL SISTEMA ==================== -->
@@ -3176,7 +3615,7 @@
           <select id="newUserTipo" class="form-control">
             <option value="mesero">Mesero (Solo vista de Mesas y Comandas)</option>
             <option value="cocina">Cocina (Solo vista de KDS / Cocina)</option>
-            <option value="caja">Caja (Acceso a Mesero, Cocina y Caja)</option>
+            <option value="caja">Caja (Acceso a Mesero, Cocina, Caja, Cuentas y Clientes)</option>
             <option value="master">Máster (Administrador Total)</option>
           </select>
         </div>
@@ -3632,6 +4071,35 @@
     </div>
   </div>
 
+  <!-- MODAL: AGREGAR / ABRIR NUEVA MESA EN SALÓN -->
+  <div class="modal-backdrop" id="modalAgregarMesa" role="dialog" aria-modal="true" aria-labelledby="agregarMesaTitulo">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="agregarMesaTitulo">🪑 Agregar Nueva Mesa</h3>
+        <button type="button" class="modal-close-btn" aria-label="Cerrar ventana" onclick="app.closeModal('modalAgregarMesa')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="nuevaMesaNombreInput">Nombre o Número de Mesa:</label>
+          <input type="text" id="nuevaMesaNombreInput" class="form-control" placeholder="Ej: Mesa 1, Terraza, Barra..." maxlength="30" onkeydown="if(event.key==='Enter'){event.preventDefault();app.confirmarAgregarMesa(true);}">
+        </div>
+        <div class="form-group">
+          <label style="display: block; margin-bottom: 0.4rem;">Selección rápida:</label>
+          <div id="chipsMesasRapidasSugeridas" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="display: block; margin-bottom: 0.4rem;">Color identificador:</label>
+          <div id="mesaColorSelector" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalAgregarMesa')">Cancelar</button>
+        <button type="button" class="btn" style="background: #e0f2fe; color: #0369a1; border: 1.5px solid #bae6fd; font-weight: 800;" onclick="app.confirmarAgregarMesa(false)">➕ Agregar a Lista</button>
+        <button type="button" class="btn btn-primary" style="font-weight: 800;" onclick="app.confirmarAgregarMesa(true)">🍽️ Crear y Tomar Pedido</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: CIERRE DE MESA CON CUENTA PENDIENTE / QUITAR MESA -->
   <div class="modal-backdrop" id="modalCierreMesaPendiente" role="dialog" aria-modal="true" aria-labelledby="cierrePendienteTitulo">
     <div class="modal-box" style="max-width: 560px;">
@@ -3813,6 +4281,70 @@
       </div>
     </div>
   </div>
+
+  
+  
+  <!-- MODAL: GUÍA DE INSTALACIÓN COMO APP NATIVA (IPHONE / ANDROID / PC) -->
+  <div class="modal-backdrop" id="modalInstalarPWA" role="dialog" aria-modal="true" aria-labelledby="modalInstallPwaTitle" style="z-index: 1400;">
+    <div class="modal-box" style="max-width: 460px; border-radius: 18px; overflow: hidden; padding: 0;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0369a1 0%, #15803d 100%); color: white; padding: 1.15rem 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <img src="apple-touch-icon.png" alt="Icono Fresh Paradise" style="width: 38px; height: 38px; border-radius: 10px; border: 2px solid white; object-fit: cover;">
+          <div>
+            <h3 id="modalInstallPwaTitle" style="color: white; margin: 0; font-size: 1.15rem;">Instalar en Pantalla de Inicio</h3>
+            <div style="font-size: 0.78rem; color: #dcfce7;">Fresh Paradise • Cocles (App Independiente)</div>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" aria-label="Cerrar ventana" onclick="app.closeModal('modalInstalarPWA')" style="color: white;">&times;</button>
+      </div>
+      <div class="modal-body" id="modalInstalarPWABody" style="padding: 1.25rem; font-size: 0.9rem; color: #1e293b; line-height: 1.5;">
+        <!-- Generado dinámicamente según iPhone Safari / iOS Chrome / Android / PC -->
+      </div>
+      <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; justify-content: flex-end;">
+        <button type="button" class="btn btn-primary" onclick="app.closeModal('modalInstalarPWA')">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL: REGISTRAR EGRESO / GASTO DIARIO (INFORMES) -->
+  <div class="modal-backdrop" id="modalRegistrarEgreso" role="dialog" aria-modal="true" aria-labelledby="modalEgresoTitulo">
+    <div class="modal-box" style="max-width: 460px;">
+      <div class="modal-header" style="background: #dc2626; color: white;">
+        <h3 id="modalEgresoTitulo" style="color: white; margin: 0;">↙ Registrar Egreso / Gasto</h3>
+        <button type="button" class="modal-close-btn" aria-label="Cerrar ventana" onclick="app.closeModal('modalRegistrarEgreso')" style="color: white;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label for="egresoConceptoInput" style="font-size: 0.85rem; font-weight: 700; color: #334155;">Concepto / Descripción: <span style="color: #dc2626;">*</span></label>
+          <input type="text" id="egresoConceptoInput" class="form-control" placeholder="Ej: Compra de hielo, frutas o gas" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label for="egresoMontoInput" style="font-size: 0.85rem; font-weight: 700; color: #334155;">Monto del Egreso (₡): <span style="color: #dc2626;">*</span></label>
+          <input type="number" id="egresoMontoInput" class="form-control" placeholder="Ej: 15000" min="1" step="any" style="font-size: 1.25rem; font-weight: 800; color: #dc2626;" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label for="egresoFechaInput" style="font-size: 0.85rem; font-weight: 700; color: #334155;">Fecha del Egreso:</label>
+          <input type="date" id="egresoFechaInput" class="form-control">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="egresoMetodoSelect" style="font-size: 0.85rem; font-weight: 700; color: #334155;">Método de Salida:</label>
+          <select id="egresoMetodoSelect" class="form-control">
+            <option value="Efectivo">💵 Efectivo Caja</option>
+            <option value="SINPE">📱 SINPE Móvil</option>
+            <option value="Tarjeta / Transferencia">💳 Tarjeta / Transferencia</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+        <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalRegistrarEgreso')">Cancelar</button>
+        <button type="button" class="btn btn-danger" onclick="app.guardarEgresoInforme()" style="font-weight: 800;">
+          💾 Guardar Egreso
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- MODAL: ALERTA EMERGENTE DE ORDEN PREPARADA PARA EL MESERO -->
   <div class="modal-backdrop" id="modalAlertaOrdenLista" role="dialog" aria-modal="true" aria-labelledby="modalAlertaOrdenListaTitulo" style="z-index: 1300;">
@@ -4106,14 +4638,7 @@
               "tipo": "mesero"
       }
 ],
-      mesas: [
-        { id: 1, nombre: 'Mesa 1', colorHex: '#2563EB', ordenes: [], pagada: false },
-        { id: 2, nombre: 'Mesa 2', colorHex: '#7C3AED', ordenes: [], pagada: false },
-        { id: 3, nombre: 'Mesa 3', colorHex: '#EA580C', ordenes: [], pagada: false },
-        { id: 4, nombre: 'Mesa 4', colorHex: '#0D9488', ordenes: [], pagada: false },
-        { id: 5, nombre: 'Mesa 5', colorHex: '#6366F1', ordenes: [], pagada: false },
-        { id: 6, nombre: 'Mesa 6', colorHex: '#DB2777', ordenes: [], pagada: false },
-      ],
+      mesas: [],
       productos: [
       {
               "id": 101,
@@ -4273,6 +4798,8 @@
       }
 ],
       ventasHistorial: [],
+      ventasArchivadas: [],
+      egresosHistorial: [],
       clientesCredito: [],
       cuentasPorCobrar: [],
       categorias: ['Comidas', 'Bebidas', 'Smoothies', 'Snacks', 'Postres', 'Licores'],
@@ -4334,6 +4861,10 @@
         this._mesaActivaPedidoSnapshot = null;
         this.clienteCreditoCobroSeleccionado = null;
         this.subTabCreditoCobro = 'existente';
+        this.informeFechaDesde = this.getFechaHoyISO();
+        this.informeFechaHasta = this.getFechaHoyISO();
+        this.informeDetalleAbierto = false;
+        this.informeVentasRemotas = [];
 
         this.initSync();
         this.initLogoUploader();
@@ -4384,16 +4915,43 @@
           .replace(/>/g, '&gt;');
       }
 
+      esMesaDefaultVacia(m) {
+        if (!m || m.esRapida || m.esCredito || m.creadaManualmente) return false;
+        const numId = Number(m.id);
+        const esIdDefault = [1, 2, 3, 4, 5, 6].includes(numId);
+        const sinConsumo = (!m.ordenes || m.ordenes.length === 0) && !m.pedidoId && !m.pagada;
+        return esIdDefault && sinConsumo;
+      }
+
+      obtenerColorMesaPorIndice(num = 1) {
+        const paleta = ['#2563EB', '#7C3AED', '#EA580C', '#0D9488', '#6366F1', '#DB2777', '#0284C7', '#059669'];
+        const idx = Math.max(0, (Number(num) || 1) - 1) % paleta.length;
+        return paleta[idx];
+      }
+
       loadData() {
+        try {
+          const guardadasCerradas = JSON.parse(localStorage.getItem('jiqui_rapidas_cerradas') || '[]');
+          this.rapidasCerradasIds = new Set(guardadasCerradas.map(String));
+        } catch(e) {
+          this.rapidasCerradasIds = new Set();
+        }
+
         const stored = localStorage.getItem('jiqui_pos_data');
         if (stored) {
           try {
             this.data = JSON.parse(stored);
             
-            // Limpieza y preparación de mesas
+            // Limpieza y preparación de mesas (solo conservar activas o creadas manualmente; sin mesas automáticas vacías)
             if (!this.data.mesas || !Array.isArray(this.data.mesas)) {
               this.data.mesas = [];
             }
+            this.data.mesas = this.data.mesas.filter(m => {
+              if (!m) return false;
+              if (this.rapidasCerradasIds && this.rapidasCerradasIds.has(String(m.id))) return false;
+              if (this.esMesaDefaultVacia(m)) return false;
+              return true;
+            });
             this.data.mesas.forEach(m => {
               if (!m.ordenes) m.ordenes = [];
               if (!m.pagosParciales) m.pagosParciales = [];
@@ -4414,20 +4972,6 @@
                 }
               });
             });
-
-            // Garantizar siempre existencia de mesas regulares de salón (Mesa 1 a 6)
-            const salonCount = this.data.mesas.filter(m => !m.esRapida && !m.esCredito).length;
-            if (salonCount === 0) {
-              const defaultSalon = [
-                { id: 1, nombre: 'Mesa 1', colorHex: '#2563EB', ordenes: [], pagada: false },
-                { id: 2, nombre: 'Mesa 2', colorHex: '#7C3AED', ordenes: [], pagada: false },
-                { id: 3, nombre: 'Mesa 3', colorHex: '#EA580C', ordenes: [], pagada: false },
-                { id: 4, nombre: 'Mesa 4', colorHex: '#0D9488', ordenes: [], pagada: false },
-                { id: 5, nombre: 'Mesa 5', colorHex: '#6366F1', ordenes: [], pagada: false },
-                { id: 6, nombre: 'Mesa 6', colorHex: '#DB2777', ordenes: [], pagada: false },
-              ];
-              this.data.mesas = [...defaultSalon, ...this.data.mesas];
-            }
 
             // Normalizar usuarios y asegurar que existan los usuarios base
             if (!this.data.usuarios || !Array.isArray(this.data.usuarios) || this.data.usuarios.length === 0) {
@@ -4482,18 +5026,6 @@
             if (!this.data.logoUrl || this.data.logoUrl === 'logo_jiqui.jpg') {
               this.data.logoUrl = 'logo_fresh_paradise.jpg';
             }
-
-            try {
-              const guardadasCerradas = JSON.parse(localStorage.getItem('jiqui_rapidas_cerradas') || '[]');
-              this.rapidasCerradasIds = new Set(guardadasCerradas.map(String));
-            } catch(e) {
-              this.rapidasCerradasIds = new Set();
-            }
-
-            if (!this.data.entregasMeseros) {
-              this.data.entregasMeseros = {};
-            }
-
           } catch(e) {
             this.data = JSON.parse(JSON.stringify(CLEAN_EMPTY_DATA));
           }
@@ -4745,7 +5277,9 @@
             if (typeof remoteMesas === 'string') {
               try { remoteMesas = JSON.parse(remoteMesas); } catch(e) {}
             }
-            if (Array.isArray(remoteMesas) && remoteMesas.length > 0) {
+            if (Array.isArray(remoteMesas)) {
+              remoteMesas = remoteMesas.filter(rm => rm && rm.id && !this.esMesaDefaultVacia(rm));
+
               // Limpieza periódica de memorias de protección según TTL
               const ahora = Date.now();
               if (this._ordenesCanceladasRecientes) {
@@ -4776,36 +5310,43 @@
               }
 
               const remoteIds = new Set(remoteMesas.map(rm => String(rm.id)));
-              // Remover mesas rápidas locales cerradas, pero proteger siempre las recién creadas o con modal abierto
+              // Remover mesas cerradas o eliminadas en otro dispositivo, protegiendo las recién creadas o en edición activa
               this.data.mesas = this.data.mesas.filter(m => {
-                if (!m.esRapida) return true;
+                if (!m || this.esMesaDefaultVacia(m)) return false;
                 const mIdStr = String(m.id);
                 if (this.rapidasCerradasIds && this.rapidasCerradasIds.has(mIdStr)) return false;
                 const creadaReciente = this._mesasCreadasRecientes && this._mesasCreadasRecientes.has(mIdStr);
                 const modalPedidoAbierto = document.getElementById('modalPedido')?.classList.contains('active') && String(this.selectedMesaId) === mIdStr;
                 const modalCobroAbierto = document.getElementById('modalCobro')?.classList.contains('active') && String(this.selectedMesaId) === mIdStr;
                 if (creadaReciente || modalPedidoAbierto || modalCobroAbierto) return true;
+                if (this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(mIdStr)) return false;
+                const tieneOrdenReciente = (m.ordenes || []).some(o => this._ordenesEnviadasRecientes && this._ordenesEnviadasRecientes.has(String(o.id)));
+                if (tieneOrdenReciente) return true;
                 return remoteIds.has(mIdStr);
               });
 
               remoteMesas.forEach(remoteMesa => {
                 const rIdStr = String(remoteMesa.id);
-                // Si esta mesa rápida ya fue cerrada localmente, no revivirla bajo ninguna circunstancia
-                if (this.rapidasCerradasIds && this.rapidasCerradasIds.has(rIdStr)) {
+                // Si esta mesa ya fue cerrada/eliminada localmente, no revivirla bajo ninguna circunstancia
+                if ((this.rapidasCerradasIds && this.rapidasCerradasIds.has(rIdStr)) ||
+                    (this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(rIdStr))) {
                   return;
                 }
 
                 let localMesa = this.data.mesas.find(m => String(m.id) === rIdStr);
-                if (!localMesa && remoteMesa.esRapida) {
-                  // Mesa rápida / crédito creada por otro dispositivo
+                if (!localMesa) {
+                  // Mesa (de salón, rápida o crédito) creada por otro dispositivo
+                  const esRap = Boolean(remoteMesa.esRapida);
                   localMesa = {
                     id: remoteMesa.id,
-                    nombre: remoteMesa.nombre || `Rápida #${remoteMesa.numeroRapida || 1} (Para Llevar)`,
-                    nombreCorto: remoteMesa.nombreCorto || `Rápida #${remoteMesa.numeroRapida || 1}`,
-                    numeroRapida: remoteMesa.numeroRapida || 1,
-                    colorHex: remoteMesa.colorHex || (remoteMesa.esCredito ? '#4f46e5' : '#b45309'),
-                    esRapida: true,
+                    nombre: remoteMesa.nombre || (esRap ? `Rápida #${remoteMesa.numeroRapida || 1} (Para Llevar)` : `Mesa ${remoteMesa.numeroMesa || remoteMesa.id}`),
+                    nombreCorto: remoteMesa.nombreCorto || remoteMesa.nombre || (esRap ? `Rápida #${remoteMesa.numeroRapida || 1}` : `Mesa ${remoteMesa.numeroMesa || remoteMesa.id}`),
+                    numeroMesa: remoteMesa.numeroMesa || null,
+                    numeroRapida: esRap ? (remoteMesa.numeroRapida || 1) : null,
+                    colorHex: remoteMesa.colorHex || (esRap ? (remoteMesa.esCredito ? '#4f46e5' : '#b45309') : this.obtenerColorMesaPorIndice(remoteMesa.numeroMesa || 1)),
+                    esRapida: esRap,
                     esCredito: Boolean(remoteMesa.esCredito),
+                    creadaManualmente: Boolean(remoteMesa.creadaManualmente),
                     clienteCredito: remoteMesa.clienteCredito || null,
                     fechaApertura: remoteMesa.fechaApertura || null,
                     pedidoId: null,
@@ -5172,23 +5713,26 @@
         const tabCaja = document.getElementById('tab-caja');
         const tabCuentas = document.getElementById('tab-cuentas');
         const tabClientes = document.getElementById('tab-clientes');
+        const tabInformes = document.getElementById('tab-informes');
         const tabMaster = document.getElementById('tab-master');
 
         if (rol === 'mesero') {
-          tabMesero.style.display = 'flex';
-          tabCocina.style.display = 'none';
-          tabCaja.style.display = 'none';
+          if (tabMesero) tabMesero.style.display = 'flex';
+          if (tabCocina) tabCocina.style.display = 'none';
+          if (tabCaja) tabCaja.style.display = 'none';
           if (tabCuentas) tabCuentas.style.display = 'none';
           if (tabClientes) tabClientes.style.display = 'none';
-          tabMaster.style.display = 'none';
+          if (tabInformes) tabInformes.style.display = 'none';
+          if (tabMaster) tabMaster.style.display = 'none';
           if (!this.tabActual || this.tabActual !== 'mesero') this.switchTab('mesero');
         } else if (rol === 'cocina') {
-          tabMesero.style.display = 'none';
-          tabCocina.style.display = 'flex';
-          tabCaja.style.display = 'none';
+          if (tabMesero) tabMesero.style.display = 'none';
+          if (tabCocina) tabCocina.style.display = 'flex';
+          if (tabCaja) tabCaja.style.display = 'none';
           if (tabCuentas) tabCuentas.style.display = 'none';
           if (tabClientes) tabClientes.style.display = 'none';
-          tabMaster.style.display = 'none';
+          if (tabInformes) tabInformes.style.display = 'none';
+          if (tabMaster) tabMaster.style.display = 'none';
           if (!this.tabActual || this.tabActual !== 'cocina') this.switchTab('cocina');
         } else if (rol === 'caja') {
           if (tabMesero) tabMesero.style.display = 'flex';
@@ -5196,17 +5740,19 @@
           if (tabCaja) tabCaja.style.display = 'flex';
           if (tabCuentas) tabCuentas.style.display = 'flex';
           if (tabClientes) tabClientes.style.display = 'flex';
-          if (tabMaster) tabMaster.style.display = 'none'; // Oculto para Caja (exclusivo Máster/Admin)
-          if (!this.tabActual || this.tabActual === 'cocina' || this.tabActual === 'master') {
+          if (tabInformes) tabInformes.style.display = 'none';
+          if (tabMaster) tabMaster.style.display = 'none';
+          if (!this.tabActual || !['mesero', 'cocina', 'caja', 'cuentas', 'clientes'].includes(this.tabActual)) {
             this.switchTab('caja');
           }
         } else if (rol === 'master') {
-          tabMesero.style.display = 'flex';
-          tabCocina.style.display = 'flex';
-          tabCaja.style.display = 'flex';
+          if (tabMesero) tabMesero.style.display = 'flex';
+          if (tabCocina) tabCocina.style.display = 'flex';
+          if (tabCaja) tabCaja.style.display = 'flex';
           if (tabCuentas) tabCuentas.style.display = 'flex';
           if (tabClientes) tabClientes.style.display = 'flex';
-          tabMaster.style.display = 'flex';
+          if (tabInformes) tabInformes.style.display = 'flex';
+          if (tabMaster) tabMaster.style.display = 'flex';
           if (!this.tabActual) this.switchTab('mesero');
         }
       }
@@ -5216,13 +5762,13 @@
         if (!this.data.usuarioActivo) return;
         const rol = (this.data.usuarioActivo.tipo || this.data.usuarioActivo.rol || 'mesero').toString().trim().toLowerCase();
 
-        if (rol === 'mesero' && tabId !== 'mesero' && tabId !== 'cocina') {
+        if (rol === 'mesero' && tabId !== 'mesero') {
           tabId = 'mesero';
         } else if (rol === 'cocina' && tabId !== 'cocina') {
           tabId = 'cocina';
-        } else if (rol === 'caja' && tabId === 'master') {
+        } else if (rol === 'caja' && !['mesero', 'cocina', 'caja', 'cuentas', 'clientes'].includes(tabId)) {
           tabId = 'caja';
-        } // Rol caja navega entre caja, mesero, cocina, cuentas y clientes (sin acceso a Máster/Admin)
+        } // Rol master tiene acceso a todas las pestañas
 
         this.tabActual = tabId;
 
@@ -5239,6 +5785,9 @@
           this.renderCuentasPorCobrar();
         } else if (tabId === 'clientes') {
           this.renderClientesCredito();
+        } else if (tabId === 'informes') {
+          this.renderInformesVentas();
+          if (this.data.googleSheetsUrl) this.cargarHistorialVentasInforme(false);
         }
 
         // Control de temporizador de 15 segundos de inactividad para perfil Caja
@@ -5350,6 +5899,7 @@
         this.renderMaster();
         if (typeof this.renderCuentasPorCobrar === 'function') this.renderCuentasPorCobrar();
         if (typeof this.renderClientesCredito === 'function') this.renderClientesCredito();
+        if (typeof this.renderInformesVentas === 'function' && rol === 'master') this.renderInformesVentas();
       }
 
       setFiltroMesas(filtro) {
@@ -5399,7 +5949,7 @@
                         💳 Cobrar (${this.formatCRC(saldo)})
                       </button>
                     `}
-                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.45rem 0.65rem;" onclick="app.descartarAvisoListo(${m.id})">
+                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.45rem 0.65rem;" onclick="app.descartarAvisoListo('${m.id}')">
                       ✕ Ocultar aviso
                     </button>
                   </div>
@@ -5517,20 +6067,8 @@
           }
         }
 
-        // Mesas de salón convencionales (excluye mesas rápidas para mantener la grilla organizada)
-        let salonMesas = (this.data.mesas || []).filter(m => !m.esRapida && !m.esCredito);
-        if (salonMesas.length === 0) {
-          const defaultSalon = [
-            { id: 1, nombre: 'Mesa 1', colorHex: '#2563EB', ordenes: [], pagada: false },
-            { id: 2, nombre: 'Mesa 2', colorHex: '#7C3AED', ordenes: [], pagada: false },
-            { id: 3, nombre: 'Mesa 3', colorHex: '#EA580C', ordenes: [], pagada: false },
-            { id: 4, nombre: 'Mesa 4', colorHex: '#0D9488', ordenes: [], pagada: false },
-            { id: 5, nombre: 'Mesa 5', colorHex: '#6366F1', ordenes: [], pagada: false },
-            { id: 6, nombre: 'Mesa 6', colorHex: '#DB2777', ordenes: [], pagada: false },
-          ];
-          this.data.mesas = [...defaultSalon, ...(this.data.mesas || [])];
-          salonMesas = defaultSalon;
-        }
+        // Mesas de salón convencionales creadas según se necesiten (excluye mesas rápidas y de crédito)
+        const salonMesas = (this.data.mesas || []).filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m));
 
         // Contadores dinámicos de mesas ocupadas y libres
         const totalMesas = salonMesas.length;
@@ -5552,6 +6090,24 @@
           mesasAMostrar = salonMesas.filter(m => (!m.ordenes || m.ordenes.length === 0));
         }
 
+        if (salonMesas.length === 0) {
+          container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1.5rem; background: white; border-radius: 16px; border: 1.5px dashed #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+              <div style="font-size: 2.75rem; margin-bottom: 0.5rem;">🪑</div>
+              <strong style="color: #0f172a; font-size: 1.15rem; display: block; margin-bottom: 0.35rem;">
+                No hay mesas abiertas en este momento
+              </strong>
+              <p style="color: #475569; font-size: 0.88rem; margin: 0 0 1.15rem 0;">
+                Las mesas comienzan vacías. Cree únicamente las mesas que vaya necesitando para atender clientes.
+              </p>
+              <button type="button" class="btn btn-primary" onclick="app.abrirModalAgregarMesa()" style="font-size: 0.92rem; padding: 0.65rem 1.35rem; font-weight: 800;">
+                🪑 + Agregar Mesa
+              </button>
+            </div>
+          `;
+          return;
+        }
+
         if (mesasAMostrar.length === 0) {
           container.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1.5rem; background: white; border-radius: 16px; border: 1.5px dashed #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
@@ -5560,7 +6116,7 @@
                 ${this.filtroMesas === 'OCUPADAS' ? 'No hay mesas ocupadas en este momento.' : 'No hay mesas desocupadas en este momento (todas están ocupadas).'}
               </strong>
               <p style="color: #475569; font-size: 0.85rem; margin: 0 0 1rem 0;">
-                ${this.filtroMesas === 'OCUPADAS' ? 'Todas las mesas del restaurante están libres.' : 'Todas las mesas tienen comandas activas.'}
+                ${this.filtroMesas === 'OCUPADAS' ? 'Todas las mesas abiertas están libres.' : 'Todas las mesas abiertas tienen comandas activas.'}
               </p>
               <button class="btn btn-secondary" onclick="app.setFiltroMesas('TODAS')" style="font-size: 0.85rem; padding: 0.45rem 1rem;">
                 🍽️ Ver Todas las Mesas
@@ -5622,7 +6178,9 @@
           }
 
           const card = document.createElement('div');
+          const colorMesa = mesa.colorHex || this.obtenerColorMesaPorIndice(mesa.numeroMesa || mesa.id);
           card.className = `mesa-card mesa-${mesa.id}`;
+          card.style.borderColor = colorMesa;
           card.setAttribute('role', 'button');
           card.tabIndex = 0;
           card.setAttribute('aria-label', `Abrir mesa ${mesa.nombre || mesa.id}`);
@@ -5674,7 +6232,7 @@
           }
 
           card.innerHTML = `
-            <div class="mesa-header">
+            <div class="mesa-header" style="background: ${colorMesa};">
               <span>${this.esc(mesa.nombre)}</span>
               <span class="mesa-status-tag">${tagTexto}</span>
             </div>
@@ -5708,9 +6266,14 @@
                     <button class="btn btn-primary" style="padding: 0.4rem 0.7rem; font-size: 0.82rem;" onclick="event.stopPropagation(); app.abrirModalPedido('${mesa.id}')">
                       + Productos
                     </button>
-                    <button class="btn btn-success" style="padding: 0.4rem 0.7rem; font-size: 0.82rem; ${mesa.ordenes.length === 0 ? 'display: none;' : ''}" onclick="event.stopPropagation(); app.abrirModalCobro(${mesa.id})">
+                    <button class="btn btn-success" style="padding: 0.4rem 0.7rem; font-size: 0.82rem; ${mesa.ordenes.length === 0 ? 'display: none;' : ''}" onclick="event.stopPropagation(); app.abrirModalCobro('${mesa.id}')">
                       💳 ${pagadoColones > 0 ? 'Cobrar Resto' : 'Cobrar'}
                     </button>
+                    ${(!mesa.ordenes || mesa.ordenes.length === 0) ? `
+                      <button type="button" class="btn btn-secondary" style="padding: 0.4rem 0.55rem; font-size: 0.82rem; color: #dc2626;" title="Quitar mesa vacía" onclick="event.stopPropagation(); app.quitarMesaSalonVacia('${mesa.id}')">
+                        🗑️
+                      </button>
+                    ` : ''}
                   `}
                 </div>
               </div>
@@ -6082,7 +6645,7 @@
                         💳 Cobrar (${this.formatCRC(saldo)})
                       </button>
                     `)}
-                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.45rem 0.65rem;" onclick="app.descartarAvisoListo(${m.id})">
+                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.45rem 0.65rem;" onclick="app.descartarAvisoListo('${m.id}')">
                       ✕ Ocultar aviso
                     </button>
                   </div>
@@ -6249,7 +6812,7 @@
                         </div>
                       </div>
                     </div>
-                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;" onclick="app.cerrarMesa(${m.id})">
+                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;" onclick="app.cerrarMesa('${m.id}')">
                       🚪 Cerrar y Liberar Mesa
                     </button>
                   </div>
@@ -6491,8 +7054,26 @@
           `;
         }
 
-        // Mesas de salón (excluye mesas rápidas para mantener la grilla de monitoreo clara)
-        this.data.mesas.filter(m => !m.esRapida).forEach(mesa => {
+        // Mesas de salón creadas dinámicamente (excluye mesas rápidas y crédito)
+        const salonMesasCaja = this.data.mesas.filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m));
+        if (salonMesasCaja.length === 0) {
+          container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 2.75rem 1.5rem; background: white; border-radius: 16px; border: 1.5px dashed #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+              <div style="font-size: 2.5rem; margin-bottom: 0.45rem;">🪑</div>
+              <strong style="color: #0f172a; font-size: 1.1rem; display: block; margin-bottom: 0.35rem;">
+                No hay mesas de salón activas
+              </strong>
+              <p style="color: #475569; font-size: 0.85rem; margin: 0 0 1rem 0;">
+                Las mesas aparecen vacías hasta que las cree según se necesiten en Mesero o Caja.
+              </p>
+              <button type="button" class="btn btn-primary" onclick="app.abrirModalAgregarMesa()" style="font-size: 0.9rem; padding: 0.6rem 1.25rem; font-weight: 800;">
+                🪑 + Agregar Mesa
+              </button>
+            </div>
+          `;
+        }
+
+        salonMesasCaja.forEach(mesa => {
           const totalColones = this.calcularTotalMesa(mesa);
           const totalDolares = totalColones / this.data.tipoCambio;
 
@@ -6508,7 +7089,7 @@
                   <span class="order-status-indicator status-${ord.estado}"></span>
                   Orden #${ord.id} <span style="font-size: 0.75rem; color: #475569;">(${estadoLabel})</span>
                 </span>
-                <button class="btn btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="event.stopPropagation(); app.abrirCancelacionModal(${mesa.id}, '${ord.id}')">
+                <button class="btn btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="event.stopPropagation(); app.abrirCancelacionModal('${mesa.id}', '${ord.id}')">
                   ✕ Cancelar
                 </button>
               </div>
@@ -6540,9 +7121,11 @@
           }
 
           const card = document.createElement('div');
+          const colorMesa = mesa.colorHex || this.obtenerColorMesaPorIndice(mesa.numeroMesa || mesa.id);
           card.className = `mesa-card mesa-${mesa.id}`;
+          card.style.borderColor = colorMesa;
           card.innerHTML = `
-            <div class="mesa-header">
+            <div class="mesa-header" style="background: ${colorMesa};">
               <span>${this.esc(mesa.nombre)}</span>
               <span class="mesa-status-tag">${tagStatus}</span>
             </div>
@@ -6568,12 +7151,21 @@
                 </div>
               </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem;">
-                <button class="btn btn-success" style="font-size: 0.8rem; padding: 0.45rem;" onclick="app.abrirModalCobro('${mesa.id}')" ${mesa.ordenes.length === 0 || estaCancelada ? 'disabled' : ''}>
-                  💳 ${estaCancelada ? 'Ya Cancelada' : (pagadoColones > 0 ? 'Cobrar Resto' : 'Cobrar')}
-                </button>
-                <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.45rem;" onclick="app.cerrarMesa(${mesa.id})" ${mesa.ordenes.length === 0 ? 'disabled' : ''}>
-                  🚪 Cerrar Mesa
-                </button>
+                ${mesa.ordenes.length === 0 ? `
+                  <button class="btn btn-primary" style="font-size: 0.8rem; padding: 0.45rem;" onclick="app.abrirModalPedido('${mesa.id}')">
+                    + Pedido
+                  </button>
+                  <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.45rem; color: #dc2626;" onclick="app.quitarMesaSalonVacia('${mesa.id}')">
+                    🗑️ Quitar
+                  </button>
+                ` : `
+                  <button class="btn btn-success" style="font-size: 0.8rem; padding: 0.45rem;" onclick="app.abrirModalCobro('${mesa.id}')" ${estaCancelada ? 'disabled' : ''}>
+                    💳 ${estaCancelada ? 'Ya Cancelada' : (pagadoColones > 0 ? 'Cobrar Resto' : 'Cobrar')}
+                  </button>
+                  <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.45rem;" onclick="app.cerrarMesa('${mesa.id}')">
+                    🚪 Cerrar Mesa
+                  </button>
+                `}
               </div>
             </div>
           `;
@@ -7402,9 +7994,9 @@
                 <div style="background: ${mesa.esRapida ? '#fef3c7' : '#e0f2fe'}; color: ${mesa.esRapida ? '#92400e' : '#0369a1'}; padding: 0.3rem 0.65rem; border-radius: 8px; font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 0.35rem; border: 1px solid ${mesa.esRapida ? '#fde68a' : '#bae6fd'};">
                   <span>${mesa.esRapida ? '🛍️' : '🪑'}</span> ${this.esc(mesa.nombre)}
                 </div>
-                ${mesa.esRapida && (!mesa.ordenes || mesa.ordenes.length === 0) ? `
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.76rem; padding: 0.3rem 0.55rem; color: #dc2626; border-color: #fca5a5;" onclick="app.descartarMesaRapida('${mesa.id}')">
-                    🗑️ Descartar
+                ${(!mesa.ordenes || mesa.ordenes.length === 0) ? `
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.76rem; padding: 0.3rem 0.55rem; color: #dc2626; border-color: #fca5a5;" onclick="${mesa.esRapida ? `app.descartarMesaRapida('${mesa.id}')` : `app.quitarMesaSalonVacia('${mesa.id}')`}">
+                    🗑️ ${mesa.esRapida ? 'Descartar' : 'Quitar mesa'}
                   </button>
                 ` : ''}
               </div>
@@ -7439,7 +8031,7 @@
               </div>
               ${totalColones > 0 ? (mesa.pagada ? (mesa.esRapida ? (
                 (this.data.usuarioActivo && (this.data.usuarioActivo.tipo === 'caja' || this.data.usuarioActivo.tipo === 'master')) ? `
-                <button type="button" class="btn btn-success" style="width: 100%; margin-top: 0.6rem; padding: 0.6rem 0.75rem; font-size: 0.92rem; font-weight: 800; border-radius: 8px; background: #047857; border-color: #047857; display: flex; align-items: center; justify-content: center; gap: 0.45rem;" onclick="app.entregarYFinalizarMesaRapida(${mesa.id}); app.closeModal('modalPedido');">
+                <button type="button" class="btn btn-success" style="width: 100%; margin-top: 0.6rem; padding: 0.6rem 0.75rem; font-size: 0.92rem; font-weight: 800; border-radius: 8px; background: #047857; border-color: #047857; display: flex; align-items: center; justify-content: center; gap: 0.45rem;" onclick="app.entregarYFinalizarMesaRapida('${mesa.id}'); app.closeModal('modalPedido');">
                   <span>🚪</span> Cerrar y Finalizar Venta Rápida
                 </button>
               ` : `
@@ -7972,12 +8564,11 @@
         if (!mesa.ordenes) mesa.ordenes = [];
         mesa.ordenes.push(nuevaOrden);
         mesa.pagada = false;
+        mesa.creadaManualmente = true;
         if (!this._ordenesEnviadasRecientes) this._ordenesEnviadasRecientes = new Map();
         this._ordenesEnviadasRecientes.set(String(nuevaOrden.id), Date.now());
-        if (mesa.esRapida || mesa.esCredito) {
-          if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
-          this._mesasCreadasRecientes.set(String(mesa.id), Date.now());
-        }
+        if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
+        this._mesasCreadasRecientes.set(String(mesa.id), Date.now());
         this.cart = [];
         this.saveData();
         this.closeModal('modalPedido');
@@ -9073,7 +9664,9 @@
           rolCobrador: rolCobrador,
           origenCobro: origenCobro,
           horaCobro: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          fecha: new Date().toLocaleTimeString(),
+          fechaISO: this.getFechaHoyISO(),
+          fechaHora: new Date().toLocaleString('es-CR'),
+          fecha: this.getFechaHoyISO(),
           items: itemsDetalleVenta,
           productosResumen: productosResumen,
           creadoOffline: !navigator.onLine
@@ -9142,6 +9735,200 @@
         }
       }
 
+      _retirarMesaDeActivas(mesaId) {
+        const idStr = String(mesaId);
+        if (!this.rapidasCerradasIds) this.rapidasCerradasIds = new Set();
+        this.rapidasCerradasIds.add(idStr);
+        try {
+          const arr = Array.from(this.rapidasCerradasIds).slice(-250);
+          localStorage.setItem('jiqui_rapidas_cerradas', JSON.stringify(arr));
+        } catch(e) {}
+        if (this._mesasCreadasRecientes) this._mesasCreadasRecientes.delete(idStr);
+        this.registrarMesaVaciadaReciente(mesaId);
+        this.data.mesas = this.data.mesas.filter(m => String(m.id) !== idStr);
+        this.enviarDatosASheets('cerrar_mesa_rapida', { mesaId });
+      }
+
+      obtenerSiguienteNumeroMesaSalon() {
+        const usadas = new Set();
+        (this.data.mesas || []).filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m)).forEach(m => {
+          if (m.numeroMesa) usadas.add(Number(m.numeroMesa));
+          const match = (m.nombre || '').match(/\bmesa\s+(\d+)\b/i);
+          if (match) usadas.add(Number(match[1]));
+        });
+        let n = 1;
+        while (usadas.has(n)) n++;
+        return n;
+      }
+
+      abrirModalAgregarMesa() {
+        const nextNum = this.obtenerSiguienteNumeroMesaSalon();
+        this.colorNuevaMesaSeleccionado = this.obtenerColorMesaPorIndice(nextNum);
+        const inp = document.getElementById('nuevaMesaNombreInput');
+        if (inp) inp.value = `Mesa ${nextNum}`;
+        this.renderOpcionesModalAgregarMesa();
+        this.openModal('modalAgregarMesa');
+        setTimeout(() => {
+          if (inp) {
+            inp.focus();
+            inp.select();
+          }
+        }, 60);
+      }
+
+      renderOpcionesModalAgregarMesa() {
+        const chipsBox = document.getElementById('chipsMesasRapidasSugeridas');
+        const colorBox = document.getElementById('mesaColorSelector');
+        const inp = document.getElementById('nuevaMesaNombreInput');
+        const nombreActual = (inp ? inp.value : '').trim().toLowerCase();
+
+        const activasSet = new Set(
+          (this.data.mesas || [])
+            .filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m))
+            .map(m => (m.nombre || '').trim().toLowerCase())
+        );
+
+        if (chipsBox) {
+          const sugeridas = [
+            { nombre: 'Mesa 1', num: 1 },
+            { nombre: 'Mesa 2', num: 2 },
+            { nombre: 'Mesa 3', num: 3 },
+            { nombre: 'Mesa 4', num: 4 },
+            { nombre: 'Mesa 5', num: 5 },
+            { nombre: 'Mesa 6', num: 6 },
+            { nombre: 'Mesa 7', num: 7 },
+            { nombre: 'Mesa 8', num: 8 },
+            { nombre: 'Terraza', num: 4 },
+            { nombre: 'Barra', num: 5 }
+          ];
+          chipsBox.innerHTML = sugeridas.map(s => {
+            const ocupada = activasSet.has(s.nombre.toLowerCase());
+            const selected = !ocupada && nombreActual === s.nombre.toLowerCase();
+            return `
+              <button type="button" class="mesa-chip-btn ${ocupada ? 'ocupada' : ''} ${selected ? 'selected' : ''}" ${ocupada ? 'disabled' : ''} onclick="app.seleccionarChipNuevaMesa('${this.escAttr(s.nombre)}', ${s.num})">
+                ${this.esc(s.nombre)}${ocupada ? ' (Activa)' : ''}
+              </button>
+            `;
+          }).join('');
+        }
+
+        if (colorBox) {
+          const paleta = ['#2563EB', '#7C3AED', '#EA580C', '#0D9488', '#6366F1', '#DB2777', '#0284C7', '#059669'];
+          colorBox.innerHTML = paleta.map(hex => {
+            const sel = (this.colorNuevaMesaSeleccionado || '').toLowerCase() === hex.toLowerCase();
+            return `<button type="button" class="mesa-color-dot ${sel ? 'selected' : ''}" style="background: ${hex};" aria-label="Color ${hex}" onclick="app.seleccionarColorNuevaMesa('${hex}')"></button>`;
+          }).join('');
+        }
+      }
+
+      seleccionarChipNuevaMesa(nombre, num) {
+        const inp = document.getElementById('nuevaMesaNombreInput');
+        if (inp) inp.value = nombre;
+        this.colorNuevaMesaSeleccionado = this.obtenerColorMesaPorIndice(num || 1);
+        this.renderOpcionesModalAgregarMesa();
+      }
+
+      seleccionarColorNuevaMesa(hex) {
+        this.colorNuevaMesaSeleccionado = hex;
+        this.renderOpcionesModalAgregarMesa();
+      }
+
+      confirmarAgregarMesa(abrirPedido = false) {
+        const inp = document.getElementById('nuevaMesaNombreInput');
+        const nombreLimpio = (inp ? inp.value : '').trim().replace(/\s+/g, ' ');
+        if (!nombreLimpio) {
+          alert('Por favor ingrese un nombre o número para la mesa.');
+          if (inp) inp.focus();
+          return;
+        }
+
+        const existe = (this.data.mesas || []).find(m =>
+          !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m) &&
+          (m.nombre || '').trim().toLowerCase() === nombreLimpio.toLowerCase()
+        );
+        if (existe) {
+          alert(`Ya existe una mesa activa llamada "${existe.nombre}". Puede abrirla directamente o indicar otro nombre.`);
+          if (inp) inp.focus();
+          return;
+        }
+
+        const matchNum = nombreLimpio.match(/\b(\d+)\b/);
+        const numeroMesa = matchNum ? Number(matchNum[1]) : null;
+        const salonActuales = (this.data.mesas || []).filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m)).length;
+
+        let mesaId = Date.now();
+        while ((this.data.mesas || []).some(m => String(m.id) === String(mesaId))) {
+          mesaId++;
+        }
+
+        const nombreUsuario = this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Mesero';
+        const nuevaMesa = {
+          id: mesaId,
+          nombre: nombreLimpio,
+          nombreCorto: nombreLimpio,
+          numeroMesa: numeroMesa || (salonActuales + 1),
+          colorHex: this.colorNuevaMesaSeleccionado || this.obtenerColorMesaPorIndice(numeroMesa || (salonActuales + 1)),
+          esRapida: false,
+          esCredito: false,
+          creadaManualmente: true,
+          pedidoId: null,
+          meseroApertura: nombreUsuario,
+          horaApertura: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
+          fechaApertura: new Date().toISOString(),
+          ordenes: [],
+          pagada: false,
+          cobradoPor: null,
+          horaCobro: null,
+          pagosParciales: [],
+          listoParaRecoger: false,
+          horaListo: null
+        };
+
+        if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
+        this._mesasCreadasRecientes.set(String(mesaId), Date.now());
+        this.bloquearDescargasTemporales(8000);
+
+        this.data.mesas.push(nuevaMesa);
+        this._mesaActivaPedidoSnapshot = nuevaMesa;
+
+        if (!abrirPedido && this.filtroMesas === 'OCUPADAS') {
+          this.filtroMesas = 'TODAS';
+          const btnTodas = document.getElementById('btnFiltroMesaTodas');
+          const btnOcup = document.getElementById('btnFiltroMesaOcupadas');
+          const btnLibres = document.getElementById('btnFiltroMesaLibres');
+          if (btnTodas) btnTodas.classList.add('active');
+          if (btnOcup) btnOcup.classList.remove('active');
+          if (btnLibres) btnLibres.classList.remove('active');
+        }
+
+        this.closeModal('modalAgregarMesa');
+        this.saveData();
+        this.renderAll();
+        this.sincronizarEstadoMesasCloud(true);
+
+        if (abrirPedido) {
+          this.abrirModalPedido(nuevaMesa.id);
+        }
+      }
+
+      quitarMesaSalonVacia(mesaId) {
+        const mesa = (this.data.mesas || []).find(m => String(m.id) === String(mesaId));
+        if (!mesa) return;
+        if (mesa.ordenes && mesa.ordenes.length > 0) {
+          this.cerrarMesa(mesaId);
+          return;
+        }
+        if (document.getElementById('modalPedido')?.classList.contains('active') && String(this.selectedMesaId) === String(mesaId)) {
+          this.closeModal('modalPedido');
+        }
+        this._retirarMesaDeActivas(mesaId);
+        this.bloquearDescargasTemporales(4000);
+        this.programarDescargaSegura(4000);
+        this.saveData();
+        this.renderAll();
+        this.sincronizarEstadoMesasCloud(true);
+      }
+
       cerrarMesa(mesaId) {
         const mesa = this.data.mesas.find(m => String(m.id) === String(mesaId));
         if (!mesa) return;
@@ -9152,7 +9939,13 @@
           return;
         }
 
-        // Restricción: Solo personal de Caja o Administración (Máster) puede cerrar mesas regulares de salón
+        // Si la mesa aún está vacía (sin comandas), permitir retirarla directamente
+        if (!mesa.ordenes || mesa.ordenes.length === 0) {
+          this.quitarMesaSalonVacia(mesaId);
+          return;
+        }
+
+        // Restricción: Solo personal de Caja o Administración (Máster) puede cerrar mesas regulares de salón con comandas
         const tipoUsuario = (this.data.usuarioActivo ? (this.data.usuarioActivo.tipo || this.data.usuarioActivo.rol || 'mesero') : 'mesero').toString().trim().toLowerCase();
         if (tipoUsuario !== 'caja' && tipoUsuario !== 'master') {
           alert('Acceso restringido: Solo el personal de Caja o Administración (Máster) puede cerrar y desocupar mesas de salón.');
@@ -9161,22 +9954,14 @@
 
         const saldoPendiente = this.calcularSaldoPendienteMesa(mesa);
 
-        // Caso 1: La mesa no tiene órdenes, o ya está debidamente pagada, o el saldo pendiente llegó a 0
-        if (!mesa.ordenes || mesa.ordenes.length === 0 || mesa.pagada || saldoPendiente === 0) {
-          mesa.ordenes = [];
-          mesa.pedidoId = null;
-          mesa.meseroApertura = null;
-          mesa.horaApertura = null;
-          mesa.pagada = false;
-          mesa.cobradoPor = null;
-          mesa.horaCobro = null;
-          mesa.pagosParciales = [];
-          this.registrarMesaVaciadaReciente(mesaId);
+        // Caso 1: La mesa ya está debidamente pagada o el saldo pendiente llegó a 0 -> retirar mesa de activas
+        if (mesa.pagada || saldoPendiente === 0) {
+          this._retirarMesaDeActivas(mesaId);
           this.bloquearDescargasTemporales(4000);
           this.programarDescargaSegura(4000);
           this.saveData();
           this.renderAll();
-          this.sincronizarEstadoMesasCloud();
+          this.sincronizarEstadoMesasCloud(true);
           return;
         }
 
@@ -9444,25 +10229,8 @@
         if (!this.data.auditoriaCancelaciones) this.data.auditoriaCancelaciones = [];
         this.data.auditoriaCancelaciones.unshift(auditEntry);
 
-        // 2. Liberar mesa o retirar de la lista si es rápida
-        if (mesa.esRapida) {
-          if (!this.rapidasCerradasIds) this.rapidasCerradasIds = new Set();
-          this.rapidasCerradasIds.add(String(mesaId));
-          try {
-            localStorage.setItem('jiqui_rapidas_cerradas', JSON.stringify(Array.from(this.rapidasCerradasIds)));
-          } catch(e) {}
-          this.data.mesas = this.data.mesas.filter(m => String(m.id) !== String(mesaId));
-          this.enviarDatosASheets('cerrar_mesa_rapida', { mesaId: mesaId });
-        } else {
-          mesa.ordenes = [];
-          mesa.pedidoId = null;
-          mesa.meseroApertura = null;
-          mesa.horaApertura = null;
-          mesa.pagada = false;
-          mesa.cobradoPor = null;
-          mesa.horaCobro = null;
-          mesa.pagosParciales = [];
-        }
+        // 2. Retirar mesa cerrada/cancelada de las mesas activas (aplica para salón y rápida)
+        this._retirarMesaDeActivas(mesaId);
 
         this.saveData();
         this.registrarMesaVaciadaReciente(mesaId);
@@ -9829,18 +10597,21 @@ const url = this.data.googleSheetsUrl;
         const url = this.data.googleSheetsUrl;
         const sep = url.includes('?') ? '&' : '?';
 
-        // Crear versión compacta de mesas (filtrando mesas rápidas cerradas y órdenes canceladas)
+        // Crear versión compacta de mesas (filtrando mesas cerradas/legacy vacías y órdenes canceladas)
         const mesasCompactas = this.data.mesas.filter(m => {
-          if (m.esRapida && this.rapidasCerradasIds && this.rapidasCerradasIds.has(String(m.id))) return false;
+          if (!m || this.esMesaDefaultVacia(m)) return false;
+          if (this.rapidasCerradasIds && this.rapidasCerradasIds.has(String(m.id))) return false;
           return true;
         }).map(m => ({
           id: m.id,
           nombre: m.nombre,
           nombreCorto: m.nombreCorto || m.nombre,
+          numeroMesa: m.numeroMesa || null,
           numeroRapida: m.numeroRapida || null,
           colorHex: m.colorHex || '#2563EB',
           esRapida: Boolean(m.esRapida),
           esCredito: Boolean(m.esCredito),
+          creadaManualmente: Boolean(m.creadaManualmente),
           clienteCredito: m.clienteCredito || null,
           fechaApertura: m.fechaApertura || null,
           listoParaRecoger: Boolean(m.listoParaRecoger),
@@ -11789,7 +12560,8 @@ generarSemicierreModal() {
           origenCobro: 'caja',
           esCobroCredito: true,
           horaCobro: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
-          fecha: new Date().toISOString().slice(0, 10),
+          fechaISO: this.getFechaHoyISO(),
+          fecha: this.getFechaHoyISO(),
           items: facturasActualizadas.map(fa => ({
             nombre: `Abono Fac #${fa.id} (${fa.fecha})`,
             precio: fa.abono,
@@ -12172,7 +12944,8 @@ ${lineasFacturas}
           origenCobro: 'caja',
           esCobroCredito: true, // FLAG CLAVE PARA REPORTES
           horaCobro: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
-          fecha: new Date().toISOString().slice(0, 10),
+          fechaISO: this.getFechaHoyISO(),
+          fecha: this.getFechaHoyISO(),
           items: facturasActualizadas.map(fa => ({
             nombre: `Cobro Crédito Fac #${fa.id} (${fa.cliente})`,
             precio: fa.abono,
@@ -12294,6 +13067,511 @@ ${lineasFacturas}
         this.renderCuentasPorCobrar();
       }
 
+    
+      // ==============================================================
+      // --- MÓDULO DE INFORMES DE VENTAS DIARIAS Y RANGO DE FECHAS ---
+      // ==============================================================
+
+      sumarDiasISO(isoStr, deltaDias) {
+        const [y, m, d] = isoStr.split('-').map(Number);
+        const dt = new Date(y, m - 1, d + deltaDias);
+        const yy = dt.getFullYear();
+        const mm = String(dt.getMonth() + 1).padStart(2, '0');
+        const dd = String(dt.getDate()).padStart(2, '0');
+        return `${yy}-${mm}-${dd}`;
+      }
+
+      formatearFechaPillEs(isoStr) {
+        if (!isoStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoStr)) return isoStr || '';
+        const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        const [y, m, d] = isoStr.split('-').map(Number);
+        return `${String(d).padStart(2, '0')} ${meses[(m - 1) % 12]}`;
+      }
+
+      extraerFechaISOLocal(reg) {
+        if (!reg) return this.getFechaHoyISO();
+        if (reg.fechaISO && /^\d{4}-\d{2}-\d{2}$/.test(String(reg.fechaISO).trim())) {
+          return String(reg.fechaISO).trim();
+        }
+        const fStr = (reg.fecha || '').toString().trim();
+        if (/^\d{4}-\d{2}-\d{2}/.test(fStr)) {
+          return fStr.slice(0, 10);
+        }
+        const dmyMatch = (reg.fechaHora || fStr).toString().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (dmyMatch) {
+          const dd = String(dmyMatch[1]).padStart(2, '0');
+          const mm = String(dmyMatch[2]).padStart(2, '0');
+          const yyyy = dmyMatch[3];
+          return `${yyyy}-${mm}-${dd}`;
+        }
+        const numId = Number(reg.id);
+        if (!isNaN(numId) && numId > 1600000000000 && numId < 3000000000000) {
+          const dt = new Date(numId);
+          return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+        }
+        return this.getFechaHoyISO();
+      }
+
+      obtenerTodasLasVentasConsolidado() {
+        const fuentes = [
+          ...(this.data.ventasArchivadas || []),
+          ...(this.data.ventasHistorial || []),
+          ...(this.informeVentasRemotas || [])
+        ];
+        const map = new Map();
+        fuentes.forEach((v, idx) => {
+          if (!v) return;
+          if (v.esCredito || v.metodoPago === 'Crédito') return;
+          const idKey = v.id ? String(v.id) : `loc_${idx}_${v.horaCobro || ''}_${v.totalCRC || 0}`;
+          const fechaISO = this.extraerFechaISOLocal(v);
+          map.set(idKey, { ...v, fechaISO });
+        });
+        return Array.from(map.values());
+      }
+
+      seleccionarFechaUnicaInforme(isoStr) {
+        this.informeFechaDesde = isoStr;
+        this.informeFechaHasta = isoStr;
+        const inpDesde = document.getElementById('informeFechaDesde');
+        const inpHasta = document.getElementById('informeFechaHasta');
+        if (inpDesde) inpDesde.value = isoStr;
+        if (inpHasta) inpHasta.value = isoStr;
+        this.renderInformesVentas();
+        if (this.data.googleSheetsUrl) {
+          this.cargarHistorialVentasInforme(false);
+        }
+      }
+
+      toggleCalendarioInforme(forzarEstado) {
+        const panel = document.getElementById('panelCalendarioInforme');
+        if (!panel) return;
+        const abrir = (typeof forzarEstado === 'boolean') ? forzarEstado : (panel.style.display === 'none');
+        panel.style.display = abrir ? 'block' : 'none';
+        if (abrir) {
+          const hoy = this.getFechaHoyISO();
+          const inpDesde = document.getElementById('informeFechaDesde');
+          const inpHasta = document.getElementById('informeFechaHasta');
+          if (inpDesde) inpDesde.value = this.informeFechaDesde || hoy;
+          if (inpHasta) inpHasta.value = this.informeFechaHasta || hoy;
+        }
+      }
+
+      aplicarPresetRangoInforme(preset) {
+        const hoy = this.getFechaHoyISO();
+        let desde = hoy;
+        let hasta = hoy;
+
+        if (preset === 'ayer') {
+          desde = this.sumarDiasISO(hoy, -1);
+          hasta = desde;
+        } else if (preset === '7dias') {
+          desde = this.sumarDiasISO(hoy, -6);
+        } else if (preset === '30dias') {
+          desde = this.sumarDiasISO(hoy, -29);
+        } else if (preset === 'mes') {
+          desde = hoy.slice(0, 8) + '01';
+        }
+
+        const inpDesde = document.getElementById('informeFechaDesde');
+        const inpHasta = document.getElementById('informeFechaHasta');
+        if (inpDesde) inpDesde.value = desde;
+        if (inpHasta) inpHasta.value = hasta;
+        this.aplicarRangoPersonalizadoInforme();
+      }
+
+      aplicarRangoPersonalizadoInforme() {
+        const hoy = this.getFechaHoyISO();
+        let desde = document.getElementById('informeFechaDesde')?.value || hoy;
+        let hasta = document.getElementById('informeFechaHasta')?.value || hoy;
+        if (desde > hasta) {
+          const tmp = desde;
+          desde = hasta;
+          hasta = tmp;
+        }
+        this.informeFechaDesde = desde;
+        this.informeFechaHasta = hasta;
+        this.toggleCalendarioInforme(false);
+        this.renderInformesVentas();
+        if (this.data.googleSheetsUrl) {
+          this.cargarHistorialVentasInforme(false);
+        }
+      }
+
+      toggleDetalleInforme() {
+        this.informeDetalleAbierto = !this.informeDetalleAbierto;
+        const panel = document.getElementById('informeDetallePanel');
+        const btn = document.getElementById('btnToggleDetalleInforme');
+        if (panel) panel.style.display = this.informeDetalleAbierto ? 'block' : 'none';
+        if (btn) btn.innerText = this.informeDetalleAbierto ? 'Ocultar detalle ▴' : 'Ver detalle ▾';
+        if (this.informeDetalleAbierto) {
+          this.renderInformesVentas();
+        }
+      }
+
+      async cargarHistorialVentasInforme(mostrarAviso = false) {
+        const url = this.data.googleSheetsUrl;
+        const statusEl = document.getElementById('informeSyncStatusBadge');
+        if (!url || url.length < 10) {
+          if (mostrarAviso) alert('Mostrando datos locales guardados (Google Sheets no conectado).');
+          return;
+        }
+
+        const hoy = this.getFechaHoyISO();
+        const desde = this.informeFechaDesde || this.sumarDiasISO(hoy, -14);
+        const hasta = this.informeFechaHasta || hoy;
+        const sep = url.includes('?') ? '&' : '?';
+        const reqUrl = `${url}${sep}action=obtener_reporte_ventas&desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}&_t=${Date.now()}`;
+
+        if (statusEl) statusEl.innerText = '⏳ Consultando nube...';
+        try {
+          const res = await fetch(reqUrl);
+          const json = await res.json();
+          if (json && json.status === 'ready' && Array.isArray(json.ventas)) {
+            this.informeVentasRemotas = json.ventas;
+            if (statusEl) statusEl.innerText = `✅ Sincronizado (${json.ventas.length} reg.)`;
+            this.renderInformesVentas();
+          } else {
+            if (statusEl) statusEl.innerText = '';
+          }
+        } catch (e) {
+          console.warn('Error consultando reporte de ventas:', e);
+          if (statusEl) statusEl.innerText = '⚠️ Datos locales (sin conexión)';
+        }
+      }
+
+      abrirModalRegistrarEgreso() {
+        const hoy = this.getFechaHoyISO();
+        document.getElementById('egresoConceptoInput').value = '';
+        document.getElementById('egresoMontoInput').value = '';
+        document.getElementById('egresoFechaInput').value = this.informeFechaHasta || hoy;
+        document.getElementById('egresoMetodoSelect').value = 'Efectivo';
+        this.openModal('modalRegistrarEgreso');
+        setTimeout(() => document.getElementById('egresoConceptoInput')?.focus(), 100);
+      }
+
+      guardarEgresoInforme() {
+        const concepto = (document.getElementById('egresoConceptoInput')?.value || '').trim();
+        const monto = parseFloat(document.getElementById('egresoMontoInput')?.value) || 0;
+        const fechaISO = document.getElementById('egresoFechaInput')?.value || this.getFechaHoyISO();
+        const metodo = document.getElementById('egresoMetodoSelect')?.value || 'Efectivo';
+
+        if (!concepto) {
+          alert('Ingrese el concepto o descripción del egreso.');
+          return;
+        }
+        if (monto <= 0) {
+          alert('Ingrese un monto válido mayor a ₡0.');
+          return;
+        }
+
+        this.data.egresosHistorial = this.data.egresosHistorial || [];
+        this.data.egresosHistorial.unshift({
+          id: 'EGR-' + Date.now(),
+          fechaISO: fechaISO,
+          hora: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
+          concepto: concepto,
+          montoCRC: monto,
+          metodoPago: metodo,
+          usuario: this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Máster'
+        });
+
+        this.saveData();
+        this.closeModal('modalRegistrarEgreso');
+        this.renderInformesVentas();
+      }
+
+      eliminarEgresoInforme(egresoId) {
+        if (!confirm('¿Desea eliminar este registro de egreso?')) return;
+        this.data.egresosHistorial = (this.data.egresosHistorial || []).filter(e => String(e.id) !== String(egresoId));
+        this.saveData();
+        this.renderInformesVentas();
+      }
+
+      obtenerDatosPeriodoInforme() {
+        const hoy = this.getFechaHoyISO();
+        if (!this.informeFechaDesde) this.informeFechaDesde = hoy;
+        if (!this.informeFechaHasta) this.informeFechaHasta = hoy;
+        const desde = this.informeFechaDesde;
+        const hasta = this.informeFechaHasta;
+
+        const todasVentas = this.obtenerTodasLasVentasConsolidado();
+        const ventasPeriodo = todasVentas.filter(v => {
+          const f = v.fechaISO || this.extraerFechaISOLocal(v);
+          return f >= desde && f <= hasta;
+        });
+
+        const egresosPeriodo = (this.data.egresosHistorial || []).filter(e => {
+          const f = e.fechaISO || this.extraerFechaISOLocal(e);
+          return f >= desde && f <= hasta;
+        });
+
+        const creditosPeriodo = (this.data.cuentasPorCobrar || []).filter(c => {
+          const f = this.extraerFechaISOLocal(c);
+          return f >= desde && f <= hasta;
+        });
+
+        return { desde, hasta, ventasPeriodo, egresosPeriodo, creditosPeriodo };
+      }
+
+      renderInformesVentas() {
+        const pillsCont = document.getElementById('informeDatePillsContainer');
+        if (!pillsCont) return;
+
+        const hoy = this.getFechaHoyISO();
+        if (!this.informeFechaDesde) this.informeFechaDesde = hoy;
+        if (!this.informeFechaHasta) this.informeFechaHasta = hoy;
+
+        const { desde, hasta, ventasPeriodo, egresosPeriodo, creditosPeriodo } = this.obtenerDatosPeriodoInforme();
+        const esUnDia = (desde === hasta);
+
+        // 1. Renderizar franja horizontal de últimos 14 días (ej: 08 nov, 09 nov, 10 nov, 11 nov...)
+        let pillsHtml = '';
+        for (let offset = -13; offset <= 0; offset++) {
+          const iso = this.sumarDiasISO(hoy, offset);
+          const isActive = esUnDia && (iso === desde);
+          const label = this.formatearFechaPillEs(iso);
+          pillsHtml += `<button type="button" class="informe-date-pill ${isActive ? 'active' : ''}" onclick="app.seleccionarFechaUnicaInforme('${iso}')">${label}</button>`;
+        }
+        pillsCont.innerHTML = pillsHtml;
+        setTimeout(() => { pillsCont.scrollLeft = pillsCont.scrollWidth; }, 20);
+
+        // 2. Actualizar etiqueta del período
+        const badgeEl = document.getElementById('informePeriodoBadge');
+        if (badgeEl) {
+          badgeEl.innerText = esUnDia
+            ? (desde === hoy ? `Hoy (${this.formatearFechaPillEs(desde)})` : this.formatearFechaPillEs(desde))
+            : `Rango: ${this.formatearFechaPillEs(desde)} – ${this.formatearFechaPillEs(hasta)}`;
+        }
+
+        // 3. Calcular Totales Ingresos & Egresos & Desglose
+        let totalIngresosCRC = 0;
+        let efectivoCRC = 0, efectivoUSD = 0, tarjetaCRC = 0, sinpeCRC = 0, cobrosCreditoCRC = 0;
+        const prodsMap = {};
+        const personalMap = {};
+
+        ventasPeriodo.forEach(v => {
+          const mCRC = Number(v.totalCRC) || 0;
+          totalIngresosCRC += mCRC;
+          const met = v.metodoPago || 'Efectivo';
+          if (v.esCobroCredito) cobrosCreditoCRC += mCRC;
+
+          if (met === 'Tarjeta') tarjetaCRC += mCRC;
+          else if (met === 'SINPE') sinpeCRC += mCRC;
+          else if (v.monedaPago === 'USD') efectivoUSD += Number(v.totalUSD) || (mCRC / (this.data.tipoCambio || 510));
+          else efectivoCRC += mCRC;
+
+          const resp = v.cobradoPor || v.meseroCobrador || v.mesero || 'Caja';
+          if (!personalMap[resp]) personalMap[resp] = { nombre: resp, total: 0, cant: 0 };
+          personalMap[resp].total += mCRC;
+          personalMap[resp].cant += 1;
+
+          (v.items || []).forEach(it => {
+            const pNom = (it.nombre || 'Producto').trim();
+            const c = Number(it.cant) || 1;
+            const sub = (Number(it.precio) || 0) * c;
+            if (!prodsMap[pNom]) prodsMap[pNom] = { nombre: pNom, cant: 0, total: 0 };
+            prodsMap[pNom].cant += c;
+            prodsMap[pNom].total += sub;
+          });
+        });
+
+        const totalEgresosCRC = egresosPeriodo.reduce((s, e) => s + (Number(e.montoCRC) || 0), 0);
+        const balanceNetoCRC = totalIngresosCRC - totalEgresosCRC;
+        const tc = this.data.tipoCambio || 510;
+
+        document.getElementById('informeIngresosCRC').innerText = this.formatCRC(totalIngresosCRC);
+        document.getElementById('informeIngresosSub').innerText = `${ventasPeriodo.length} venta(s) &bull; ${this.formatUSD(totalIngresosCRC / tc)}`;
+        document.getElementById('informeEgresosCRC').innerText = this.formatCRC(totalEgresosCRC);
+        document.getElementById('informeEgresosSub').innerText = `${egresosPeriodo.length} egreso(s) registrado(s)`;
+
+        const strip = document.getElementById('informeMetodosResumenStrip');
+        if (strip) {
+          strip.innerHTML = `
+            <div style="font-weight: 800; color: ${balanceNetoCRC >= 0 ? '#15803d' : '#dc2626'};">
+              Balance Neto: ${this.formatCRC(balanceNetoCRC)}
+            </div>
+            <div style="display: flex; gap: 0.45rem; flex-wrap: wrap; color: #475569; font-weight: 600;">
+              <span>💵 ${this.formatCRC(efectivoCRC)}</span>
+              ${efectivoUSD > 0 ? `<span>&bull; 💵 ${this.formatUSD(efectivoUSD)}</span>` : ''}
+              <span>&bull; 💳 ${this.formatCRC(tarjetaCRC)}</span>
+              <span>&bull; 📱 ${this.formatCRC(sinpeCRC)}</span>
+              ${cobrosCreditoCRC > 0 ? `<span>&bull; 💰 Abonos CxC: ${this.formatCRC(cobrosCreditoCRC)}</span>` : ''}
+            </div>
+          `;
+        }
+
+        // 4. Renderizar Detalle Completo si está desplegado
+        const detallePanel = document.getElementById('informeDetallePanel');
+        if (!detallePanel || detallePanel.style.display === 'none') return;
+
+        const creditosEmitidosCRC = creditosPeriodo.reduce((s, c) => s + (Number(c.totalCRC) || 0), 0);
+        const desgloseGrid = document.getElementById('informeDesgloseMetodosGrid');
+        if (desgloseGrid) {
+          desgloseGrid.innerHTML = `
+            <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 0.75rem;">
+              <div style="font-size: 0.74rem; font-weight: 800; color: #166534;">💵 EFECTIVO COLONES</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #15803d;">${this.formatCRC(efectivoCRC)}</div>
+            </div>
+            <div style="background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 12px; padding: 0.75rem;">
+              <div style="font-size: 0.74rem; font-weight: 800; color: #0369a1;">💵 EFECTIVO DÓLARES</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #0284c7;">${this.formatUSD(efectivoUSD)}</div>
+            </div>
+            <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 0.75rem;">
+              <div style="font-size: 0.74rem; font-weight: 800; color: #334155;">💳 TARJETA</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a;">${this.formatCRC(tarjetaCRC)}</div>
+            </div>
+            <div style="background: #faf5ff; border: 1.5px solid #e9d5ff; border-radius: 12px; padding: 0.75rem;">
+              <div style="font-size: 0.74rem; font-weight: 800; color: #6b21a8;">📱 SINPE MÓVIL</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #7e22ce;">${this.formatCRC(sinpeCRC)}</div>
+            </div>
+            <div style="background: #eef2ff; border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 0.75rem;">
+              <div style="font-size: 0.74rem; font-weight: 800; color: #3730a3;">🧾 CRÉDITOS EMITIDOS</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #4338ca;">${this.formatCRC(creditosEmitidosCRC)}</div>
+            </div>
+          `;
+        }
+
+        const topProdsEl = document.getElementById('informeTopProductosList');
+        if (topProdsEl) {
+          const sortedProds = Object.values(prodsMap).sort((a, b) => b.total - a.total);
+          topProdsEl.innerHTML = sortedProds.length === 0
+            ? '<div style="color: #64748b; font-style: italic;">Sin productos vendidos en este período.</div>'
+            : sortedProds.map(p => `
+                <div style="display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px dashed #e2e8f0;">
+                  <span><strong>${p.cant}x</strong> ${this.esc(p.nombre)}</span>
+                  <strong style="color: #15803d;">${this.formatCRC(p.total)}</strong>
+                </div>
+              `).join('');
+        }
+
+        const persEl = document.getElementById('informePersonalList');
+        if (persEl) {
+          const sortedPers = Object.values(personalMap).sort((a, b) => b.total - a.total);
+          persEl.innerHTML = sortedPers.length === 0
+            ? '<div style="color: #64748b; font-style: italic;">Sin cobros registrados en este período.</div>'
+            : sortedPers.map(u => `
+                <div style="display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px dashed #e2e8f0;">
+                  <span>👤 <strong>${this.esc(u.nombre)}</strong> (${u.cant})</span>
+                  <strong style="color: #0369a1;">${this.formatCRC(u.total)}</strong>
+                </div>
+              `).join('');
+        }
+
+        // 5. Tabla unificada de Movimientos (Ingresos + Egresos)
+        const tbody = document.getElementById('informeMovimientosTbody');
+        if (tbody) {
+          const q = (document.getElementById('informeBuscarInput')?.value || '').toLowerCase().trim();
+          const movs = [
+            ...ventasPeriodo.map(v => ({
+              tipo: 'INGRESO',
+              id: v.id,
+              fechaISO: v.fechaISO,
+              hora: v.horaCobro || '',
+              titulo: v.mesaNombre || 'Venta',
+              responsable: v.cobradoPor || v.mesero || 'Caja',
+              metodo: v.metodoPago || 'Efectivo',
+              detalle: v.productosResumen || (v.items || []).map(i => `${i.cant || 1}x ${i.nombre}`).join(', ') || v.referenciaPago || 'Consumo',
+              monto: Number(v.totalCRC) || 0
+            })),
+            ...egresosPeriodo.map(e => ({
+              tipo: 'EGRESO',
+              id: e.id,
+              fechaISO: e.fechaISO,
+              hora: e.hora || '',
+              titulo: e.concepto,
+              responsable: e.usuario || 'Máster',
+              metodo: e.metodoPago || 'Efectivo',
+              detalle: 'Gasto / Salida registrada',
+              monto: Number(e.montoCRC) || 0
+            }))
+          ].filter(m => {
+            if (!q) return true;
+            return (m.titulo + ' ' + m.responsable + ' ' + m.metodo + ' ' + m.detalle).toLowerCase().includes(q);
+          }).sort((a, b) => (b.fechaISO + ' ' + b.hora).localeCompare(a.fechaISO + ' ' + a.hora));
+
+          if (movs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 1.5rem; color: #64748b; font-style: italic;">No hay movimientos registrados para este día o rango.</td></tr>';
+          } else {
+            tbody.innerHTML = movs.map(m => `
+              <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 0.5rem 0.65rem; white-space: nowrap;"><strong>${this.esc(this.formatearFechaPillEs(m.fechaISO))}</strong> <span style="color: #64748b;">${this.esc(m.hora)}</span></td>
+                <td style="padding: 0.5rem 0.65rem;">
+                  <span style="padding: 0.15rem 0.5rem; border-radius: 6px; font-weight: 800; font-size: 0.72rem; ${m.tipo === 'INGRESO' ? 'background: #dcfce7; color: #15803d;' : 'background: #fee2e2; color: #dc2626;'}">
+                    ${m.tipo === 'INGRESO' ? '↗ INGRESO' : '↙ EGRESO'}
+                  </span>
+                </td>
+                <td style="padding: 0.5rem 0.65rem; font-weight: 700; color: #0f172a;">${this.esc(m.titulo)}</td>
+                <td style="padding: 0.5rem 0.65rem; color: #475569;">${this.esc(m.responsable)}</td>
+                <td style="padding: 0.5rem 0.65rem;">${this.esc(m.metodo)}</td>
+                <td style="padding: 0.5rem 0.65rem; color: #475569; max-width: 240px;">${this.esc(m.detalle)}</td>
+                <td style="padding: 0.5rem 0.65rem; text-align: right; font-weight: 800; color: ${m.tipo === 'INGRESO' ? '#15803d' : '#dc2626'};">
+                  ${m.tipo === 'INGRESO' ? '' : '-'}${this.formatCRC(m.monto)}
+                  ${m.tipo === 'EGRESO' ? `<button type="button" onclick="app.eliminarEgresoInforme('${this.escAttr(m.id)}')" style="margin-left: 0.35rem; border: none; background: transparent; cursor: pointer; color: #94a3b8;" title="Eliminar egreso">🗑️</button>` : ''}
+                </td>
+              </tr>
+            `).join('');
+          }
+        }
+      }
+
+      descargarReporteCSV() {
+        const { desde, hasta, ventasPeriodo, egresosPeriodo } = this.obtenerDatosPeriodoInforme();
+        const escapeCsv = (val) => '"' + String(val === null || val === undefined ? '' : val).replace(/"/g, '""') + '"';
+
+        const filas = [
+          ['Fecha', 'Hora', 'Tipo', 'Mesa / Concepto', 'Responsable', 'Metodo de Pago', 'Detalle / Productos', 'Monto Colones (CRC)']
+        ];
+
+        let totalIng = 0;
+        ventasPeriodo.forEach(v => {
+          const m = Number(v.totalCRC) || 0;
+          totalIng += m;
+          const det = v.productosResumen || (v.items || []).map(i => `${i.cant || 1}x ${i.nombre}`).join(', ') || '';
+          filas.push([v.fechaISO, v.horaCobro || '', 'INGRESO', v.mesaNombre || '', v.cobradoPor || v.mesero || '', v.metodoPago || 'Efectivo', det, m]);
+        });
+
+        let totalEgr = 0;
+        egresosPeriodo.forEach(e => {
+          const m = Number(e.montoCRC) || 0;
+          totalEgr += m;
+          filas.push([e.fechaISO, e.hora || '', 'EGRESO', e.concepto, e.usuario || '', e.metodoPago || 'Efectivo', 'Gasto registrado', -m]);
+        });
+
+        filas.push([]);
+        filas.push(['RESUMEN DEL PERIODO', `${desde} a ${hasta}`, 'Total Ingresos:', totalIng, 'Total Egresos:', totalEgr, 'Balance Neto:', totalIng - totalEgr]);
+
+        const csvContent = '\uFEFF' + filas.map(r => r.map(escapeCsv).join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Informe_Ventas_FreshParadise_${desde}_al_${hasta}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      imprimirReporteVentas() {
+        const { desde, hasta, ventasPeriodo, egresosPeriodo } = this.obtenerDatosPeriodoInforme();
+        const totalIng = ventasPeriodo.reduce((s, v) => s + (Number(v.totalCRC) || 0), 0);
+        const totalEgr = egresosPeriodo.reduce((s, e) => s + (Number(e.montoCRC) || 0), 0);
+
+        const lineas = ventasPeriodo.map(v =>
+          `• [${v.fechaISO} ${v.horaCobro || ''}] ${v.mesaNombre || ''} (${v.metodoPago || 'Efectivo'}): ${this.formatCRC(v.totalCRC)}`
+        ).join('\n') || '(Sin ventas en este período)';
+
+        const texto = `========================================\n       FRESH PARADISE • COCLES\n     INFORME DE VENTAS POR PERÍODO\n========================================\nDesde: ${desde}    Hasta: ${hasta}\nGenerado: ${new Date().toLocaleString('es-CR')}\n----------------------------------------\n↗ TOTAL INGRESOS:  ${this.formatCRC(totalIng)} (${ventasPeriodo.length} ventas)\n↙ TOTAL EGRESOS:   ${this.formatCRC(totalEgr)} (${egresosPeriodo.length} egresos)\n= BALANCE NETO:    ${this.formatCRC(totalIng - totalEgr)}\n----------------------------------------\nDETALLE DE VENTAS:\n${lineas}\n========================================`;
+
+        const win = window.open('', '_blank', 'width=480,height=640');
+        if (win) {
+          win.document.write('<!DOCTYPE html><html><head><title>Informe de Ventas - Fresh Paradise</title><style>body{font-family:monospace;font-size:13px;padding:16px;}pre{white-space:pre-wrap;font-family:inherit;}</style></head><body><pre>' + this.esc(texto) + '</pre><' + 'script>window.onload=function(){window.print();};<' + '/script></body></html>');
+          win.document.close();
+        } else {
+          alert(texto);
+        }
+      }
+
     }
 
     const app = new JiquiApp();
@@ -12309,6 +13587,132 @@ ${lineasFacturas}
       app.verificarSesion();
       app.renderAll();
     }
+  
+    // ==============================================================
+    // --- SOPORTE PWA E INSTALACIÓN EN IPHONE / ANDROID / DESKTOP ---
+    // ==============================================================
+    (function initPwaSupport() {
+      let deferredPrompt = null;
+
+      const isStandalone = () =>
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+
+      const isIOS = () =>
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      const isIOSSafari = () => {
+        const ua = navigator.userAgent;
+        return isIOS() && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|WhatsApp|FBAN|FBAV|Instagram/i.test(ua);
+      };
+
+      function mostrarBotonesInstalar(visible, labelTxt) {
+        ['btnInstallPwaHeader', 'btnInstallPwaLogin'].forEach(id => {
+          const btn = document.getElementById(id);
+          if (!btn) return;
+          btn.style.display = visible ? (id === 'btnInstallPwaLogin' ? 'flex' : 'inline-flex') : 'none';
+          if (labelTxt && id === 'btnInstallPwaLogin') {
+            btn.innerHTML = '<span>📲</span> <span>' + labelTxt + '</span>';
+          }
+        });
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (!isStandalone()) {
+          mostrarBotonesInstalar(true, 'Instalar App en este dispositivo');
+        }
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        mostrarBotonesInstalar(false);
+      });
+
+      window.instalarAppPWA = async function() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          if (choice && choice.outcome === 'accepted') {
+            deferredPrompt = null;
+            mostrarBotonesInstalar(false);
+          }
+          return;
+        }
+
+        const body = document.getElementById('modalInstalarPWABody');
+        if (!body) return;
+
+        if (window.location.protocol === 'file:') {
+          body.innerHTML = `
+            <div style="background: #fef3c7; border: 1.5px solid #fcd34d; border-radius: 12px; padding: 0.85rem; margin-bottom: 0.85rem; color: #92400e;">
+              <strong>⚠️ Archivo abierto de forma local (file://)</strong><br>
+              Ni iPhone ni Android permiten instalar una app web desde archivos locales sin servidor HTTPS.
+            </div>
+            <p style="margin-bottom: 0.5rem;"><strong>Pasos para que sea instalable en iPhone y celulares:</strong></p>
+            <ol style="padding-left: 1.25rem; margin: 0;">
+              <li style="margin-bottom: 0.35rem;">Sube la carpeta a un hosting gratuito con HTTPS (<strong>GitHub Pages</strong>, <strong>Netlify</strong> o <strong>Vercel</strong>).</li>
+              <li style="margin-bottom: 0.35rem;">Abre el enlace HTTPS resultante desde <strong>Safari en tu iPhone</strong>.</li>
+              <li>Toca <strong>Compartir (⬆️) ➔ Agregar a pantalla de inicio</strong>.</li>
+            </ol>
+          `;
+        } else if (isIOS()) {
+          if (!isIOSSafari()) {
+            body.innerHTML = `
+              <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 12px; padding: 0.85rem; margin-bottom: 0.85rem; color: #9f1239;">
+                <strong>📱 Estás abriendo esto fuera de Safari</strong><br>
+                En iPhone, solo <strong>Safari</strong> permite instalar aplicaciones web en la pantalla de inicio.
+              </div>
+              <ol style="padding-left: 1.25rem; margin: 0;">
+                <li style="margin-bottom: 0.45rem;">Copia el enlace de arriba o toca el menú para elegir <strong>"Abrir en Safari"</strong>.</li>
+                <li style="margin-bottom: 0.45rem;">Ya en Safari, toca el botón <strong>Compartir</strong> (<span style="font-size: 1.1rem;">⬆️</span> cuadro con flecha arriba).</li>
+                <li>Elige <strong>"Agregar a pantalla de inicio"</strong> y luego <strong>"Agregar"</strong>.</li>
+              </ol>
+            `;
+          } else {
+            body.innerHTML = `
+              <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 0.85rem; margin-bottom: 0.85rem; color: #166534;">
+                <strong>🍏 Instalar en iPhone / iPad (3 pasos en Safari):</strong>
+              </div>
+              <ol style="padding-left: 1.25rem; margin: 0;">
+                <li style="margin-bottom: 0.6rem;">Toca el botón <strong>Compartir</strong> <span style="display:inline-block; background:#e2e8f0; padding:1px 6px; border-radius:6px; font-weight:800;">⬆️</span> en la barra inferior (o superior derecha) de Safari.</li>
+                <li style="margin-bottom: 0.6rem;">Desliza el menú hacia abajo y toca <strong>"Agregar a pantalla de inicio"</strong> <span style="display:inline-block; background:#e2e8f0; padding:1px 6px; border-radius:6px; font-weight:800;">➕</span>.</li>
+                <li>Toca <strong>"Agregar"</strong> arriba a la derecha. ¡Listo, aparecerá con el ícono de <strong>Fresh Paradise</strong> como app en pantalla completa!</li>
+              </ol>
+            `;
+          }
+        } else {
+          body.innerHTML = `
+            <p style="margin-bottom: 0.65rem;">Para instalar esta aplicación como app independiente:</p>
+            <ul style="padding-left: 1.25rem; margin: 0;">
+              <li style="margin-bottom: 0.45rem;"><strong>Android (Chrome):</strong> Toca el menú <strong>⋮</strong> arriba a la derecha ➔ <strong>"Instalar aplicación"</strong> o <strong>"Agregar a pantalla principal"</strong>.</li>
+              <li style="margin-bottom: 0.45rem;"><strong>iPhone / iPad (Safari):</strong> Toca <strong>Compartir ⬆️</strong> ➔ <strong>"Agregar a pantalla de inicio"</strong>.</li>
+              <li><strong>PC / Mac (Chrome o Edge):</strong> Haz clic en el ícono de instalar <strong>⊕</strong> al lado derecho de la barra de direcciones.</li>
+            </ul>
+          `;
+        }
+        window.app.openModal('modalInstalarPWA');
+      };
+
+      // Mostrar botón automáticamente en iPhone/iPad (Safari/navegador) si aún no está instalada
+      document.addEventListener('DOMContentLoaded', () => {
+        if (!isStandalone() && isIOS()) {
+          mostrarBotonesInstalar(true, 'Instalar en iPhone');
+        }
+      });
+
+      // Registrar Service Worker únicamente sobre HTTPS o localhost
+      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch((err) => {
+            console.warn('Service Worker registro opcional fallido:', err);
+          });
+        });
+      }
+    })();
+
   </script>
 </body>
 </html>

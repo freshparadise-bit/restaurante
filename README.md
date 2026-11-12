@@ -10,7 +10,6 @@ Sistema integral de Punto de Venta (POS), Pantalla de Cocina (KDS), Facturación
 |---|---|
 | [`index.html`](index.html) | Aplicación POS completa (Caja, Cocina KDS, Mesas de Salón, Cuentas por Cobrar y Administración Máster). |
 | [`logo_fresh_paradise.jpg`](logo_fresh_paradise.jpg) | Logotipo oficial en alta definición. |
-| [`GOOGLE_SHEETS_SCRIPT.txt`](GOOGLE_SHEETS_SCRIPT.txt) | Código del backend en Google Apps Script para sincronización multi-dispositivo con control de concurrencia. |
 | [`.gitignore`](.gitignore) | Exclusiones de archivos temporales del repositorio. |
 
 ---
@@ -21,5 +20,3 @@ Sistema integral de Punto de Venta (POS), Pantalla de Cocina (KDS), Facturación
    - Hacer doble clic en [`index.html`](index.html) en cualquier navegador moderno (Chrome, Edge, Safari, Firefox).
 2. **Despliegue Web:**
    - Puede subirse directamente a **GitHub Pages**, **Vercel**, **Netlify** o cualquier servidor estático.
-3. **Conexión con Google Sheets:**
-   - En el primer inicio (o desde el icono ⚙️), pegar la URL del Web App de Google Sheets para sincronizar usuarios, productos y comandas.
