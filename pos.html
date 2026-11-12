@@ -438,45 +438,9 @@
     .mesa-3 .mesa-header { background: var(--mesa-3); }
     .mesa-4 .mesa-header { background: var(--mesa-4); }
 
-    .mesa-chip-btn {
-      padding: 0.4rem 0.75rem;
-      border-radius: 9999px;
-      border: 1.5px solid #cbd5e1;
-      background: #f8fafc;
-      color: #334155;
-      font-size: 0.82rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .mesa-chip-btn:hover:not(:disabled) {
-      border-color: #0369a1;
-      background: #e0f2fe;
-      color: #0369a1;
-    }
-    .mesa-chip-btn.selected {
-      border-color: #0369a1;
-      background: #0369a1;
-      color: white;
-    }
-    .mesa-chip-btn.ocupada {
-      opacity: 0.55;
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #991b1b;
-    }
-    .mesa-color-dot {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 2.5px solid transparent;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .mesa-color-dot.selected {
-      transform: scale(1.15);
-      border-color: #0f172a;
-      box-shadow: 0 0 0 2px white inset;
+    .btn-agregar-mesa-salon:disabled {
+      opacity: 0.72;
+      cursor: wait;
     }
 
     /* ESTILOS COMPROBANTE DE PAGO (VISTA PREVIA Y COMPARTIR) */
@@ -2871,7 +2835,7 @@
   <div id="loginScreenOverlay">
     <div class="login-card">
       <div class="login-logo-circle">
-        <img src="logo_fresh_paradise.jpg" alt="Logo Fresh Paradise Cocles">
+        <img src="logo_fresh_paradise.jpg" alt="Logo Fresh Paradise Cocles" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='https://freshparadise-bit.github.io/restaurante/logo_fresh_paradise.jpg';}else{this.onerror=null;if(typeof FRESH_PARADISE_LOGO_DATA_URI!=='undefined')this.src=FRESH_PARADISE_LOGO_DATA_URI;}">
       </div>
       <h2 style="font-size: 1.5rem; color: #0f172a; margin-bottom: 0.25rem;">Fresh Paradise • Cocles</h2>
       <p style="font-size: 0.85rem; color: #475569; margin-bottom: 1.15rem;">Sistema de Pedidos & Punto de Venta</p>
@@ -2935,7 +2899,7 @@
   <header>
     <div class="brand-section">
       <div class="brand-logo-container" id="logoUploadTrigger" role="button" tabindex="0" title="Clic para cambiar logo" aria-label="Cambiar logo del negocio">
-        <img id="brandLogoImg" src="logo_fresh_paradise.jpg" width="48" height="48" decoding="async" style="display: block;" alt="Logo Fresh Paradise Cocles">
+        <img id="brandLogoImg" src="logo_fresh_paradise.jpg" width="48" height="48" decoding="async" style="display: block;" alt="Logo Fresh Paradise Cocles" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='https://freshparadise-bit.github.io/restaurante/logo_fresh_paradise.jpg';}else{this.onerror=null;if(typeof FRESH_PARADISE_LOGO_DATA_URI!=='undefined')this.src=FRESH_PARADISE_LOGO_DATA_URI;}">
         <span class="brand-logo-placeholder" id="logoPlaceholder" style="display: none;">FP</span>
       </div>
       <input type="file" id="logoFileInput" accept="image/*" style="display: none;">
@@ -3020,7 +2984,7 @@
 
         <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
           <!-- BOTÓN SUPERIOR: AGREGAR MESA EN SALÓN -->
-          <button type="button" class="btn btn-primary" onclick="app.abrirModalAgregarMesa()" style="padding: 0.55rem 0.95rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 6px rgba(3, 105, 161, 0.22);" title="Crear y abrir una nueva mesa según se necesite">
+          <button type="button" class="btn btn-primary btn-agregar-mesa-salon" onclick="app.crearMesaConsecutiva()" style="padding: 0.55rem 0.95rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 6px rgba(3, 105, 161, 0.22);" title="Crear y abrir automáticamente la siguiente mesa consecutiva">
             <span>🪑</span>
             <span>+ Agregar Mesa</span>
           </button>
@@ -3058,7 +3022,15 @@
     <!-- 2. PANTALLA COCINA (KDS) -->
     <div id="view-cocina" class="view-panel">
       <div class="kds-container">
-        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <h2 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.45rem; color: #0f172a;">
+            <span>👨‍🍳</span> <span>Pantalla de Cocina (Comandas en Tiempo Real)</span>
+          </h2>
+          <button type="button" class="btn btn-secondary" onclick="app.descargarDatosDesdeSheets(true)" style="font-size: 0.82rem; padding: 0.4rem 0.8rem; font-weight: 700;">
+            🔄 Actualizar Cocina
+          </button>
+        </div>
+
         <!-- ORDEN ACTUAL EN PREPARACIÓN O AVISO DE SIN ÓRDENES PENDIENTES -->
         <div id="kdsCurrentOrderSection">
           <!-- Renderizado dinámico de la orden activa en cocina o aviso cuando no hay órdenes -->
@@ -3111,7 +3083,7 @@
             <h2 style="margin: 0;">Monitoreo de Cuentas y Mesas</h2>
             <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
               <!-- BOTÓN SUPERIOR: AGREGAR MESA EN SALÓN -->
-              <button type="button" class="btn btn-primary" onclick="app.abrirModalAgregarMesa()" style="padding: 0.52rem 0.9rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.35rem;" title="Crear y abrir una nueva mesa en el salón">
+              <button type="button" class="btn btn-primary btn-agregar-mesa-salon" onclick="app.crearMesaConsecutiva()" style="padding: 0.52rem 0.9rem; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.35rem;" title="Crear y abrir automáticamente la siguiente mesa consecutiva">
                 <span>🪑</span>
                 <span>+ Agregar Mesa</span>
               </button>
@@ -4163,35 +4135,6 @@
     </div>
   </div>
 
-  <!-- MODAL: AGREGAR / ABRIR NUEVA MESA EN SALÓN -->
-  <div class="modal-backdrop" id="modalAgregarMesa" role="dialog" aria-modal="true" aria-labelledby="agregarMesaTitulo">
-    <div class="modal-box" style="max-width: 480px;">
-      <div class="modal-header">
-        <h3 id="agregarMesaTitulo">🪑 Agregar Nueva Mesa</h3>
-        <button type="button" class="modal-close-btn" aria-label="Cerrar ventana" onclick="app.closeModal('modalAgregarMesa')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="nuevaMesaNombreInput">Nombre o Número de Mesa:</label>
-          <input type="text" id="nuevaMesaNombreInput" class="form-control" placeholder="Ej: Mesa 1, Terraza, Barra..." maxlength="30" onkeydown="if(event.key==='Enter'){event.preventDefault();app.confirmarAgregarMesa(true);}">
-        </div>
-        <div class="form-group">
-          <label style="display: block; margin-bottom: 0.4rem;">Selección rápida:</label>
-          <div id="chipsMesasRapidasSugeridas" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
-        </div>
-        <div class="form-group" style="margin-bottom: 0;">
-          <label style="display: block; margin-bottom: 0.4rem;">Color identificador:</label>
-          <div id="mesaColorSelector" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
-        </div>
-      </div>
-      <div class="modal-footer" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalAgregarMesa')">Cancelar</button>
-        <button type="button" class="btn" style="background: #e0f2fe; color: #0369a1; border: 1.5px solid #bae6fd; font-weight: 800;" onclick="app.confirmarAgregarMesa(false)">➕ Agregar a Lista</button>
-        <button type="button" class="btn btn-primary" style="font-weight: 800;" onclick="app.confirmarAgregarMesa(true)">🍽️ Crear y Tomar Pedido</button>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL: CIERRE DE MESA CON CUENTA PENDIENTE / QUITAR MESA -->
   <div class="modal-backdrop" id="modalCierreMesaPendiente" role="dialog" aria-modal="true" aria-labelledby="cierrePendienteTitulo">
     <div class="modal-box" style="max-width: 560px;">
@@ -4741,6 +4684,8 @@
   <script>
     const FRESH_PARADISE_LOGO_DATA_URI = 'data:image/jpeg;base64,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';
 
+    const FRESH_PARADISE_HOSTED_LOGO_URL = 'https://freshparadise-bit.github.io/restaurante/logo_fresh_paradise.jpg';
+
     // --- ESTADO INICIAL 100% LIMPIO (SIN DATOS DE PRUEBA) ---
     const CLEAN_EMPTY_DATA = {
       tipoCambio: 510,
@@ -4944,7 +4889,7 @@
       constructor() {
         this.loadData();
         this.cart = [];
-        this.selectedMesaId = 1;
+        this.selectedMesaId = null;
         this.monedaVueltoSeleccionada = 'CRC';
         this.activeKdsOrderIndex = 0;
         this.selectedKdsOrderId = null;
@@ -4990,6 +4935,8 @@
         this._mesasCreadasRecientes = new Map(); // mesaId -> timestamp (TTL 120s)
         this._ordenesEnviadasRecientes = new Map(); // ordenId -> timestamp (TTL 60s)
         this._mesaActivaPedidoSnapshot = null;
+        this._creandoMesaEnCurso = false;
+        this._soportaCrearMesaCloud = null;
         this.clienteCreditoCobroSeleccionado = null;
         this.subTabCreditoCobro = 'existente';
         this.informeFechaDesde = this.getFechaHoyISO();
@@ -5000,6 +4947,7 @@
         this.initSync();
         this.initLogoUploader();
         this._obtenerLogoEmbebidoDecodificado();
+        this._cargarImagenComprobante(this.getComprobanteHeaderConfig().logoUrl);
 
         // Renderizado inicial garantizado (Offline-first inmediato)
         this.verificarSesion();
@@ -5182,6 +5130,7 @@
         } else {
           this.data.usuarioActivo = null;
         }
+        this.reconciliarMesasConsecutivasDuplicadas(false);
       }
 
       saveData() {
@@ -5220,14 +5169,21 @@
           }
         });
 
-        // 3. Sincronización periódica automática con la nube de Google Sheets (cada 30 segundos)
-        // No se ejecuta con la pestaña oculta para no gastar datos ni CPU innecesariamente.
+        // 3. Sincronización periódica automática con la nube de Google Sheets
+        // En pestaña Cocina refresca cada 8 segundos para recepción rápida de comandas; en otras pestañas cada 30 segundos.
+        this._ultimoPollSheetsTs = 0;
         setInterval(() => {
           if (document.hidden) return;
-          if (this.data.googleSheetsUrl && this.data.usuarioActivo) {
+          if (!this.data.googleSheetsUrl || !this.data.usuarioActivo) return;
+          const rolActual = (this.data.usuarioActivo.tipo || this.data.usuarioActivo.rol || '').toString().trim().toLowerCase();
+          const enCocina = (this.tabActual === 'cocina' || rolActual === 'cocina');
+          const intervaloMs = enCocina ? 8000 : 30000;
+          const ahoraPoll = Date.now();
+          if (ahoraPoll - (this._ultimoPollSheetsTs || 0) >= intervaloMs) {
+            this._ultimoPollSheetsTs = ahoraPoll;
             this.descargarDatosDesdeSheets(false);
           }
-        }, 30000);
+        }, 4000);
 
         // 4. Sincronización inmediata al cambiar de pestaña o reactivar la pantalla del dispositivo
         document.addEventListener('visibilitychange', () => {
@@ -5271,6 +5227,7 @@
             const reader = new FileReader();
             reader.onload = (evt) => {
               this.data.logoUrl = evt.target.result;
+              this._logoCanvasCache = {};
               this.saveData();
               this.renderLogo();
             };
@@ -5284,13 +5241,21 @@
         const loginImg = document.querySelector('.login-logo-circle img');
         const placeholder = document.getElementById('logoPlaceholder');
         const url = this.data.logoUrl || 'logo_fresh_paradise.jpg';
-        if (img) {
-          img.src = url;
-          img.style.display = 'block';
-        }
-        if (loginImg) {
-          loginImg.src = url;
-        }
+        [img, loginImg].forEach(el => {
+          if (!el) return;
+          el.dataset.fb = '';
+          el.onerror = () => {
+            if (el.dataset.fb !== '1' && el.src !== FRESH_PARADISE_HOSTED_LOGO_URL) {
+              el.dataset.fb = '1';
+              el.src = FRESH_PARADISE_HOSTED_LOGO_URL;
+            } else {
+              el.onerror = null;
+              el.src = FRESH_PARADISE_LOGO_DATA_URI;
+            }
+          };
+          el.src = url;
+          if (el === img) el.style.display = 'block';
+        });
         if (placeholder) {
           placeholder.style.display = 'none';
         }
@@ -5341,6 +5306,194 @@
         this._mesasVaciadasRecientes.set(String(mesaId), Date.now());
       }
 
+      _aplicarMesasRemotas(remoteMesas, reUploadOnConflict = true) {
+        if (!Array.isArray(remoteMesas)) return [];
+        const limpias = remoteMesas.filter(rm => rm && rm.id && !this.esMesaDefaultVacia(rm));
+
+        // Limpieza periódica de memorias de protección según TTL
+        const ahora = Date.now();
+        if (this._ordenesCanceladasRecientes) {
+          for (const [id, t] of this._ordenesCanceladasRecientes.entries()) {
+            if (ahora - t > 60000) this._ordenesCanceladasRecientes.delete(id);
+          }
+        }
+        if (this._estadosKdsLocales) {
+          for (const [id, entry] of this._estadosKdsLocales.entries()) {
+            if (ahora - entry.timestamp > 45000) this._estadosKdsLocales.delete(id);
+          }
+        }
+        if (this._mesasVaciadasRecientes) {
+          for (const [id, t] of this._mesasVaciadasRecientes.entries()) {
+            if (ahora - t > 45000) this._mesasVaciadasRecientes.delete(id);
+          }
+        }
+        if (this._mesasCreadasRecientes) {
+          for (const [id, t] of this._mesasCreadasRecientes.entries()) {
+            if (ahora - t > 120000) this._mesasCreadasRecientes.delete(id);
+          }
+        }
+        if (this._ordenesEnviadasRecientes) {
+          for (const [id, t] of this._ordenesEnviadasRecientes.entries()) {
+            if (ahora - t > 180000) this._ordenesEnviadasRecientes.delete(id);
+          }
+        }
+
+        const remoteIds = new Set(limpias.map(rm => String(rm.id)));
+        // Remover mesas cerradas o eliminadas en otro dispositivo, protegiendo las recién creadas o en edición activa
+        this.data.mesas = (this.data.mesas || []).filter(m => {
+          if (!m || this.esMesaDefaultVacia(m)) return false;
+          const mIdStr = String(m.id);
+          if (this.rapidasCerradasIds && this.rapidasCerradasIds.has(mIdStr)) return false;
+          const creadaReciente = this._mesasCreadasRecientes && this._mesasCreadasRecientes.has(mIdStr);
+          const modalPedidoAbierto = document.getElementById('modalPedido')?.classList.contains('active') && String(this.selectedMesaId) === mIdStr;
+          const modalCobroAbierto = document.getElementById('modalCobro')?.classList.contains('active') && String(this.selectedMesaId) === mIdStr;
+          if (creadaReciente || modalPedidoAbierto || modalCobroAbierto) return true;
+          if (this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(mIdStr)) return false;
+          const tieneOrdenReciente = (m.ordenes || []).some(o => this._ordenesEnviadasRecientes && this._ordenesEnviadasRecientes.has(String(o.id)));
+          if (tieneOrdenReciente) return true;
+          return remoteIds.has(mIdStr);
+        });
+
+        let huboPromocionRemota = false;
+        limpias.forEach(remoteMesa => {
+          const rIdStr = String(remoteMesa.id);
+          // Si esta mesa ya fue cerrada/eliminada localmente, no revivirla bajo ninguna circunstancia
+          if ((this.rapidasCerradasIds && this.rapidasCerradasIds.has(rIdStr)) ||
+              (this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(rIdStr))) {
+            return;
+          }
+
+          let localMesa = this.data.mesas.find(m => String(m.id) === rIdStr);
+          if (!localMesa) {
+            // Mesa (de salón, rápida o crédito) creada por otro dispositivo
+            const esRap = Boolean(remoteMesa.esRapida);
+            localMesa = {
+              id: remoteMesa.id,
+              nombre: remoteMesa.nombre || (esRap ? `Rápida #${remoteMesa.numeroRapida || 1} (Para Llevar)` : `Mesa ${remoteMesa.numeroMesa || remoteMesa.id}`),
+              nombreCorto: remoteMesa.nombreCorto || remoteMesa.nombre || (esRap ? `Rápida #${remoteMesa.numeroRapida || 1}` : `Mesa ${remoteMesa.numeroMesa || remoteMesa.id}`),
+              numeroMesa: remoteMesa.numeroMesa || null,
+              numeroRapida: esRap ? (remoteMesa.numeroRapida || 1) : null,
+              colorHex: remoteMesa.colorHex || (esRap ? (remoteMesa.esCredito ? '#4f46e5' : '#b45309') : this.obtenerColorMesaPorIndice(remoteMesa.numeroMesa || 1)),
+              esRapida: esRap,
+              esCredito: Boolean(remoteMesa.esCredito),
+              creditoRegistrado: Boolean(remoteMesa.creditoRegistrado),
+              creadaManualmente: Boolean(remoteMesa.creadaManualmente),
+              clienteCredito: remoteMesa.clienteCredito || null,
+              fechaApertura: remoteMesa.fechaApertura || null,
+              pedidoId: null,
+              meseroApertura: null,
+              horaApertura: null,
+              ordenes: [],
+              pagada: false,
+              cobradoPor: null,
+              horaCobro: null,
+              pagosParciales: [],
+              listoParaRecoger: false,
+              horaListo: null
+            };
+            this.data.mesas.push(localMesa);
+          }
+
+          if (localMesa) {
+            // Preservar atributos de crédito y creación manual
+            if (remoteMesa.esCredito) localMesa.esCredito = true;
+            if (remoteMesa.creadaManualmente) localMesa.creadaManualmente = true;
+            if (remoteMesa.clienteCredito && !localMesa.clienteCredito) {
+              localMesa.clienteCredito = remoteMesa.clienteCredito;
+            }
+            if (remoteMesa.fechaApertura && !localMesa.fechaApertura) {
+              localMesa.fechaApertura = remoteMesa.fechaApertura;
+            }
+
+            // Proteger mesa de salón vaciada recientemente contra restauración de órdenes obsoletas
+            const mesaVaciadaReciente = !localMesa.esRapida && this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(rIdStr);
+            if (mesaVaciadaReciente && (!localMesa.ordenes || localMesa.ordenes.length === 0)) {
+              localMesa.pedidoId = null;
+              localMesa.meseroApertura = null;
+              localMesa.horaApertura = null;
+              localMesa.ordenes = [];
+              localMesa.pagada = false;
+              localMesa.cobradoPor = null;
+              localMesa.horaCobro = null;
+              localMesa.pagosParciales = [];
+            } else {
+              // Si otro dispositivo o el servidor reasignó esta mesa al siguiente consecutivo por concurrencia, reflejarlo aquí
+              if (!localMesa.esRapida && !localMesa.esCredito) {
+                const rNum = this._extraerNumeroMesaConsecutiva(remoteMesa);
+                const lNum = this._extraerNumeroMesaConsecutiva(localMesa);
+                if (rNum && lNum && rNum > lNum) {
+                  const anteriorNombre = localMesa.nombre || `Mesa ${lNum}`;
+                  localMesa.numeroMesa = rNum;
+                  localMesa.nombre = remoteMesa.nombre || `Mesa ${rNum}`;
+                  localMesa.nombreCorto = remoteMesa.nombreCorto || localMesa.nombre;
+                  localMesa.colorHex = remoteMesa.colorHex || this.obtenerColorMesaPorIndice(rNum);
+                  huboPromocionRemota = true;
+                  if (document.getElementById('modalPedido')?.classList.contains('active') && String(this.selectedMesaId) === rIdStr) {
+                    this._renderEncabezadoModalPedido(localMesa);
+                    this._mostrarToast(`ℹ️ ${anteriorNombre} ya fue creada por otro mesero. Se asignó automáticamente ${localMesa.nombre}.`, '#0369a1', 4200);
+                  }
+                }
+              }
+
+              localMesa.pedidoId = remoteMesa.pedidoId || localMesa.pedidoId || null;
+              localMesa.meseroApertura = remoteMesa.meseroApertura || localMesa.meseroApertura || null;
+              localMesa.horaApertura = remoteMesa.horaApertura || localMesa.horaApertura || null;
+
+              // Filtrar órdenes que hayan sido canceladas localmente y proteger estado KDS
+              const remoteOrdenes = Array.isArray(remoteMesa.ordenes) ? remoteMesa.ordenes : [];
+              const ordenesFiltradas = remoteOrdenes.filter(o => {
+                if (this._ordenesCanceladasRecientes && this._ordenesCanceladasRecientes.has(String(o.id))) {
+                  return false;
+                }
+                return true;
+              }).map(o => {
+                const oIdStr = String(o.id);
+                if (this._estadosKdsLocales && this._estadosKdsLocales.has(oIdStr)) {
+                  const entry = this._estadosKdsLocales.get(oIdStr);
+                  // Mantener el estado local más avanzado (evita que Sheets degrade verde/amarillo a rojo)
+                  o.estado = entry.estado;
+                }
+                return o;
+              });
+
+              // Conservar órdenes recién enviadas localmente que aún no han regresado en el snapshot de Sheets
+              const remoteOrderIds = new Set(ordenesFiltradas.map(o => String(o.id)));
+              const ordenesLocalesRecientes = (localMesa.ordenes || []).filter(o =>
+                this._ordenesEnviadasRecientes &&
+                this._ordenesEnviadasRecientes.has(String(o.id)) &&
+                !remoteOrderIds.has(String(o.id))
+              );
+
+              localMesa.ordenes = [...ordenesFiltradas, ...ordenesLocalesRecientes];
+              if (localMesa.nombre && Array.isArray(localMesa.ordenes)) {
+                localMesa.ordenes.forEach(o => { o.mesaNombre = localMesa.nombre; });
+              }
+              localMesa.pagada = Boolean(remoteMesa.pagada || localMesa.pagada);
+              localMesa.creditoRegistrado = Boolean(remoteMesa.creditoRegistrado || localMesa.creditoRegistrado);
+              localMesa.cobradoPor = remoteMesa.cobradoPor || localMesa.cobradoPor || null;
+              localMesa.horaCobro = remoteMesa.horaCobro || localMesa.horaCobro || null;
+              localMesa.pagosParciales = Array.isArray(remoteMesa.pagosParciales) && remoteMesa.pagosParciales.length >= (localMesa.pagosParciales || []).length
+                ? remoteMesa.pagosParciales
+                : (localMesa.pagosParciales || []);
+              localMesa.listoParaRecoger = Boolean(remoteMesa.listoParaRecoger);
+              localMesa.horaListo = remoteMesa.horaListo || null;
+              if (localMesa.ordenes.length > 0 && this.calcularSaldoPendienteMesa(localMesa) <= 0 && this.calcularPagadoMesa(localMesa) > 0) {
+                localMesa.pagada = true;
+              }
+            }
+          }
+        });
+
+        const reasignaciones = this.reconciliarMesasConsecutivasDuplicadas(true);
+        if ((reasignaciones.length > 0 || huboPromocionRemota) && reUploadOnConflict) {
+          this.saveData();
+          if (reasignaciones.length > 0) {
+            this.sincronizarEstadoMesasCloud(true);
+          }
+        }
+        return reasignaciones;
+      }
+
       // --- DESCARGAR DATOS EXCLUSIVAMENTE CREADOS EN SHEETS ---
       async descargarDatosDesdeSheets(mostrarAlerta = false) {
         if (!this.data.googleSheetsUrl) {
@@ -5348,8 +5501,8 @@
           return;
         }
 
-        // Si ya hay una descarga en curso, evitar peticiones concurrentes
-        if (this._descargaEnCurso) return;
+        // Si ya hay una descarga en curso, compartir la promesa en lugar de omitirla
+        if (this._descargaEnCurso) return this._descargaPromesaActual;
 
         // Si se acaba de realizar una acción (cambio de estado KDS, cancelación, cobro o cierre),
         // proteger contra descarga prematura durante al menos 3 a 4 segundos
@@ -5365,8 +5518,11 @@
         }
 
         this._descargaEnCurso = true;
+        this._descargaPromesaActual = (async () => {
         try {
-          const res = await fetch(this.data.googleSheetsUrl);
+          const baseUrl = this.data.googleSheetsUrl;
+          const sepFetch = baseUrl.includes('?') ? '&' : '?';
+          const res = await fetch(`${baseUrl}${sepFetch}_t=${Date.now()}`, { redirect: 'follow' });
           const json = await res.json();
 
           if (json && json.status === 'ready') {
@@ -5410,157 +5566,7 @@
               try { remoteMesas = JSON.parse(remoteMesas); } catch(e) {}
             }
             if (Array.isArray(remoteMesas)) {
-              remoteMesas = remoteMesas.filter(rm => rm && rm.id && !this.esMesaDefaultVacia(rm));
-
-              // Limpieza periódica de memorias de protección según TTL
-              const ahora = Date.now();
-              if (this._ordenesCanceladasRecientes) {
-                for (const [id, t] of this._ordenesCanceladasRecientes.entries()) {
-                  if (ahora - t > 60000) this._ordenesCanceladasRecientes.delete(id);
-                }
-              }
-              if (this._estadosKdsLocales) {
-                for (const [id, entry] of this._estadosKdsLocales.entries()) {
-                  if (ahora - entry.timestamp > 45000) this._estadosKdsLocales.delete(id);
-                }
-              }
-              if (this._mesasVaciadasRecientes) {
-                for (const [id, t] of this._mesasVaciadasRecientes.entries()) {
-                  if (ahora - t > 45000) this._mesasVaciadasRecientes.delete(id);
-                }
-              }
-
-              if (this._mesasCreadasRecientes) {
-                for (const [id, t] of this._mesasCreadasRecientes.entries()) {
-                  if (ahora - t > 120000) this._mesasCreadasRecientes.delete(id);
-                }
-              }
-              if (this._ordenesEnviadasRecientes) {
-                for (const [id, t] of this._ordenesEnviadasRecientes.entries()) {
-                  if (ahora - t > 60000) this._ordenesEnviadasRecientes.delete(id);
-                }
-              }
-
-              const remoteIds = new Set(remoteMesas.map(rm => String(rm.id)));
-              // Remover mesas cerradas o eliminadas en otro dispositivo, protegiendo las recién creadas o en edición activa
-              this.data.mesas = this.data.mesas.filter(m => {
-                if (!m || this.esMesaDefaultVacia(m)) return false;
-                const mIdStr = String(m.id);
-                if (this.rapidasCerradasIds && this.rapidasCerradasIds.has(mIdStr)) return false;
-                const creadaReciente = this._mesasCreadasRecientes && this._mesasCreadasRecientes.has(mIdStr);
-                const modalPedidoAbierto = document.getElementById('modalPedido')?.classList.contains('active') && String(this.selectedMesaId) === mIdStr;
-                const modalCobroAbierto = document.getElementById('modalCobro')?.classList.contains('active') && String(this.selectedMesaId) === mIdStr;
-                if (creadaReciente || modalPedidoAbierto || modalCobroAbierto) return true;
-                if (this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(mIdStr)) return false;
-                const tieneOrdenReciente = (m.ordenes || []).some(o => this._ordenesEnviadasRecientes && this._ordenesEnviadasRecientes.has(String(o.id)));
-                if (tieneOrdenReciente) return true;
-                return remoteIds.has(mIdStr);
-              });
-
-              remoteMesas.forEach(remoteMesa => {
-                const rIdStr = String(remoteMesa.id);
-                // Si esta mesa ya fue cerrada/eliminada localmente, no revivirla bajo ninguna circunstancia
-                if ((this.rapidasCerradasIds && this.rapidasCerradasIds.has(rIdStr)) ||
-                    (this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(rIdStr))) {
-                  return;
-                }
-
-                let localMesa = this.data.mesas.find(m => String(m.id) === rIdStr);
-                if (!localMesa) {
-                  // Mesa (de salón, rápida o crédito) creada por otro dispositivo
-                  const esRap = Boolean(remoteMesa.esRapida);
-                  localMesa = {
-                    id: remoteMesa.id,
-                    nombre: remoteMesa.nombre || (esRap ? `Rápida #${remoteMesa.numeroRapida || 1} (Para Llevar)` : `Mesa ${remoteMesa.numeroMesa || remoteMesa.id}`),
-                    nombreCorto: remoteMesa.nombreCorto || remoteMesa.nombre || (esRap ? `Rápida #${remoteMesa.numeroRapida || 1}` : `Mesa ${remoteMesa.numeroMesa || remoteMesa.id}`),
-                    numeroMesa: remoteMesa.numeroMesa || null,
-                    numeroRapida: esRap ? (remoteMesa.numeroRapida || 1) : null,
-                    colorHex: remoteMesa.colorHex || (esRap ? (remoteMesa.esCredito ? '#4f46e5' : '#b45309') : this.obtenerColorMesaPorIndice(remoteMesa.numeroMesa || 1)),
-                    esRapida: esRap,
-                    esCredito: Boolean(remoteMesa.esCredito),
-                    creadaManualmente: Boolean(remoteMesa.creadaManualmente),
-                    clienteCredito: remoteMesa.clienteCredito || null,
-                    fechaApertura: remoteMesa.fechaApertura || null,
-                    pedidoId: null,
-                    meseroApertura: null,
-                    horaApertura: null,
-                    ordenes: [],
-                    pagada: false,
-                    cobradoPor: null,
-                    horaCobro: null,
-                    pagosParciales: [],
-                    listoParaRecoger: false,
-                    horaListo: null
-                  };
-                  this.data.mesas.push(localMesa);
-                }
-
-                if (localMesa) {
-                  // Preservar atributos de crédito si la mesa es de crédito local o remota
-                  if (remoteMesa.esCredito) localMesa.esCredito = true;
-                  if (remoteMesa.clienteCredito && !localMesa.clienteCredito) {
-                    localMesa.clienteCredito = remoteMesa.clienteCredito;
-                  }
-                  if (remoteMesa.fechaApertura && !localMesa.fechaApertura) {
-                    localMesa.fechaApertura = remoteMesa.fechaApertura;
-                  }
-
-                  // Proteger mesa de salón vaciada recientemente contra restauración de órdenes obsoletas
-                  const mesaVaciadaReciente = !localMesa.esRapida && this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(rIdStr);
-                  if (mesaVaciadaReciente && (!localMesa.ordenes || localMesa.ordenes.length === 0)) {
-                    localMesa.pedidoId = null;
-                    localMesa.meseroApertura = null;
-                    localMesa.horaApertura = null;
-                    localMesa.ordenes = [];
-                    localMesa.pagada = false;
-                    localMesa.cobradoPor = null;
-                    localMesa.horaCobro = null;
-                    localMesa.pagosParciales = [];
-                  } else {
-                    localMesa.pedidoId = remoteMesa.pedidoId || localMesa.pedidoId || null;
-                    localMesa.meseroApertura = remoteMesa.meseroApertura || localMesa.meseroApertura || null;
-                    localMesa.horaApertura = remoteMesa.horaApertura || localMesa.horaApertura || null;
-
-                    // Filtrar órdenes que hayan sido canceladas localmente y proteger estado KDS
-                    const remoteOrdenes = Array.isArray(remoteMesa.ordenes) ? remoteMesa.ordenes : [];
-                    const ordenesFiltradas = remoteOrdenes.filter(o => {
-                      if (this._ordenesCanceladasRecientes && this._ordenesCanceladasRecientes.has(String(o.id))) {
-                        return false;
-                      }
-                      return true;
-                    }).map(o => {
-                      const oIdStr = String(o.id);
-                      if (this._estadosKdsLocales && this._estadosKdsLocales.has(oIdStr)) {
-                        const entry = this._estadosKdsLocales.get(oIdStr);
-                        // Mantener el estado local más avanzado (evita que Sheets degrade verde/amarillo a rojo)
-                        o.estado = entry.estado;
-                      }
-                      return o;
-                    });
-
-                    // Conservar órdenes recién enviadas localmente que aún no han regresado en el snapshot de Sheets
-                    const remoteOrderIds = new Set(ordenesFiltradas.map(o => String(o.id)));
-                    const ordenesLocalesRecientes = (localMesa.ordenes || []).filter(o =>
-                      this._ordenesEnviadasRecientes &&
-                      this._ordenesEnviadasRecientes.has(String(o.id)) &&
-                      !remoteOrderIds.has(String(o.id))
-                    );
-
-                    localMesa.ordenes = [...ordenesFiltradas, ...ordenesLocalesRecientes];
-                    localMesa.pagada = Boolean(remoteMesa.pagada || localMesa.pagada);
-                    localMesa.cobradoPor = remoteMesa.cobradoPor || localMesa.cobradoPor || null;
-                    localMesa.horaCobro = remoteMesa.horaCobro || localMesa.horaCobro || null;
-                    localMesa.pagosParciales = Array.isArray(remoteMesa.pagosParciales) && remoteMesa.pagosParciales.length >= (localMesa.pagosParciales || []).length
-                      ? remoteMesa.pagosParciales
-                      : (localMesa.pagosParciales || []);
-                    localMesa.listoParaRecoger = Boolean(remoteMesa.listoParaRecoger);
-                    localMesa.horaListo = remoteMesa.horaListo || null;
-                    if (localMesa.ordenes.length > 0 && this.calcularSaldoPendienteMesa(localMesa) <= 0 && this.calcularPagadoMesa(localMesa) > 0) {
-                      localMesa.pagada = true;
-                    }
-                  }
-                }
-              });
+              this._aplicarMesasRemotas(remoteMesas, true);
             }
 
             // Sincronizar historial de ventas del turno directamente desde Google Sheets (con respaldo offline)
@@ -5664,37 +5670,13 @@
 
             this.actualizarIndicadorConexion(true);
             await this.procesarColaPendienteSync();
-
-            const currentSignature = JSON.stringify({
-              u: (this.data.usuarios || []).map(u => u.nombre + u.tipo),
-              p: (this.data.productos || []).length,
-              m: (this.data.mesas || []).map(m => String(m.id) + (m.ordenes || []).map(o => String(o.id) + o.estado).join('') + (m.pagada ? 1 : 0) + (m.listoParaRecoger ? 1 : 0)),
-              v: (this.data.ventasHistorial || []).length,
-              e: this.data.entregasMeseros
-            });
-
-            const dataChanged = (this._lastDataSignature !== currentSignature);
-            this._lastDataSignature = currentSignature;
-
             this.saveData();
 
-            // Verificación anti-flicker (cero brinco ni golpeteo si los datos no cambiaron)
-            const nuevoDataHash = JSON.stringify({
-              mesas: (this.data.mesas || []).map(m => ({
-                id: m.id,
-                pagada: m.pagada,
-                listo: m.listoParaRecoger,
-                ords: (m.ordenes || []).map(o => ({ id: o.id, est: o.estado, cant: (o.items || []).length, serv: o.servida }))
-              })),
-              ventasCount: (this.data.ventasHistorial || []).length,
-              cuentasCount: (this.data.cuentasPorCobrar || []).length,
-              prodsCount: (this.data.productos || []).length
-            });
+            // Comparar contra el último estado realmente renderizado en pantalla (anti-flicker seguro)
+            const nuevoDataHash = this._computeRenderHash();
+            const huboCambioReal = (nuevoDataHash !== this._renderedDataHash);
 
-            const huboCambioReal = (nuevoDataHash !== this._ultimoDataHash);
-            this._ultimoDataHash = nuevoDataHash;
-
-            if (huboCambioReal || dataChanged || mostrarAlerta) {
+            if (huboCambioReal || mostrarAlerta) {
               const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
               this.renderAll();
               if (typeof window !== 'undefined' && scrollY > 0) {
@@ -5715,8 +5697,11 @@
           }
         } finally {
           this._descargaEnCurso = false;
+          this._descargaPromesaActual = null;
           // Cero brinco ni golpeteo: no re-renderizar incondicionalmente en background
         }
+        })();
+        return this._descargaPromesaActual;
       }
 
       // --- LOGIN Y CONTROL DE ACCESO OBLIGATORIO ---
@@ -5816,11 +5801,15 @@
         
         this.renderAll();
         this.verificarYMostrarAlertasPreparadas();
+        if (this.data.googleSheetsUrl) {
+          this.descargarDatosDesdeSheets(false);
+        }
       }
 
       cerrarSesion() {
         if (confirm('¿Desea cerrar la sesión actual?')) {
           this.limpiarTemporizadorRetornoCaja();
+          this._renderedDataHash = null;
           this.tabActual = null;
           this.data.usuarioActivo = null;
           sessionStorage.removeItem('jiqui_active_user');
@@ -5913,7 +5902,10 @@
         const activeTabEl = document.getElementById(`tab-${tabId}`);
         if (activeTabEl) activeTabEl.classList.add('active');
 
-        if (tabId === 'cuentas') {
+        if (tabId === 'cocina') {
+          this.renderCocina();
+          if (this.data.googleSheetsUrl) this.descargarDatosDesdeSheets(false);
+        } else if (tabId === 'cuentas') {
           this.renderCuentasPorCobrar();
         } else if (tabId === 'clientes') {
           this.renderClientesCredito();
@@ -5959,9 +5951,32 @@
       }
 
       // --- RENDERS ---
+      _computeRenderHash() {
+        return JSON.stringify({
+          r: this.data.usuarioActivo ? (this.data.usuarioActivo.tipo || this.data.usuarioActivo.rol || '') : '',
+          u: (this.data.usuarios || []).map(u => u.nombre + u.tipo),
+          p: (this.data.productos || []).length,
+          m: (this.data.mesas || []).map(m => ({
+            id: m.id,
+            nom: m.nombre || '',
+            num: m.numeroMesa || null,
+            pagada: Boolean(m.pagada),
+            credReg: Boolean(m.creditoRegistrado),
+            listo: Boolean(m.listoParaRecoger),
+            ords: (m.ordenes || []).map(o => ({ id: o.id, est: o.estado, cant: (o.items || []).length, serv: Boolean(o.servida) }))
+          })),
+          v: (this.data.ventasHistorial || []).length,
+          cxc: (this.data.cuentasPorCobrar || []).length,
+          e: this.data.entregasMeseros || {}
+        });
+      }
+
       renderAll() {
         this.verificarSesion();
-        if (!this.data.usuarioActivo) return;
+        if (!this.data.usuarioActivo) {
+          this._renderedDataHash = null;
+          return;
+        }
 
         const rol = (this.data.usuarioActivo.tipo || this.data.usuarioActivo.rol || 'mesero').toString().trim().toLowerCase();
         this.data.usuarioActivo.tipo = rol;
@@ -6032,6 +6047,7 @@
         if (typeof this.renderCuentasPorCobrar === 'function') this.renderCuentasPorCobrar();
         if (typeof this.renderClientesCredito === 'function') this.renderClientesCredito();
         if (typeof this.renderInformesVentas === 'function' && rol === 'master') this.renderInformesVentas();
+        this._renderedDataHash = this._computeRenderHash();
       }
 
       setFiltroMesas(filtro) {
@@ -6056,7 +6072,7 @@
         // Banner de aviso de pedidos para llevar listos en cocina
         const bannerListo = document.getElementById('meseroAvisoListoBanner');
         if (bannerListo) {
-          const listasParaLlevar = this.data.mesas.filter(m => m.esRapida && !m.esCredito && m.listoParaRecoger);
+          const listasParaLlevar = this.data.mesas.filter(m => m.esRapida && m.listoParaRecoger);
           if (listasParaLlevar.length > 0) {
             bannerListo.innerHTML = listasParaLlevar.map(m => {
               const saldo = this.calcularSaldoPendienteMesa(m);
@@ -6098,7 +6114,7 @@
         // Sección de Mesas Rápidas / Para Llevar activas
         const rapidasSec = document.getElementById('meseroRapidasSection');
         if (rapidasSec) {
-          const rapidas = this.data.mesas.filter(m => m.esRapida && !m.esCredito);
+          const rapidas = this.data.mesas.filter(m => m.esRapida);
           if (rapidas.length > 0) {
             let rapidasHtml = `
               <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 14px; padding: 0.85rem 1rem;">
@@ -6165,11 +6181,16 @@
                       + Productos
                     </button>
                     ${(!estaCancelada && totalColones > 0) ? (
-                      m.esCredito ? `
+                      m.esCredito ? (
+                        (this.data.usuarioActivo && (this.data.usuarioActivo.tipo === 'caja' || this.data.usuarioActivo.tipo === 'master')) ? `
                         <button class="btn" style="font-size: 0.76rem; padding: 0.35rem 0.65rem; background: #4f46e5; border: 1.5px solid #4338ca; font-weight: 800; color: white; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="app.crearCxCYEntregarMesaCredito('${m.id}')">
                           <span>📋</span> <span>Crear C x C</span>
                         </button>
                       ` : `
+                        <span style="font-size: 0.73rem; color: #3730a3; font-weight: 700; background: #eef2ff; padding: 0.35rem 0.6rem; border-radius: 6px; border: 1px solid #c7d2fe;">
+                          💳 Crédito (Autoriza Caja)
+                        </span>
+                      `) : `
                         <button class="btn btn-success" style="font-size: 0.76rem; padding: 0.35rem 0.65rem;" onclick="app.abrirModalCobro('${m.id}')">
                           💳 Cobrar
                         </button>
@@ -6199,8 +6220,8 @@
           }
         }
 
-        // Mesas de salón convencionales creadas según se necesiten (excluye mesas rápidas y de crédito)
-        const salonMesas = (this.data.mesas || []).filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m));
+        // Mesas de salón convencionales creadas consecutivamente (excluye mesas rápidas y de crédito)
+        const salonMesas = this._obtenerMesasSalonOrdenadas();
 
         // Contadores dinámicos de mesas ocupadas y libres
         const totalMesas = salonMesas.length;
@@ -6232,7 +6253,7 @@
               <p style="color: #475569; font-size: 0.88rem; margin: 0 0 1.15rem 0;">
                 Las mesas comienzan vacías. Cree únicamente las mesas que vaya necesitando para atender clientes.
               </p>
-              <button type="button" class="btn btn-primary" onclick="app.abrirModalAgregarMesa()" style="font-size: 0.92rem; padding: 0.65rem 1.35rem; font-weight: 800;">
+              <button type="button" class="btn btn-primary btn-agregar-mesa-salon" onclick="app.crearMesaConsecutiva()" style="font-size: 0.92rem; padding: 0.65rem 1.35rem; font-weight: 800;">
                 🪑 + Agregar Mesa
               </button>
             </div>
@@ -6418,14 +6439,15 @@
       // 2. RENDER COCINA (KDS)
       renderCocina() {
         const allOrders = [];
-        this.data.mesas.forEach(mesa => {
-          mesa.ordenes.forEach(ord => {
+        (this.data.mesas || []).forEach(mesa => {
+          (mesa.ordenes || []).forEach(ord => {
             allOrders.push({
               ...ord,
               mesaNombre: mesa.nombre,
               mesaId: mesa.id,
               mesaColor: mesa.colorHex,
-              esRapida: Boolean(mesa.esRapida || ord.esRapida)
+              esRapida: Boolean(mesa.esRapida || ord.esRapida),
+              esCredito: Boolean(mesa.esCredito || ord.esCredito)
             });
           });
         });
@@ -6527,6 +6549,11 @@
                       ${(currentOrd.esRapida || currentOrd.mesaNombre.includes('Para Llevar')) ? `
                         <span style="background: #fef3c7; color: #92400e; border: 1.5px solid #f59e0b; padding: 0.2rem 0.55rem; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">
                           🛍️ EMPACAR PARA LLEVAR
+                        </span>
+                      ` : ''}
+                      ${currentOrd.esCredito ? `
+                        <span style="background: #eef2ff; color: #3730a3; border: 1.5px solid #818cf8; padding: 0.2rem 0.55rem; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">
+                          💳 CRÉDITO
                         </span>
                       ` : ''}
                     </div>
@@ -6764,13 +6791,13 @@
                     </div>
                   </div>
                   <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                    ${(m.esCredito || (m.nombre && m.nombre.toLowerCase().includes('crédito'))) ? `
-                      <button class="btn btn-primary" style="font-size: 0.85rem; padding: 0.45rem 0.85rem; font-weight: 800; background: #4f46e5; border-color: #4338ca; color: white;" onclick="app.crearCxCYEntregarMesaCredito('${m.id}')">
-                        📋 Entregar y Crear C x C
-                      </button>
-                    ` : (m.pagada || saldo <= 0 ? `
+                    ${(m.pagada || m.creditoRegistrado || saldo <= 0) ? `
                       <button class="btn btn-success" style="font-size: 0.85rem; padding: 0.45rem 0.85rem; font-weight: 800;" onclick="app.entregarYFinalizarMesaRapida('${m.id}')">
                         ✅ Entregar y Finalizar
+                      </button>
+                    ` : ((m.esCredito || (m.nombre && m.nombre.toLowerCase().includes('crédito'))) ? `
+                      <button class="btn btn-primary" style="font-size: 0.85rem; padding: 0.45rem 0.85rem; font-weight: 800; background: #4f46e5; border-color: #4338ca; color: white;" onclick="app.crearCxCYEntregarMesaCredito('${m.id}')">
+                        📋 Entregar y Crear C x C
                       </button>
                     ` : `
                       <button class="btn btn-primary" style="font-size: 0.85rem; padding: 0.45rem 0.85rem; font-weight: 800;" onclick="app.abrirModalCobro('${m.id}')">
@@ -7186,8 +7213,8 @@
           `;
         }
 
-        // Mesas de salón creadas dinámicamente (excluye mesas rápidas y crédito)
-        const salonMesasCaja = this.data.mesas.filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m));
+        // Mesas de salón creadas consecutivamente (excluye mesas rápidas y crédito)
+        const salonMesasCaja = this._obtenerMesasSalonOrdenadas();
         if (salonMesasCaja.length === 0) {
           container.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 2.75rem 1.5rem; background: white; border-radius: 16px; border: 1.5px dashed #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
@@ -7198,7 +7225,7 @@
               <p style="color: #475569; font-size: 0.85rem; margin: 0 0 1rem 0;">
                 Las mesas aparecen vacías hasta que las cree según se necesiten en Mesero o Caja.
               </p>
-              <button type="button" class="btn btn-primary" onclick="app.abrirModalAgregarMesa()" style="font-size: 0.9rem; padding: 0.6rem 1.25rem; font-weight: 800;">
+              <button type="button" class="btn btn-primary btn-agregar-mesa-salon" onclick="app.crearMesaConsecutiva()" style="font-size: 0.9rem; padding: 0.6rem 1.25rem; font-weight: 800;">
                 🪑 + Agregar Mesa
               </button>
             </div>
@@ -8077,32 +8104,23 @@
         return this.getCategoryIcon(p.categoria);
       }
 
-      abrirModalPedido(mesaId) {
-        this.selectedMesaId = mesaId;
-        this.cart = [];
-        let mesa = this.data.mesas.find(m => String(m.id) === String(mesaId));
-        if (!mesa) {
-          mesa = this.data.mesas.find(m => Number(m.id) === Number(mesaId));
-        }
-        if (!mesa) {
-          console.warn('Mesa no encontrada:', mesaId, this.data.mesas);
-          alert('No se encontró la comanda/mesa en el sistema.');
-          return;
-        }
-        this._mesaActivaPedidoSnapshot = mesa;
-
+      _renderEncabezadoModalPedido(mesa) {
+        if (!mesa) return;
         const totalColones = this.calcularTotalMesa(mesa);
         const numComandas = (mesa.ordenes || []).length;
         const nombreUsuario = this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Mesero';
 
-        document.getElementById('modalPedidoTitulo').innerText = mesa.esCredito ?
-          `💳 Venta a Crédito: ${mesa.clienteCredito ? mesa.clienteCredito.nombre : mesa.nombre}` :
-          (mesa.esRapida ? 
-            `${mesa.nombre} - Factura / Pedido Rápido (Para Llevar)` : 
-            `${mesa.nombre} - Pedido y Comandas`);
+        const tituloEl = document.getElementById('modalPedidoTitulo');
+        if (tituloEl) {
+          tituloEl.innerText = mesa.esCredito ?
+            `💳 Venta a Crédito: ${mesa.clienteCredito ? mesa.clienteCredito.nombre : mesa.nombre}` :
+            (mesa.esRapida ?
+              `${mesa.nombre} - Factura / Pedido Rápido (Para Llevar)` :
+              `${mesa.nombre} - Pedido y Comandas`);
+        }
 
-        // 1. Render Encabezado del Pedido exactamente como referencia
         const headerBox = document.getElementById('modalPedidoHeaderBox');
+        if (!headerBox) return;
         const pedidoIdDisplay = mesa.pedidoId || `(Nuevo Pedido)`;
         const meseroDisplay = mesa.meseroApertura || nombreUsuario;
         const horaDisplay = mesa.horaApertura || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -8136,9 +8154,9 @@
 
             <!-- Fila media: Mesero y Apertura -->
             <div style="font-size: 0.82rem; color: #475569; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-              <span>👤 Mesero: <strong>${meseroDisplay}</strong></span>
+              <span>👤 Mesero: <strong>${this.esc(meseroDisplay)}</strong></span>
               <span style="color: #cbd5e1;">|</span>
-              <span>⏰ Apertura: <strong>${horaDisplay}</strong></span>
+              <span>⏰ Apertura: <strong>${this.esc(horaDisplay)}</strong></span>
             </div>
 
             <!-- Tarjeta verde de saldo acumulado -->
@@ -8188,6 +8206,24 @@
             </div>
           </div>
         `;
+      }
+
+      abrirModalPedido(mesaId) {
+        this.selectedMesaId = mesaId;
+        this.cart = [];
+        let mesa = this.data.mesas.find(m => String(m.id) === String(mesaId));
+        if (!mesa) {
+          mesa = this.data.mesas.find(m => Number(m.id) === Number(mesaId));
+        }
+        if (!mesa) {
+          console.warn('Mesa no encontrada:', mesaId, this.data.mesas);
+          alert('No se encontró la comanda/mesa en el sistema.');
+          return;
+        }
+        this._mesaActivaPedidoSnapshot = mesa;
+        this._renderEncabezadoModalPedido(mesa);
+        const totalColones = this.calcularTotalMesa(mesa);
+        const numComandas = (mesa.ordenes || []).length;
 
         // Actualizar botón de cobro en el pie de la ventana (solo si NO está pagada)
         const btnCobrarFooter = document.getElementById('btnCobrarMesaFooter');
@@ -8697,6 +8733,7 @@
         mesa.ordenes.push(nuevaOrden);
         mesa.pagada = false;
         mesa.creadaManualmente = true;
+        if (!mesa.fechaApertura) mesa.fechaApertura = new Date().toISOString();
         if (!this._ordenesEnviadasRecientes) this._ordenesEnviadasRecientes = new Map();
         this._ordenesEnviadasRecientes.set(String(nuevaOrden.id), Date.now());
         if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
@@ -8711,10 +8748,23 @@
         this.enviarDatosASheets('sync_order', {
           id: nuevaOrden.id,
           pedidoId: mesa.pedidoId,
+          comandaNum: nuevaOrden.comandaNum,
           mesaId: mesa.id,
           mesaNombre: mesa.nombre,
+          nombreCorto: mesa.nombreCorto || mesa.nombre,
+          numeroMesa: mesa.numeroMesa || null,
+          numeroRapida: mesa.numeroRapida || null,
+          mesaColor: mesa.colorHex || null,
           mesero: nuevaOrden.mesero,
+          meseroApertura: mesa.meseroApertura || nuevaOrden.mesero,
+          horaApertura: mesa.horaApertura || nuevaOrden.fecha,
+          fechaApertura: mesa.fechaApertura,
+          fecha: nuevaOrden.fecha,
           esRapida: Boolean(mesa.esRapida),
+          esCredito: Boolean(mesa.esCredito),
+          creadaManualmente: true,
+          clienteCredito: mesa.clienteCredito || null,
+          pagada: Boolean(mesa.pagada),
           estado: nuevaOrden.estado,
           items: nuevaOrden.items,
           totalCRC: nuevaOrden.items.reduce((acc, i) => acc + (i.precio * i.cant), 0)
@@ -9516,6 +9566,7 @@
 
         const saldoAntes = this.calcularSaldoPendienteMesa(mesa);
         const nuevoSaldoMesa = Math.max(0, saldoAntes - montoCRC);
+        const tienePendientesCocina = (mesa.ordenes || []).some(o => o.estado !== 'verde');
 
         if (nuevoSaldoMesa > 0) {
           // Abono/división parcial acreditada a un cliente: mantener mesa abierta con saldo restante
@@ -9527,8 +9578,8 @@
             clienteNombre: cliente.nombre,
             hora: horaStr
           });
-        } else if (mesa.esRapida || mesa.esCredito) {
-          // Retirar mesa rápida/crédito completada
+        } else if ((mesa.esRapida || mesa.esCredito) && !tienePendientesCocina) {
+          // Retirar mesa rápida/crédito solo cuando Cocina ya completó todas sus comandas (o no hay comandas activas)
           if (!this.rapidasCerradasIds) this.rapidasCerradasIds = new Set();
           this.rapidasCerradasIds.add(String(mesa.id));
           try {
@@ -9537,8 +9588,18 @@
           this.data.mesas = this.data.mesas.filter(m => String(m.id) !== String(mesa.id));
           this.enviarDatosASheets('cerrar_mesa_rapida', { mesaId: mesa.id });
         } else {
-          // Mesa de salón convencional acreditada al 100%: marcar pagada para cierre ordenado en Caja
+          // Mesa de salón o venta rápida/crédito aún en preparación en Cocina:
+          // marcar acreditada/pagada SIN eliminarla de data.mesas para que siga visible en Cocina hasta ser preparada y entregada
+          mesa.pagosParciales = mesa.pagosParciales || [];
+          mesa.pagosParciales.push({
+            id: facturaId,
+            montoCRC: montoCRC,
+            metodoPago: 'Crédito',
+            clienteNombre: cliente.nombre,
+            hora: horaStr
+          });
           mesa.pagada = true;
+          mesa.creditoRegistrado = true;
           mesa.origenCobro = 'caja';
           mesa.cobradoPor = `${cajero} [Crédito: ${cliente.nombre}]`;
           mesa.horaCobro = horaStr;
@@ -9588,6 +9649,11 @@
         }
         if (!mesa) {
           alert('No se encontró la comanda/mesa de crédito.');
+          return;
+        }
+
+        if (mesa.creditoRegistrado || mesa.pagada) {
+          this.entregarYFinalizarMesaRapida(mesa.id);
           return;
         }
 
@@ -9989,11 +10055,27 @@
 
         const rapidaBox = document.getElementById('comprobanteAccionRapidaBox');
         if (rapidaBox) {
+          const mesaComp = datos.mesaId ? (this.data.mesas || []).find(m => String(m.id) === String(datos.mesaId)) : null;
+          const sigueEnCocina = Boolean(mesaComp && (mesaComp.ordenes || []).some(o => o.estado !== 'verde'));
           if (datos.esRapida && !datos.esMeseroActivo && !datos.esPagoParcial && datos.metodoPago !== 'Crédito') {
-            rapidaBox.innerHTML = `
+            rapidaBox.innerHTML = sigueEnCocina ? `
+              <div style="background: #fefce8; border: 1px solid #fde047; color: #854d0e; border-radius: 8px; padding: 0.5rem 0.7rem; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.45rem; text-align: center;">
+                👨‍🍳 Orden activa en Cocina (se mantendrá ahí hasta que Cocina la marque Lista)
+              </div>
+              <button type="button" class="btn btn-secondary" style="width: 100%; padding: 0.5rem 0.9rem; font-weight: 700; font-size: 0.82rem;" onclick="app.finalizarRapidaDesdeComprobante()">
+                <span>🚪</span> <span>Si ya la entregó, cerrar Venta Rápida ahora</span>
+              </button>
+            ` : `
               <button type="button" class="btn btn-success" style="width: 100%; padding: 0.65rem 1rem; font-weight: 800; background: #047857; border-color: #047857; display: flex; align-items: center; justify-content: center; gap: 0.45rem;" onclick="app.finalizarRapidaDesdeComprobante()">
                 <span>🚪</span> <span>Marcar como Entregado y Finalizar Venta Rápida</span>
               </button>
+            `;
+            rapidaBox.style.display = 'block';
+          } else if (sigueEnCocina) {
+            rapidaBox.innerHTML = `
+              <div style="background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; border-radius: 8px; padding: 0.5rem 0.7rem; font-size: 0.8rem; font-weight: 700; text-align: center;">
+                👨‍🍳 Orden enviada y activa en Cocina hasta ser preparada
+              </div>
             `;
             rapidaBox.style.display = 'block';
           } else {
@@ -10040,7 +10122,7 @@
         if (!host || !datos) return;
         const cfg = this.getComprobanteHeaderConfig();
         const logoPreviewSrc = (window.location.protocol === 'file:' && (cfg.logoUrl === 'logo_fresh_paradise.jpg' || cfg.logoUrl === './logo_fresh_paradise.jpg'))
-          ? FRESH_PARADISE_LOGO_DATA_URI
+          ? FRESH_PARADISE_HOSTED_LOGO_URL
           : cfg.logoUrl;
         const itemsHtml = (datos.items || []).map(it => `
           <tr>
@@ -10055,7 +10137,7 @@
           <div class="comprobante-preview-card" id="comprobantePreviewCard">
             <div class="comprobante-header">
               <div class="comprobante-logo-wrap">
-                <img src="${this.escAttr(logoPreviewSrc)}" alt="${this.escAttr(cfg.negocio)}" onerror="this.onerror=null;this.src=FRESH_PARADISE_LOGO_DATA_URI;">
+                <img src="${this.escAttr(logoPreviewSrc)}" alt="${this.escAttr(cfg.negocio)}" onerror="if(this.dataset.fb!=='1'&&this.src!==FRESH_PARADISE_HOSTED_LOGO_URL){this.dataset.fb='1';this.src=FRESH_PARADISE_HOSTED_LOGO_URL;}else{this.onerror=null;this.src=FRESH_PARADISE_LOGO_DATA_URI;}">
               </div>
               <div style="min-width: 0;">
                 <div style="font-size: 1.18rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 0.28rem;">${this.esc(cfg.negocio)}</div>
@@ -10121,19 +10203,46 @@
         `;
       }
 
-      _imagenEsAptaParaCanvas(img) {
-        if (!img || img.width <= 0 || img.height <= 0) return false;
+      _rasterizarLogoParaCanvas(img) {
+        if (!img) return null;
+        const w = img.naturalWidth || img.width || 0;
+        const h = img.naturalHeight || img.height || 0;
+        if (w <= 0 || h <= 0) return null;
         try {
-          const probe = document.createElement('canvas');
-          probe.width = 4;
-          probe.height = 4;
-          const pCtx = probe.getContext('2d');
-          pCtx.drawImage(img, 0, 0, 4, 4);
-          probe.toDataURL('image/png');
-          return true;
+          const targetSize = Math.min(512, Math.max(240, Math.max(w, h)));
+          const off = document.createElement('canvas');
+          off.width = targetSize;
+          off.height = targetSize;
+          const oCtx = off.getContext('2d');
+          oCtx.fillStyle = '#ffffff';
+          oCtx.fillRect(0, 0, targetSize, targetSize);
+          const ratio = Math.min(targetSize / w, targetSize / h);
+          const dW = w * ratio;
+          const dH = h * ratio;
+          oCtx.drawImage(img, (targetSize - dW) / 2, (targetSize - dH) / 2, dW, dH);
+
+          const check = oCtx.getImageData(
+            Math.floor(targetSize * 0.15),
+            Math.floor(targetSize * 0.15),
+            Math.floor(targetSize * 0.7),
+            Math.floor(targetSize * 0.7)
+          ).data;
+          let hasColor = false;
+          for (let i = 0; i < check.length; i += 16) {
+            if (check[i] < 245 || check[i + 1] < 245 || check[i + 2] < 245) {
+              hasColor = true;
+              break;
+            }
+          }
+          off.toDataURL('image/png');
+          return hasColor ? off : null;
         } catch (e) {
-          return false;
+          return null;
         }
+      }
+
+      _imagenEsAptaParaCanvas(img) {
+        return Boolean(this._rasterizarLogoParaCanvas(img));
       }
 
       _obtenerLogoEmbebidoDecodificado() {
@@ -10142,7 +10251,7 @@
           const imgFb = new Image();
           imgFb.onload = async () => {
             try { if (typeof imgFb.decode === 'function') await imgFb.decode(); } catch (_) {}
-            resolve(this._imagenEsAptaParaCanvas(imgFb) ? imgFb : null);
+            resolve(this._rasterizarLogoParaCanvas(imgFb));
           };
           imgFb.onerror = () => {
             this._embeddedLogoPromise = null;
@@ -10154,39 +10263,74 @@
       }
 
       _cargarImagenComprobante(src) {
-        return new Promise((resolve) => {
-          const rawSrc = (src || '').trim();
-          const normSrc = rawSrc.replace(/^\.\//, '');
-          const usarEmbebidaPorDefecto =
-            !normSrc ||
-            normSrc === 'logo_fresh_paradise.jpg' ||
-            normSrc === 'logo_jiqui.jpg' ||
-            (!rawSrc.startsWith('data:') && window.location.protocol === 'file:');
+        const rawSrc = (src || '').trim();
+        const normSrc = rawSrc.replace(/^\.\//, '');
+        const esDefault = (!normSrc || normSrc === 'logo_fresh_paradise.jpg' || normSrc === 'logo_jiqui.jpg');
 
-          const loadDataUriFallback = () => {
-            this._obtenerLogoEmbebidoDecodificado().then(resolve);
-          };
+        if (!this._logoCanvasCache) this._logoCanvasCache = {};
+        const cacheKey = esDefault ? '__DEFAULT__' : rawSrc;
+        if (this._logoCanvasCache[cacheKey]) {
+          return this._logoCanvasCache[cacheKey];
+        }
 
-          if (usarEmbebidaPorDefecto) {
-            loadDataUriFallback();
-            return;
+        const probarFuente = (fuenteUrl) => {
+          if (!fuenteUrl) return Promise.resolve(null);
+          if (fuenteUrl === FRESH_PARADISE_LOGO_DATA_URI) {
+            return this._obtenerLogoEmbebidoDecodificado();
           }
-
-          const img = new Image();
-          if (/^https?:\/\//i.test(rawSrc)) {
-            img.crossOrigin = 'anonymous';
-          }
-          img.onload = async () => {
-            try { if (typeof img.decode === 'function') await img.decode(); } catch (_) {}
-            if (this._imagenEsAptaParaCanvas(img)) {
-              resolve(img);
-            } else {
-              loadDataUriFallback();
+          return new Promise((resolve) => {
+            const img = new Image();
+            if (/^https?:\/\//i.test(fuenteUrl)) {
+              img.crossOrigin = 'anonymous';
             }
-          };
-          img.onerror = loadDataUriFallback;
-          img.src = rawSrc;
-        });
+            let done = false;
+            const finish = (val) => { if (!done) { done = true; resolve(val); } };
+            const timer = setTimeout(() => finish(null), 4500);
+            img.onload = async () => {
+              clearTimeout(timer);
+              try { if (typeof img.decode === 'function') await img.decode(); } catch (_) {}
+              finish(this._rasterizarLogoParaCanvas(img));
+            };
+            img.onerror = () => { clearTimeout(timer); finish(null); };
+            img.src = fuenteUrl;
+          });
+        };
+
+        const promesa = (async () => {
+          const candidatos = [];
+          const isHttp = (window.location.protocol === 'http:' || window.location.protocol === 'https:');
+
+          if (rawSrc.startsWith('data:')) {
+            candidatos.push(rawSrc);
+          } else if (!esDefault) {
+            if (isHttp) {
+              try { candidatos.push(new URL(rawSrc, window.location.href).href); } catch (_) { candidatos.push(rawSrc); }
+            } else {
+              candidatos.push(rawSrc);
+            }
+          }
+
+          if (isHttp) {
+            try {
+              const localLogoUrl = new URL('logo_fresh_paradise.jpg', window.location.href).href;
+              if (!candidatos.includes(localLogoUrl)) candidatos.push(localLogoUrl);
+            } catch (_) {}
+          }
+
+          if (typeof FRESH_PARADISE_HOSTED_LOGO_URL === 'string' && !candidatos.includes(FRESH_PARADISE_HOSTED_LOGO_URL)) {
+            candidatos.push(FRESH_PARADISE_HOSTED_LOGO_URL);
+          }
+          candidatos.push(FRESH_PARADISE_LOGO_DATA_URI);
+
+          for (const url of candidatos) {
+            const canvasLogo = await probarFuente(url);
+            if (canvasLogo) return canvasLogo;
+          }
+          return null;
+        })();
+
+        this._logoCanvasCache[cacheKey] = promesa;
+        return promesa;
       }
 
       _envolverTextoCanvas(ctx, text, maxWidth) {
@@ -10737,165 +10881,311 @@
         this.enviarDatosASheets('cerrar_mesa_rapida', { mesaId });
       }
 
-      obtenerSiguienteNumeroMesaSalon() {
-        const usadas = new Set();
-        (this.data.mesas || []).filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m)).forEach(m => {
-          if (m.numeroMesa) usadas.add(Number(m.numeroMesa));
-          const match = (m.nombre || '').match(/\bmesa\s+(\d+)\b/i);
-          if (match) usadas.add(Number(match[1]));
+      _mostrarToast(mensaje, colorBg = '#0f172a', duracionMs = 3600) {
+        if (!mensaje) return;
+        let host = document.getElementById('toastHost');
+        if (!host) {
+          host = document.createElement('div');
+          host.id = 'toastHost';
+          host.setAttribute('aria-live', 'polite');
+          document.body.appendChild(host);
+        }
+        const item = document.createElement('div');
+        item.className = 'toast-item';
+        item.style.background = colorBg;
+        item.textContent = mensaje;
+        host.appendChild(item);
+        setTimeout(() => {
+          item.style.transition = 'opacity 0.2s ease';
+          item.style.opacity = '0';
+          setTimeout(() => item.remove(), 220);
+        }, duracionMs);
+      }
+
+      _extraerNumeroMesaConsecutiva(m) {
+        if (!m || m.esRapida || m.esCredito || this.esMesaDefaultVacia(m)) return null;
+        const nom = String(m.nombre || m.nombreCorto || '').trim();
+        const match = nom.match(/^mesa\s+#?\s*(\d+)$/i);
+        if (match) return Number(match[1]);
+        const numProp = Number(m.numeroMesa);
+        if (!nom && Number.isInteger(numProp) && numProp > 0) return numProp;
+        return null;
+      }
+
+      _obtenerMesasSalonOrdenadas() {
+        const mesas = (this.data.mesas || []).filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m));
+        return mesas.slice().sort((a, b) => {
+          const nA = this._extraerNumeroMesaConsecutiva(a) || Number.MAX_SAFE_INTEGER;
+          const nB = this._extraerNumeroMesaConsecutiva(b) || Number.MAX_SAFE_INTEGER;
+          if (nA !== nB) return nA - nB;
+          return String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es');
         });
-        let n = 1;
-        while (usadas.has(n)) n++;
-        return n;
+      }
+
+      obtenerSiguienteNumeroMesaSalon(listaMesas = null) {
+        let maxNum = 0;
+        (listaMesas || this.data.mesas || []).forEach(m => {
+          const n = this._extraerNumeroMesaConsecutiva(m);
+          if (n && n > maxNum) maxNum = n;
+        });
+        return maxNum + 1;
+      }
+
+      reconciliarMesasConsecutivasDuplicadas(notificar = true) {
+        const mesas = this.data.mesas || [];
+        const porNumero = new Map();
+        const usados = new Set();
+        let maxUsado = 0;
+
+        mesas.forEach(m => {
+          const num = this._extraerNumeroMesaConsecutiva(m);
+          if (num && num > 0) {
+            usados.add(num);
+            if (num > maxUsado) maxUsado = num;
+            if (!porNumero.has(num)) porNumero.set(num, []);
+            porNumero.get(num).push(m);
+          }
+        });
+
+        const reasignaciones = [];
+        const numsOrdenados = Array.from(porNumero.keys()).sort((a, b) => a - b);
+
+        numsOrdenados.forEach(num => {
+          const grupo = porNumero.get(num);
+          if (!grupo || grupo.length <= 1) return;
+
+          // Prioridad determinística: 1) ya tiene órdenes en cocina, 2) creada antes, 3) ID menor
+          grupo.sort((a, b) => {
+            const ordA = (a.ordenes && a.ordenes.length > 0) ? 0 : 1;
+            const ordB = (b.ordenes && b.ordenes.length > 0) ? 0 : 1;
+            if (ordA !== ordB) return ordA - ordB;
+            const tsA = a.fechaApertura ? Date.parse(a.fechaApertura) : Number.MAX_SAFE_INTEGER;
+            const tsB = b.fechaApertura ? Date.parse(b.fechaApertura) : Number.MAX_SAFE_INTEGER;
+            const safeA = Number.isFinite(tsA) ? tsA : Number.MAX_SAFE_INTEGER;
+            const safeB = Number.isFinite(tsB) ? tsB : Number.MAX_SAFE_INTEGER;
+            if (safeA !== safeB) return safeA - safeB;
+            return String(a.id).localeCompare(String(b.id));
+          });
+
+          for (let i = 1; i < grupo.length; i++) {
+            const dup = grupo[i];
+            const nombreAnterior = dup.nombre || `Mesa ${num}`;
+            let nuevoNum = Math.max(maxUsado, num) + 1;
+            while (usados.has(nuevoNum)) nuevoNum++;
+            usados.add(nuevoNum);
+            if (nuevoNum > maxUsado) maxUsado = nuevoNum;
+
+            const nuevoNombre = `Mesa ${nuevoNum}`;
+            dup.numeroMesa = nuevoNum;
+            dup.nombre = nuevoNombre;
+            dup.nombreCorto = nuevoNombre;
+            dup.colorHex = this.obtenerColorMesaPorIndice(nuevoNum);
+            if (Array.isArray(dup.ordenes)) {
+              dup.ordenes.forEach(o => { o.mesaNombre = nuevoNombre; });
+            }
+
+            const esPropiaOModalAbierto =
+              (this._mesasCreadasRecientes && this._mesasCreadasRecientes.has(String(dup.id))) ||
+              (document.getElementById('modalPedido')?.classList.contains('active') && String(this.selectedMesaId) === String(dup.id));
+
+            reasignaciones.push({
+              mesa: dup,
+              nombreAnterior,
+              nuevoNombre,
+              nuevoNum,
+              esPropiaOModalAbierto
+            });
+          }
+        });
+
+        if (reasignaciones.length > 0 && notificar) {
+          reasignaciones.forEach(r => {
+            if (r.esPropiaOModalAbierto) {
+              if (document.getElementById('modalPedido')?.classList.contains('active') && String(this.selectedMesaId) === String(r.mesa.id)) {
+                this._renderEncabezadoModalPedido(r.mesa);
+              }
+              this._mostrarToast(`ℹ️ ${r.nombreAnterior} ya fue creada por otro mesero. Se asignó automáticamente ${r.nuevoNombre}.`, '#0369a1', 4200);
+            }
+          });
+        }
+        return reasignaciones;
+      }
+
+      async _fetchJsonConTimeout(url, timeoutMs = 3800) {
+        const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+        try {
+          const res = await fetch(url, {
+            redirect: 'follow',
+            signal: controller ? controller.signal : undefined
+          });
+          return await res.json();
+        } finally {
+          if (timer) clearTimeout(timer);
+        }
       }
 
       abrirModalAgregarMesa() {
-        const nextNum = this.obtenerSiguienteNumeroMesaSalon();
-        this.colorNuevaMesaSeleccionado = this.obtenerColorMesaPorIndice(nextNum);
-        const inp = document.getElementById('nuevaMesaNombreInput');
-        if (inp) inp.value = `Mesa ${nextNum}`;
-        this.renderOpcionesModalAgregarMesa();
-        this.openModal('modalAgregarMesa');
-        setTimeout(() => {
-          if (inp) {
-            inp.focus();
-            inp.select();
+        return this.crearMesaConsecutiva(true);
+      }
+
+      async crearMesaConsecutiva(abrirPedido = true) {
+        if (this._creandoMesaEnCurso) return;
+        this._creandoMesaEnCurso = true;
+
+        const botones = Array.from(document.querySelectorAll('.btn-agregar-mesa-salon'));
+        const textosPrevios = botones.map(b => b.innerHTML);
+        botones.forEach(b => {
+          b.disabled = true;
+          b.innerHTML = '<span>⏳</span> <span>Abriendo mesa...</span>';
+        });
+
+        try {
+          const numEsperadoLocal = this.obtenerSiguienteNumeroMesaSalon();
+          let mesaId = Date.now() * 100 + Math.floor(Math.random() * 100);
+          while ((this.data.mesas || []).some(m => String(m.id) === String(mesaId))) {
+            mesaId++;
           }
-        }, 60);
-      }
 
-      renderOpcionesModalAgregarMesa() {
-        const chipsBox = document.getElementById('chipsMesasRapidasSugeridas');
-        const colorBox = document.getElementById('mesaColorSelector');
-        const inp = document.getElementById('nuevaMesaNombreInput');
-        const nombreActual = (inp ? inp.value : '').trim().toLowerCase();
+          const nombreUsuario = this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Mesero';
+          const horaApertura = new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+          const fechaApertura = new Date().toISOString();
 
-        const activasSet = new Set(
-          (this.data.mesas || [])
-            .filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m))
-            .map(m => (m.nombre || '').trim().toLowerCase())
-        );
+          let nuevaMesa = null;
+          const url = (this.data.googleSheetsUrl || '').trim();
+          const puedeConsultarCloud = Boolean(url.length >= 10 && navigator.onLine);
 
-        if (chipsBox) {
-          const sugeridas = [
-            { nombre: 'Mesa 1', num: 1 },
-            { nombre: 'Mesa 2', num: 2 },
-            { nombre: 'Mesa 3', num: 3 },
-            { nombre: 'Mesa 4', num: 4 },
-            { nombre: 'Mesa 5', num: 5 },
-            { nombre: 'Mesa 6', num: 6 },
-            { nombre: 'Mesa 7', num: 7 },
-            { nombre: 'Mesa 8', num: 8 },
-            { nombre: 'Terraza', num: 4 },
-            { nombre: 'Barra', num: 5 }
-          ];
-          chipsBox.innerHTML = sugeridas.map(s => {
-            const ocupada = activasSet.has(s.nombre.toLowerCase());
-            const selected = !ocupada && nombreActual === s.nombre.toLowerCase();
-            return `
-              <button type="button" class="mesa-chip-btn ${ocupada ? 'ocupada' : ''} ${selected ? 'selected' : ''}" ${ocupada ? 'disabled' : ''} onclick="app.seleccionarChipNuevaMesa('${this.escAttr(s.nombre)}', ${s.num})">
-                ${this.esc(s.nombre)}${ocupada ? ' (Activa)' : ''}
-              </button>
-            `;
-          }).join('');
-        }
+          if (puedeConsultarCloud) {
+            const sep = url.includes('?') ? '&' : '?';
 
-        if (colorBox) {
-          const paleta = ['#2563EB', '#7C3AED', '#EA580C', '#0D9488', '#6366F1', '#DB2777', '#0284C7', '#059669'];
-          colorBox.innerHTML = paleta.map(hex => {
-            const sel = (this.colorNuevaMesaSeleccionado || '').toLowerCase() === hex.toLowerCase();
-            return `<button type="button" class="mesa-color-dot ${sel ? 'selected' : ''}" style="background: ${hex};" aria-label="Color ${hex}" onclick="app.seleccionarColorNuevaMesa('${hex}')"></button>`;
-          }).join('');
-        }
-      }
+            // 1. Intentar reserva atómica en Google Apps Script (LockService) si el script ya soporta crear_mesa_consecutiva
+            if (this._soportaCrearMesaCloud !== false) {
+              try {
+                const payload = {
+                  id: mesaId,
+                  meseroApertura: nombreUsuario,
+                  horaApertura,
+                  fechaApertura
+                };
+                const resp = await this._fetchJsonConTimeout(
+                  `${url}${sep}action=crear_mesa_consecutiva&data=${encodeURIComponent(JSON.stringify(payload))}&_t=${Date.now()}`,
+                  4000
+                );
+                if (resp && resp.atomic === true && resp.mesa && resp.mesa.id) {
+                  this._soportaCrearMesaCloud = true;
+                  if (Array.isArray(resp.mesas)) {
+                    this._aplicarMesasRemotas(resp.mesas, false);
+                  }
+                  const existente = (this.data.mesas || []).find(m => String(m.id) === String(resp.mesa.id));
+                  if (existente) {
+                    nuevaMesa = existente;
+                  } else {
+                    nuevaMesa = resp.mesa;
+                    this.data.mesas.push(nuevaMesa);
+                  }
+                } else if (resp && resp.status) {
+                  // El Apps Script aún no tiene la acción atómica: usar lectura fresca + sync_mesas_state sin repetir este paso en la sesión
+                  this._soportaCrearMesaCloud = false;
+                }
+              } catch(e) {
+                console.warn('No se pudo completar crear_mesa_consecutiva, verificando estado en la nube:', e);
+              }
+            }
 
-      seleccionarChipNuevaMesa(nombre, num) {
-        const inp = document.getElementById('nuevaMesaNombreInput');
-        if (inp) inp.value = nombre;
-        this.colorNuevaMesaSeleccionado = this.obtenerColorMesaPorIndice(num || 1);
-        this.renderOpcionesModalAgregarMesa();
-      }
+            // 2. Respaldo compatible con Apps Script previo: leer el estado vivo más reciente antes de asignar consecutivo
+            if (!nuevaMesa) {
+              try {
+                const estado = await this._fetchJsonConTimeout(`${url}${sep}_t=${Date.now()}`, 4000);
+                if (estado && estado.status === 'ready') {
+                  let remoteMesas = estado.mesas;
+                  if (typeof remoteMesas === 'string') {
+                    try { remoteMesas = JSON.parse(remoteMesas); } catch(e) {}
+                  }
+                  if (typeof remoteMesas === 'string') {
+                    try { remoteMesas = JSON.parse(remoteMesas); } catch(e) {}
+                  }
+                  if (Array.isArray(remoteMesas)) {
+                    this._aplicarMesasRemotas(remoteMesas, false);
+                  }
+                }
+              } catch(e) {
+                console.warn('Sin respuesta rápida de la nube al crear mesa, continuando en modo consecutivo local:', e);
+              }
+            }
+          }
 
-      seleccionarColorNuevaMesa(hex) {
-        this.colorNuevaMesaSeleccionado = hex;
-        this.renderOpcionesModalAgregarMesa();
-      }
+          if (!nuevaMesa) {
+            const nextNum = this.obtenerSiguienteNumeroMesaSalon();
+            while ((this.data.mesas || []).some(m => String(m.id) === String(mesaId))) {
+              mesaId++;
+            }
+            const nombreMesa = `Mesa ${nextNum}`;
+            nuevaMesa = {
+              id: mesaId,
+              nombre: nombreMesa,
+              nombreCorto: nombreMesa,
+              numeroMesa: nextNum,
+              colorHex: this.obtenerColorMesaPorIndice(nextNum),
+              esRapida: false,
+              esCredito: false,
+              creadaManualmente: true,
+              pedidoId: null,
+              meseroApertura: nombreUsuario,
+              horaApertura,
+              fechaApertura,
+              ordenes: [],
+              pagada: false,
+              cobradoPor: null,
+              horaCobro: null,
+              pagosParciales: [],
+              listoParaRecoger: false,
+              horaListo: null
+            };
+            this.data.mesas.push(nuevaMesa);
+          }
 
-      confirmarAgregarMesa(abrirPedido = false) {
-        const inp = document.getElementById('nuevaMesaNombreInput');
-        const nombreLimpio = (inp ? inp.value : '').trim().replace(/\s+/g, ' ');
-        if (!nombreLimpio) {
-          alert('Por favor ingrese un nombre o número para la mesa.');
-          if (inp) inp.focus();
-          return;
-        }
+          if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
+          this._mesasCreadasRecientes.set(String(nuevaMesa.id), Date.now());
+          this.reconciliarMesasConsecutivasDuplicadas(false);
+          this.bloquearDescargasTemporales(8000);
+          this._mesaActivaPedidoSnapshot = nuevaMesa;
 
-        const existe = (this.data.mesas || []).find(m =>
-          !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m) &&
-          (m.nombre || '').trim().toLowerCase() === nombreLimpio.toLowerCase()
-        );
-        if (existe) {
-          alert(`Ya existe una mesa activa llamada "${existe.nombre}". Puede abrirla directamente o indicar otro nombre.`);
-          if (inp) inp.focus();
-          return;
-        }
+          if (this.filtroMesas === 'OCUPADAS') {
+            this.filtroMesas = 'TODAS';
+            const btnTodas = document.getElementById('btnFiltroMesaTodas');
+            const btnOcup = document.getElementById('btnFiltroMesaOcupadas');
+            const btnLibres = document.getElementById('btnFiltroMesaLibres');
+            if (btnTodas) btnTodas.classList.add('active');
+            if (btnOcup) btnOcup.classList.remove('active');
+            if (btnLibres) btnLibres.classList.remove('active');
+          }
 
-        const matchNum = nombreLimpio.match(/\b(\d+)\b/);
-        const numeroMesa = matchNum ? Number(matchNum[1]) : null;
-        const salonActuales = (this.data.mesas || []).filter(m => !m.esRapida && !m.esCredito && !this.esMesaDefaultVacia(m)).length;
+          this.saveData();
+          this.renderAll();
 
-        let mesaId = Date.now();
-        while ((this.data.mesas || []).some(m => String(m.id) === String(mesaId))) {
-          mesaId++;
-        }
+          if (!this._soportaCrearMesaCloud || this._soportaCrearMesaCloud !== true) {
+            this.sincronizarEstadoMesasCloud(true);
+          }
 
-        const nombreUsuario = this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Mesero';
-        const nuevaMesa = {
-          id: mesaId,
-          nombre: nombreLimpio,
-          nombreCorto: nombreLimpio,
-          numeroMesa: numeroMesa || (salonActuales + 1),
-          colorHex: this.colorNuevaMesaSeleccionado || this.obtenerColorMesaPorIndice(numeroMesa || (salonActuales + 1)),
-          esRapida: false,
-          esCredito: false,
-          creadaManualmente: true,
-          pedidoId: null,
-          meseroApertura: nombreUsuario,
-          horaApertura: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
-          fechaApertura: new Date().toISOString(),
-          ordenes: [],
-          pagada: false,
-          cobradoPor: null,
-          horaCobro: null,
-          pagosParciales: [],
-          listoParaRecoger: false,
-          horaListo: null
-        };
+          const numFinal = this._extraerNumeroMesaConsecutiva(nuevaMesa) || nuevaMesa.numeroMesa || numEsperadoLocal;
+          if (numFinal > numEsperadoLocal) {
+            const msgPrefix = (numFinal === numEsperadoLocal + 1)
+              ? `Mesa ${numEsperadoLocal} ya fue creada por otro mesero.`
+              : `Las mesas hasta la #${numFinal - 1} ya estaban tomadas por otros meseros.`;
+            this._mostrarToast(`ℹ️ ${msgPrefix} Se asignó automáticamente ${nuevaMesa.nombre}.`, '#0369a1', 4200);
+          } else {
+            this._mostrarToast(`✅ ${nuevaMesa.nombre} creada`, '#047857', 2200);
+          }
 
-        if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
-        this._mesasCreadasRecientes.set(String(mesaId), Date.now());
-        this.bloquearDescargasTemporales(8000);
-
-        this.data.mesas.push(nuevaMesa);
-        this._mesaActivaPedidoSnapshot = nuevaMesa;
-
-        if (!abrirPedido && this.filtroMesas === 'OCUPADAS') {
-          this.filtroMesas = 'TODAS';
-          const btnTodas = document.getElementById('btnFiltroMesaTodas');
-          const btnOcup = document.getElementById('btnFiltroMesaOcupadas');
-          const btnLibres = document.getElementById('btnFiltroMesaLibres');
-          if (btnTodas) btnTodas.classList.add('active');
-          if (btnOcup) btnOcup.classList.remove('active');
-          if (btnLibres) btnLibres.classList.remove('active');
-        }
-
-        this.closeModal('modalAgregarMesa');
-        this.saveData();
-        this.renderAll();
-        this.sincronizarEstadoMesasCloud(true);
-
-        if (abrirPedido) {
-          this.abrirModalPedido(nuevaMesa.id);
+          if (abrirPedido) {
+            this.abrirModalPedido(nuevaMesa.id);
+          }
+        } finally {
+          this._creandoMesaEnCurso = false;
+          botones.forEach((b, i) => {
+            b.disabled = false;
+            if (textosPrevios[i] !== undefined) b.innerHTML = textosPrevios[i];
+          });
         }
       }
 
@@ -10991,7 +11281,10 @@
 
       abrirMesaRapida() {
         const num = this.obtenerSiguienteNumeroMesaRapida();
-        const rapidaId = Date.now();
+        let rapidaId = Date.now();
+        while ((this.data.mesas || []).some(m => String(m.id) === String(rapidaId))) {
+          rapidaId++;
+        }
         const nombreMesero = (this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Mesero');
 
         const nuevaRapida = {
@@ -11001,9 +11294,13 @@
           numeroRapida: num,
           colorHex: '#b45309',
           esRapida: true,
+          esCredito: false,
+          creditoRegistrado: false,
+          creadaManualmente: true,
           pedidoId: null,
           meseroApertura: nombreMesero,
           horaApertura: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
+          fechaApertura: new Date().toISOString(),
           ordenes: [],
           pagada: false,
           cobradoPor: null,
@@ -11082,6 +11379,13 @@
             return;
           }
           return;
+        }
+
+        const tieneOrdenesPendientesCocina = (mesa.ordenes || []).some(o => o.estado !== 'verde');
+        if (tieneOrdenesPendientesCocina) {
+          if (!confirm(`⚠️ La orden de ${mesa.nombre} aún sigue en preparación / pendiente en Cocina.\n\nSi la finaliza ahora desaparecerá de la pantalla de Cocina.\n\n¿Desea entregarla y finalizarla de todas formas?`)) {
+            return;
+          }
         }
 
         // Registrar en blacklist local para que ningún polling concurrente la vuelva a resucitar
@@ -11488,21 +11792,43 @@ const url = this.data.googleSheetsUrl;
             return true;
           }
 
-          // Para sync_order: registrar la comanda vía GET 
+          // Para sync_order: registrar la comanda y garantizar respaldo en Estado_Mesas (GET compacto o POST si es largo)
           if (action === 'sync_order') {
             const orderData = {
               id: data.id,
               pedidoId: data.pedidoId || null,
-              comandaNum: data.comandaNum || null,
+              comandaNum: data.comandaNum || 1,
               mesaId: data.mesaId,
               mesaNombre: data.mesaNombre,
+              nombreCorto: data.nombreCorto || data.mesaNombre,
+              numeroMesa: data.numeroMesa || null,
+              numeroRapida: data.numeroRapida || null,
+              mesaColor: data.mesaColor || null,
               mesero: data.mesero,
-              estado: data.estado,
+              meseroApertura: data.meseroApertura || data.mesero,
+              horaApertura: data.horaApertura || data.fecha || null,
+              fechaApertura: data.fechaApertura || new Date().toISOString(),
+              fecha: data.fecha || null,
+              esRapida: Boolean(data.esRapida),
+              esCredito: Boolean(data.esCredito),
+              creadaManualmente: data.creadaManualmente !== undefined ? Boolean(data.creadaManualmente) : true,
+              clienteCredito: data.clienteCredito || null,
+              pagada: Boolean(data.pagada),
+              estado: data.estado || 'rojo',
               items: data.items,
               totalCRC: data.totalCRC
             };
-            const getUrl = `${url}${sep}action=sync_order&data=${encodeURIComponent(JSON.stringify(orderData))}`;
-            fetch(getUrl, { redirect: 'follow' }).catch(() => {});
+            const getUrl = `${url}${sep}action=sync_order&data=${encodeURIComponent(JSON.stringify(orderData))}&_t=${Date.now()}`;
+            if (getUrl.length <= 1850) {
+              fetch(getUrl, { redirect: 'follow' }).catch(() => {});
+            } else {
+              fetch(url, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'sync_order', data: orderData })
+              }).catch(() => {});
+            }
             return true;
           }
 
@@ -11627,15 +11953,27 @@ const url = this.data.googleSheetsUrl;
             }))
           })),
           pagada: m.pagada || false,
+          creditoRegistrado: Boolean(m.creditoRegistrado),
           cobradoPor: m.cobradoPor || null,
           horaCobro: m.horaCobro || null,
           pagosParciales: m.pagosParciales || []
         }));
 
         const getUrl = `${url}${sep}action=sync_mesas_state&data=${encodeURIComponent(JSON.stringify(mesasCompactas))}&_t=${Date.now()}`;
-        fetch(getUrl, { redirect: 'follow' }).catch(e => {
-          console.warn('Error sincronizando estado de mesas vía GET:', e);
-        });
+        if (getUrl.length <= 1850) {
+          fetch(getUrl, { redirect: 'follow' }).catch(e => {
+            console.warn('Error sincronizando estado de mesas vía GET:', e);
+          });
+        } else {
+          fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'sync_mesas_state', data: mesasCompactas })
+          }).catch(e => {
+            console.warn('Error sincronizando estado de mesas vía POST:', e);
+          });
+        }
       }
 
 
@@ -12768,13 +13106,22 @@ generarSemicierreModal() {
       iniciarPedidoCreditoConCliente(cliente) {
         if (!cliente) return;
 
-        const mesaId = Date.now();
+        let mesaId = Date.now();
+        while ((this.data.mesas || []).some(m => String(m.id) === String(mesaId))) {
+          mesaId++;
+        }
+        const numRap = this.obtenerSiguienteNumeroMesaRapida();
         const nuevaMesa = {
           id: mesaId,
           nombre: `Crédito - ${cliente.nombre}`,
           nombreCorto: `Crédito: ${(cliente.nombre.split(' ')[0] || cliente.nombre)}`,
+          numeroRapida: numRap,
+          colorHex: '#4f46e5',
           esRapida: true,
           esCredito: true,
+          creditoRegistrado: false,
+          creadaManualmente: true,
+          pedidoId: null,
           clienteCredito: {
             id: cliente.id,
             nombre: cliente.nombre,
@@ -12782,7 +13129,12 @@ generarSemicierreModal() {
             telefono: cliente.telefono
           },
           ordenes: [],
+          pagada: false,
+          cobradoPor: null,
+          horaCobro: null,
           pagosParciales: [],
+          listoParaRecoger: false,
+          horaListo: null,
           meseroApertura: (this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Caja'),
           horaApertura: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           fechaApertura: new Date().toISOString()
@@ -15044,7 +15396,7 @@ ${lineasFacturas}
           </tr>
         `).join('') || '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:18px;">Sin transacciones en el período</td></tr>';
 
-        const htmlDoc = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Ventas ${this.esc(modelo.rangoFechaTexto)}</title><style>@page{size:landscape;margin:12mm;}body{font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#0f172a;margin:0;padding:18px;font-size:12px;}.head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}.logo{width:68px;height:68px;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;padding:3px;}.bar{background:#f8fafc;padding:9px 16px;border-radius:4px;display:flex;gap:34px;font-size:12px;margin-bottom:12px;}.sum{border:1px solid #cbd5e1;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;text-align:center;}.sum-lbl{font-size:11px;color:#64748b;margin-bottom:4px;}.sum-val{font-size:16px;font-weight:700;color:#475569;}.op{font-weight:800;font-size:16px;}.sec{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}.pill{background:#f1f5f9;padding:5px 14px;border-radius:5px;font-size:11px;color:#475569;}table{width:100%;border-collapse:collapse;font-size:11.5px;}thead tr{border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}th,td{padding:7px 6px;text-align:left;border-bottom:1px solid #e2e8f0;}</style></head><body><div class="head"><img class="logo" src="${this.escAttr(logoAbs)}"><div><div style="font-size:17px;font-weight:700;margin-bottom:4px;">${this.esc(modelo.negocio)}</div><div style="color:#475569;">${this.esc(modelo.responsableHeader)}</div><div style="color:#475569;">${this.esc(modelo.telefonoHeader)}</div></div></div><div class="bar"><span>Fecha de reporte: <strong>${this.esc(modelo.rangoFechaTexto)}</strong></span><span>Generación: <strong>${this.esc(modelo.generacionTexto)}</strong></span><span>Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><div class="sum"><div><div class="sum-lbl">Ingresos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.ingresosRegularesCRC))}</div></div><div class="op">+</div><div><div class="sum-lbl">Abonos ventas</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.abonosVentasCRC))}</div></div><div class="op">-</div><div><div class="sum-lbl">Costo de ventas</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Abonos gastos</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Gastos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.gastosCRC))}</div></div><div class="op">=</div><div><div class="sum-lbl">Utilidad Total</div><div class="sum-val" style="color:${modelo.utilidadTotalCRC >= 0 ? '#16a34a' : '#dc2626'};font-weight:800;">${this.esc(this._formatCRCComprobante(modelo.utilidadTotalCRC))}</div></div></div><div class="sec"><strong style="font-size:15px;">Ventas y abonos a ventas</strong><span class="pill">Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Vendedor</th><th>Descripción</th><th>Contacto</th><th>Estado</th><th>M. de pago</th><th style="text-align:right;">Valor</th><th style="text-align:right;">Costo</th></tr></thead><tbody>${filasHtml}</tbody></table><` + `script>window.onload=function(){window.print();};<` + `/script></body></html>`;
+        const htmlDoc = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Ventas ${this.esc(modelo.rangoFechaTexto)}</title><style>@page{size:landscape;margin:12mm;}body{font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#0f172a;margin:0;padding:18px;font-size:12px;}.head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}.logo{width:68px;height:68px;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;padding:3px;}.bar{background:#f8fafc;padding:9px 16px;border-radius:4px;display:flex;gap:34px;font-size:12px;margin-bottom:12px;}.sum{border:1px solid #cbd5e1;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;text-align:center;}.sum-lbl{font-size:11px;color:#64748b;margin-bottom:4px;}.sum-val{font-size:16px;font-weight:700;color:#475569;}.op{font-weight:800;font-size:16px;}.sec{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}.pill{background:#f1f5f9;padding:5px 14px;border-radius:5px;font-size:11px;color:#475569;}table{width:100%;border-collapse:collapse;font-size:11.5px;}thead tr{border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}th,td{padding:7px 6px;text-align:left;border-bottom:1px solid #e2e8f0;}</style></head><body><div class="head"><img class="logo" src="${this.escAttr(logoAbs)}" onerror="this.onerror=null;this.src='${FRESH_PARADISE_HOSTED_LOGO_URL}';"><div><div style="font-size:17px;font-weight:700;margin-bottom:4px;">${this.esc(modelo.negocio)}</div><div style="color:#475569;">${this.esc(modelo.responsableHeader)}</div><div style="color:#475569;">${this.esc(modelo.telefonoHeader)}</div></div></div><div class="bar"><span>Fecha de reporte: <strong>${this.esc(modelo.rangoFechaTexto)}</strong></span><span>Generación: <strong>${this.esc(modelo.generacionTexto)}</strong></span><span>Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><div class="sum"><div><div class="sum-lbl">Ingresos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.ingresosRegularesCRC))}</div></div><div class="op">+</div><div><div class="sum-lbl">Abonos ventas</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.abonosVentasCRC))}</div></div><div class="op">-</div><div><div class="sum-lbl">Costo de ventas</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Abonos gastos</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Gastos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.gastosCRC))}</div></div><div class="op">=</div><div><div class="sum-lbl">Utilidad Total</div><div class="sum-val" style="color:${modelo.utilidadTotalCRC >= 0 ? '#16a34a' : '#dc2626'};font-weight:800;">${this.esc(this._formatCRCComprobante(modelo.utilidadTotalCRC))}</div></div></div><div class="sec"><strong style="font-size:15px;">Ventas y abonos a ventas</strong><span class="pill">Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Vendedor</th><th>Descripción</th><th>Contacto</th><th>Estado</th><th>M. de pago</th><th style="text-align:right;">Valor</th><th style="text-align:right;">Costo</th></tr></thead><tbody>${filasHtml}</tbody></table><` + `script>window.onload=function(){window.print();};<` + `/script></body></html>`;
 
         const win = window.open('', '_blank', 'width=1050,height=760');
         if (win) {
@@ -15189,7 +15541,9 @@ ${lineasFacturas}
       // Registrar Service Worker únicamente sobre HTTPS o localhost
       if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch((err) => {
+          navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
+            if (reg && typeof reg.update === 'function') reg.update().catch(() => {});
+          }).catch((err) => {
             console.warn('Service Worker registro opcional fallido:', err);
           });
         });

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fresh-paradise-pos-v2';
+const CACHE_NAME = 'fresh-paradise-pos-v5';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -32,8 +32,11 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Estrategia Network-first con respaldo en caché para operación offline
+  // En documentos HTML evitar caché HTTP del navegador para reflejar despliegues recientes en GitHub Pages
+  const esHtml = event.request.mode === 'navigate' || reqUrl.endsWith('/') || reqUrl.endsWith('.html');
+  const netReq = esHtml ? new Request(event.request, { cache: 'no-cache' }) : event.request;
   event.respondWith(
-    fetch(event.request)
+    fetch(netReq)
       .then((networkRes) => {
         if (networkRes && networkRes.status === 200 && reqUrl.startsWith(self.location.origin)) {
           const copy = networkRes.clone();
