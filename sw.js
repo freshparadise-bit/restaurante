@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fresh-paradise-pos-v6';
+const CACHE_NAME = 'fresh-paradise-pos-v7';
 const STATIC_ASSETS = [
   './',
   './index.html',

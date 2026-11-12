@@ -3438,6 +3438,7 @@
             </div>
             <div class="informe-metric-value" id="informeIngresosCRC">₡0</div>
             <div class="informe-metric-sub" id="informeIngresosSub">0 transacciones &bull; $0.00</div>
+            <div id="informeIngresosDesglose" style="margin-top: 0.45rem; display: flex; flex-direction: column; gap: 0.18rem; font-size: 0.79rem;"></div>
           </div>
 
           <!-- EGRESOS -->
@@ -4946,6 +4947,7 @@
         this._mesasVaciadasRecientes = new Map(); // mesaId -> timestamp (TTL 45s)
         this._mesasCreadasRecientes = new Map(); // mesaId -> timestamp (TTL 120s)
         this._ordenesEnviadasRecientes = new Map(); // ordenId -> timestamp (TTL 60s)
+        this._ventasRecientesProtegidas = new Map(); // ventaId -> timestamp (TTL 120s)
         this._mesaActivaPedidoSnapshot = null;
         this._creandoMesaEnCurso = false;
         this._soportaCrearMesaCloud = null;
@@ -5583,29 +5585,46 @@
 
             // Sincronizar historial de ventas del turno directamente desde Google Sheets (con respaldo offline)
             if (json.ventas !== undefined && Array.isArray(json.ventas)) {
+              const ahoraVentas = Date.now();
+              if (this._ventasRecientesProtegidas) {
+                for (const [id, t] of this._ventasRecientesProtegidas.entries()) {
+                  if (ahoraVentas - t > 120000) this._ventasRecientesProtegidas.delete(id);
+                }
+              }
               const remoteIds = new Set(json.ventas.map(v => String(v.id)));
 
-              // Conservar cualquier venta hecha en este dispositivo mientras no había internet y que aún está en cola
-              const pendientesLocales = (this.data.ventasHistorial || []).filter(v => 
-                v && v.id && !remoteIds.has(String(v.id)) && (v.creadoOffline || (this.data.colaPendienteSync && this.data.colaPendienteSync.some(c => c.action === 'sync_sale' && c.data && String(c.data.id) === String(v.id))))
+              // Conservar cualquier venta o abono CxC reciente aún en tránsito hacia Google Sheets o hecho sin conexión
+              const pendientesLocales = (this.data.ventasHistorial || []).filter(v =>
+                v && v.id && !remoteIds.has(String(v.id)) && (
+                  (this._ventasRecientesProtegidas && this._ventasRecientesProtegidas.has(String(v.id))) ||
+                  v.creadoOffline ||
+                  (this.data.colaPendienteSync && this.data.colaPendienteSync.some(c => c.action === 'sync_sale' && c.data && String(c.data.id) === String(v.id)))
+                )
               );
 
               const remoteParsed = json.ventas.map(v => {
                 if (!v) return null;
                 const totalCRC = Number(v.totalCRC) || 0;
                 const tipoCambio = Number(v.tipoCambio) || this.data.tipoCambio || 510;
-                const totalUSD = (v.totalUSD !== undefined && v.totalUSD !== null && v.totalUSD !== '') 
-                  ? Number(v.totalUSD) 
+                const totalUSD = (v.totalUSD !== undefined && v.totalUSD !== null && v.totalUSD !== '')
+                  ? Number(v.totalUSD)
                   : (totalCRC / tipoCambio);
                 const metodo = v.metodoPago || 'Efectivo';
                 const origen = v.origenCobro || ((v.rolCobrador === 'caja' || v.rolCobrador === 'master') ? 'caja' : 'mesero');
                 const meseroNombre = v.meseroCobrador || v.mesero || v.meseroMesa || 'Mesero';
+                const esCobroCred = this._esVentaCobroCredito(v);
+                const clienteNom = (v.clienteNombre || '').toString();
+                let mesaNom = v.mesaNombre || (v.mesa ? v.mesa : `Mesa ${v.mesaId || ''}`);
+                if (esCobroCred && clienteNom && (!v.mesaNombre || v.mesaNombre === 'Mesa Crédito')) {
+                  mesaNom = `Abono Crédito (${clienteNom})`;
+                }
 
                 return {
                   id: v.id || Date.now(),
                   pedidoId: v.pedidoId || '',
                   mesaId: v.mesaId || '',
-                  mesaNombre: v.mesaNombre || (v.mesa ? v.mesa : `Mesa ${v.mesaId || ''}`),
+                  mesaNombre: mesaNom,
+                  clienteNombre: clienteNom,
                   metodoPago: metodo,
                   referenciaPago: v.referenciaPago || v.referencia || '',
                   referencia: v.referencia || v.referenciaPago || '',
@@ -5624,14 +5643,17 @@
                   cobradoPor: v.cobradoPor || '',
                   rolCobrador: v.rolCobrador || (origen === 'caja' ? 'caja' : 'mesero'),
                   origenCobro: origen,
+                  esCobroCredito: esCobroCred,
+                  esCredito: Boolean(v.esCredito || metodo === 'Crédito'),
                   horaCobro: v.horaCobro || (v.fechaHora ? String(v.fechaHora).slice(11, 16) : ''),
+                  fechaISO: v.fechaISO || (v.fecha && /^\d{4}-\d{2}-\d{2}/.test(String(v.fecha)) ? String(v.fecha).slice(0, 10) : ''),
                   fecha: v.fecha || (v.fechaHora ? String(v.fechaHora).slice(0, 10) : ''),
                   items: Array.isArray(v.items) ? v.items : [],
                   productosResumen: v.productosResumen || ''
                 };
               }).filter(Boolean);
 
-              this.data.ventasHistorial = [...remoteParsed, ...pendientesLocales];
+              this.data.ventasHistorial = [...pendientesLocales, ...remoteParsed];
 
               // Cargar Categorías desde Google Sheets
               if (json.categorias && Array.isArray(json.categorias) && json.categorias.length > 0) {
@@ -7106,10 +7128,10 @@
 
         // Rubros de Ventas a Crédito y Cobro de Créditos en Panel Lateral
         let totalCreditoOtorgadoHoy = 0, cantCreditoOtorgadoHoy = 0;
-        const hoyIso = new Date().toISOString().slice(0, 10);
+        const hoyIso = this.getFechaHoyISO();
         (this.data.cuentasPorCobrar || []).forEach(c => {
-          const fechaC = (c.fecha || (c.fechaHora ? c.fechaHora.slice(0, 10) : ''));
-          if (fechaC === hoyIso || !c.fecha) {
+          const fechaC = this.extraerFechaISOLocal(c);
+          if (fechaC === hoyIso || (!c.fecha && !c.fechaHora)) {
             totalCreditoOtorgadoHoy += (Number(c.totalCRC) || 0);
             cantCreditoOtorgadoHoy++;
           }
@@ -7117,7 +7139,7 @@
 
         let totalCreditoCobradoHoy = 0, cantCreditoCobradoHoy = 0;
         (this.data.ventasHistorial || []).forEach(v => {
-          if (v.esCobroCredito || (v.id && String(v.id).startsWith('REC-LIQ-')) || (v.pedidoId && String(v.pedidoId).includes('FAC-CRED-'))) {
+          if (this._esVentaCobroCredito(v)) {
             totalCreditoCobradoHoy += (Number(v.totalCRC) || 0);
             cantCreditoCobradoHoy++;
           }
@@ -13801,6 +13823,81 @@ generarSemicierreModal() {
         }
       }
 
+      _esVentaCobroCredito(v) {
+        if (!v) return false;
+        const idStr = String(v.id || '');
+        const pedStr = String(v.pedidoId || '');
+        const mesaStr = String(v.mesaNombre || '').toLowerCase();
+        const refStr = String(v.referenciaPago || v.referencia || '').toLowerCase();
+        return Boolean(
+          v.esCobroCredito ||
+          idStr.startsWith('ABONO-') ||
+          idStr.startsWith('REC-LIQ-') ||
+          pedStr.includes('FAC-CRED-') ||
+          pedStr.toLowerCase().includes('abono') ||
+          mesaStr.includes('abono crédito') ||
+          mesaStr.includes('abono credito') ||
+          mesaStr.includes('cobro crédito') ||
+          mesaStr.includes('cobro credito') ||
+          refStr.includes('abono consolidado') ||
+          refStr.includes('liquidación facturas') ||
+          refStr.includes('liquidacion facturas')
+        );
+      }
+
+      _registrarCobroCreditoEnHistorial({ id, pedidoId, clienteNombre, mesaNombre, metodo, ref, montoCRC, cajero, items, productosResumen }) {
+        const metodoStr = (metodo || 'Efectivo Colones').toString();
+        const metodoNormalizado = metodoStr.includes('Dólares')
+          ? 'Efectivo'
+          : (metodoStr.includes('SINPE') ? 'SINPE' : (metodoStr.includes('Tarjeta') ? 'Tarjeta' : 'Efectivo'));
+        const tc = this.data.tipoCambio || 510;
+        const hoyISO = this.getFechaHoyISO();
+        const horaCobro = new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+
+        const cobroRecord = {
+          id,
+          pedidoId,
+          mesaId: 'Crédito',
+          mesaNombre,
+          clienteNombre: clienteNombre || '',
+          metodoPago: metodoNormalizado,
+          referenciaPago: ref,
+          totalCRC: Number(montoCRC) || 0,
+          totalUSD: (Number(montoCRC) || 0) / tc,
+          monedaPago: metodoStr.includes('Dólares') ? 'USD' : 'CRC',
+          montoRecibido: Number(montoCRC) || 0,
+          tipoCambio: tc,
+          mesero: cajero,
+          meseroCobrador: cajero,
+          cobradoPor: cajero,
+          rolCobrador: 'caja',
+          origenCobro: 'caja',
+          esCobroCredito: true,
+          esCredito: false,
+          tipoIngreso: 'CXC',
+          creadoOffline: !navigator.onLine,
+          horaCobro,
+          fechaISO: hoyISO,
+          fecha: hoyISO,
+          productosResumen: productosResumen || ref || mesaNombre,
+          items: Array.isArray(items) ? items : []
+        };
+
+        this.data.ventasHistorial = this.data.ventasHistorial || [];
+        this.data.ventasHistorial.unshift(cobroRecord);
+
+        if (!this._ventasRecientesProtegidas) this._ventasRecientesProtegidas = new Map();
+        this._ventasRecientesProtegidas.set(String(id), Date.now());
+        this.bloquearDescargasTemporales(6000);
+
+        const wireRecord = {
+          ...cobroRecord,
+          items: cobroRecord.items.slice(0, 6)
+        };
+        this.enviarDatosASheets('sync_sale', wireRecord);
+        return cobroRecord;
+      }
+
       confirmarAbonoConsolidado() {
         if (!this.clienteAbonoConsolidadoActivo) return;
 
@@ -13890,31 +13987,19 @@ generarSemicierreModal() {
           this.enviarDatosASheets('sync_cliente_credito', cliente);
         }
 
-        // Registrar cobro en ventasHistorial para que ingrese al Cierre de Caja / Arqueo del turno
-        const metodoNormalizado = metodo.includes('Dólares') ? 'Efectivo' : (metodo.includes('SINPE') ? 'SINPE' : (metodo.includes('Tarjeta') ? 'Tarjeta' : 'Efectivo'));
-        const comprobanteId = 'ABONO-' + Date.now().toString().slice(-6);
-
-        this.data.ventasHistorial = this.data.ventasHistorial || [];
-        this.data.ventasHistorial.unshift({
+        // Registrar cobro en ventasHistorial + sync_sale para que ingrese a Ventas del Día, Balance CxC y Reportes
+        const comprobanteId = 'ABONO-' + Date.now().toString().slice(-6) + String(Math.floor(Math.random() * 90 + 10));
+        const resumenFacturas = facturasActualizadas.map(fa => `Abono Fac #${fa.id}`).join(', ');
+        this._registrarCobroCreditoEnHistorial({
           id: comprobanteId,
           pedidoId: 'Abono Consolidado',
-          mesaId: 'Crédito',
+          clienteNombre: this.clienteAbonoConsolidadoActivo.nombre,
           mesaNombre: `Abono Crédito (${this.clienteAbonoConsolidadoActivo.nombre})`,
-          metodoPago: metodoNormalizado,
-          referenciaPago: ref || `Abono Consolidado a Cuenta`,
-          totalCRC: montoEfectivoAbonado,
-          totalUSD: montoEfectivoAbonado / (this.data.tipoCambio || 510),
-          monedaPago: metodo.includes('Dólares') ? 'USD' : 'CRC',
-          montoRecibido: montoEfectivoAbonado,
-          tipoCambio: this.data.tipoCambio || 510,
-          mesero: cajero,
-          cobradoPor: cajero,
-          rolCobrador: 'caja',
-          origenCobro: 'caja',
-          esCobroCredito: true,
-          horaCobro: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
-          fechaISO: this.getFechaHoyISO(),
-          fecha: this.getFechaHoyISO(),
+          metodo,
+          ref: ref || 'Abono Consolidado a Cuenta',
+          montoCRC: montoEfectivoAbonado,
+          cajero,
+          productosResumen: resumenFacturas || 'Abono Consolidado a Cuenta',
           items: facturasActualizadas.map(fa => ({
             nombre: `Abono Fac #${fa.id} (${fa.fecha})`,
             precio: fa.abono,
@@ -14273,32 +14358,19 @@ ${lineasFacturas}
           }
         });
 
-        // 3. REGISTRAR COBRO EN VENTAS DEL TURNO (HISTORIAL) PARA QUE INTEGRE AL CIERRE DE CAJA Y ARQUEO
+        // 3. Registrar cobro en ventasHistorial + sync_sale para Ventas del Día, Balance CxC y Reportes
         const nombresClientesStr = Array.from(new Set(facturasAProcesar.map(f => f.clienteNombre || 'Cliente'))).join(', ');
         const idsFacturasStr = facturasAProcesar.map(f => f.idFactura || f.id).join(', ');
-        const metodoNormalizado = metodo.includes('Dólares') ? 'Efectivo' : (metodo.includes('SINPE') ? 'SINPE' : (metodo.includes('Tarjeta') ? 'Tarjeta' : 'Efectivo'));
-
-        this.data.ventasHistorial = this.data.ventasHistorial || [];
-        this.data.ventasHistorial.unshift({
-          id: 'REC-LIQ-' + Date.now().toString().slice(-6),
+        this._registrarCobroCreditoEnHistorial({
+          id: 'REC-LIQ-' + Date.now().toString().slice(-6) + String(Math.floor(Math.random() * 90 + 10)),
           pedidoId: idsFacturasStr,
-          mesaId: 'Crédito',
+          clienteNombre: nombresClientesStr,
           mesaNombre: `Cobro Crédito (${nombresClientesStr})`,
-          metodoPago: metodoNormalizado,
-          referenciaPago: ref || `Liquidación Facturas ${idsFacturasStr}`,
-          totalCRC: montoEfectivoCobrado,
-          totalUSD: montoEfectivoCobrado / (this.data.tipoCambio || 510),
-          monedaPago: metodo.includes('Dólares') ? 'USD' : 'CRC',
-          montoRecibido: montoEfectivoCobrado,
-          tipoCambio: this.data.tipoCambio || 510,
-          mesero: cajero,
-          cobradoPor: cajero,
-          rolCobrador: 'caja',
-          origenCobro: 'caja',
-          esCobroCredito: true, // FLAG CLAVE PARA REPORTES
-          horaCobro: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
-          fechaISO: this.getFechaHoyISO(),
-          fecha: this.getFechaHoyISO(),
+          metodo,
+          ref: ref || `Liquidación Facturas ${idsFacturasStr}`,
+          montoCRC: montoEfectivoCobrado,
+          cajero,
+          productosResumen: `Cobro CxC Fac ${idsFacturasStr} (${nombresClientesStr})`,
           items: facturasActualizadas.map(fa => ({
             nombre: `Cobro Crédito Fac #${fa.id} (${fa.cliente})`,
             precio: fa.abono,
@@ -14476,8 +14548,14 @@ ${lineasFacturas}
           if (!v) return;
           if (v.esCredito || v.metodoPago === 'Crédito') return;
           const idKey = v.id ? String(v.id) : `loc_${idx}_${v.horaCobro || ''}_${v.totalCRC || 0}`;
+          const prev = map.get(idKey) || {};
           const fechaISO = this.extraerFechaISOLocal(v);
-          map.set(idKey, { ...v, fechaISO });
+          const merged = { ...prev, ...v, fechaISO };
+          merged.esCobroCredito = this._esVentaCobroCredito(merged);
+          if (merged.esCobroCredito && (!merged.mesaNombre || merged.mesaNombre === 'Mesa Crédito') && merged.clienteNombre) {
+            merged.mesaNombre = `Abono Crédito (${merged.clienteNombre})`;
+          }
+          map.set(idKey, merged);
         });
         return Array.from(map.values());
       }
@@ -14698,7 +14776,9 @@ ${lineasFacturas}
 
         // 3. Calcular Totales Ingresos & Egresos & Desglose
         let totalIngresosCRC = 0;
-        let efectivoCRC = 0, efectivoUSD = 0, tarjetaCRC = 0, sinpeCRC = 0, cobrosCreditoCRC = 0;
+        let ventasRegularesCRC = 0, cantVentasRegulares = 0;
+        let efectivoCRC = 0, efectivoUSD = 0, tarjetaCRC = 0, sinpeCRC = 0;
+        let cobrosCreditoCRC = 0, cantCobrosCredito = 0;
         const prodsMap = {};
         const personalMap = {};
 
@@ -14706,7 +14786,13 @@ ${lineasFacturas}
           const mCRC = Number(v.totalCRC) || 0;
           totalIngresosCRC += mCRC;
           const met = v.metodoPago || 'Efectivo';
-          if (v.esCobroCredito) cobrosCreditoCRC += mCRC;
+          if (this._esVentaCobroCredito(v)) {
+            cobrosCreditoCRC += mCRC;
+            cantCobrosCredito++;
+          } else {
+            ventasRegularesCRC += mCRC;
+            cantVentasRegulares++;
+          }
 
           if (met === 'Tarjeta') tarjetaCRC += mCRC;
           else if (met === 'SINPE') sinpeCRC += mCRC;
@@ -14733,7 +14819,19 @@ ${lineasFacturas}
         const tc = this.data.tipoCambio || 510;
 
         document.getElementById('informeIngresosCRC').innerText = this.formatCRC(totalIngresosCRC);
-        document.getElementById('informeIngresosSub').innerText = `${ventasPeriodo.length} venta(s) • ${this.formatUSD(totalIngresosCRC / tc)}`;
+        document.getElementById('informeIngresosSub').innerText = cantCobrosCredito > 0
+          ? `${cantVentasRegulares} venta(s) + ${cantCobrosCredito} cobro(s) CxC • ${this.formatUSD(totalIngresosCRC / tc)}`
+          : `${ventasPeriodo.length} venta(s) • ${this.formatUSD(totalIngresosCRC / tc)}`;
+
+        const desgloseIngEl = document.getElementById('informeIngresosDesglose');
+        if (desgloseIngEl) {
+          desgloseIngEl.innerHTML = `
+            <div style="color: #475569;">🛒 Ventas directas: <strong>${this.formatCRC(ventasRegularesCRC)}</strong></div>
+            <div style="color: ${cobrosCreditoCRC > 0 ? '#047857' : '#64748b'}; font-weight: ${cobrosCreditoCRC > 0 ? '800' : '600'};">
+              💰 Ingreso de cobro de CxC: <strong>${this.formatCRC(cobrosCreditoCRC)}</strong> (${cantCobrosCredito})
+            </div>
+          `;
+        }
         document.getElementById('informeEgresosCRC').innerText = this.formatCRC(totalEgresosCRC);
         document.getElementById('informeEgresosSub').innerText = `${egresosPeriodo.length} egreso(s) registrado(s)`;
 
@@ -14748,7 +14846,7 @@ ${lineasFacturas}
               ${efectivoUSD > 0 ? `<span>&bull; 💵 ${this.formatUSD(efectivoUSD)}</span>` : ''}
               <span>&bull; 💳 ${this.formatCRC(tarjetaCRC)}</span>
               <span>&bull; 📱 ${this.formatCRC(sinpeCRC)}</span>
-              ${cobrosCreditoCRC > 0 ? `<span>&bull; 💰 Abonos CxC: ${this.formatCRC(cobrosCreditoCRC)}</span>` : ''}
+              <span style="color: #047857; font-weight: 800;">&bull; 💰 Ingreso Cobro CxC: ${this.formatCRC(cobrosCreditoCRC)}</span>
             </div>
           `;
         }
@@ -14776,6 +14874,11 @@ ${lineasFacturas}
             <div style="background: #faf5ff; border: 1.5px solid #e9d5ff; border-radius: 12px; padding: 0.75rem;">
               <div style="font-size: 0.74rem; font-weight: 800; color: #6b21a8;">📱 SINPE MÓVIL</div>
               <div style="font-size: 1.2rem; font-weight: 800; color: #7e22ce;">${this.formatCRC(sinpeCRC)}</div>
+            </div>
+            <div style="background: #ecfdf5; border: 1.5px solid #6ee7b7; border-radius: 12px; padding: 0.75rem;">
+              <div style="font-size: 0.74rem; font-weight: 800; color: #065f46;">💰 INGRESO COBRO DE CXC</div>
+              <div style="font-size: 1.2rem; font-weight: 800; color: #047857;">${this.formatCRC(cobrosCreditoCRC)}</div>
+              <div style="font-size: 0.72rem; color: #065f46; font-weight: 600;">${cantCobrosCredito} cobro(s)</div>
             </div>
             <div style="background: #eef2ff; border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 0.75rem;">
               <div style="font-size: 0.74rem; font-weight: 800; color: #3730a3;">🧾 CRÉDITOS EMITIDOS</div>
@@ -14816,7 +14919,7 @@ ${lineasFacturas}
           const q = (document.getElementById('informeBuscarInput')?.value || '').toLowerCase().trim();
           const movs = [
             ...ventasPeriodo.map(v => ({
-              tipo: 'INGRESO',
+              tipo: this._esVentaCobroCredito(v) ? 'COBRO_CXC' : 'INGRESO',
               id: v.id,
               fechaISO: v.fechaISO,
               hora: v.horaCobro || '',
@@ -14849,16 +14952,16 @@ ${lineasFacturas}
               <tr style="border-bottom: 1px solid #f1f5f9;">
                 <td style="padding: 0.5rem 0.65rem; white-space: nowrap;"><strong>${this.esc(this.formatearFechaPillEs(m.fechaISO))}</strong> <span style="color: #64748b;">${this.esc(m.hora)}</span></td>
                 <td style="padding: 0.5rem 0.65rem;">
-                  <span style="padding: 0.15rem 0.5rem; border-radius: 6px; font-weight: 800; font-size: 0.72rem; ${m.tipo === 'INGRESO' ? 'background: #dcfce7; color: #15803d;' : 'background: #fee2e2; color: #dc2626;'}">
-                    ${m.tipo === 'INGRESO' ? '↗ INGRESO' : '↙ EGRESO'}
+                  <span style="padding: 0.15rem 0.5rem; border-radius: 6px; font-weight: 800; font-size: 0.72rem; ${m.tipo === 'COBRO_CXC' ? 'background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;' : (m.tipo === 'INGRESO' ? 'background: #dcfce7; color: #15803d;' : 'background: #fee2e2; color: #dc2626;')}">
+                    ${m.tipo === 'COBRO_CXC' ? '💰 COBRO CXC' : (m.tipo === 'INGRESO' ? '↗ INGRESO' : '↙ EGRESO')}
                   </span>
                 </td>
                 <td style="padding: 0.5rem 0.65rem; font-weight: 700; color: #0f172a;">${this.esc(m.titulo)}</td>
                 <td style="padding: 0.5rem 0.65rem; color: #475569;">${this.esc(m.responsable)}</td>
                 <td style="padding: 0.5rem 0.65rem;">${this.esc(m.metodo)}</td>
                 <td style="padding: 0.5rem 0.65rem; color: #475569; max-width: 240px;">${this.esc(m.detalle)}</td>
-                <td style="padding: 0.5rem 0.65rem; text-align: right; font-weight: 800; color: ${m.tipo === 'INGRESO' ? '#15803d' : '#dc2626'};">
-                  ${m.tipo === 'INGRESO' ? '' : '-'}${this.formatCRC(m.monto)}
+                <td style="padding: 0.5rem 0.65rem; text-align: right; font-weight: 800; color: ${m.tipo !== 'EGRESO' ? '#15803d' : '#dc2626'};">
+                  ${m.tipo !== 'EGRESO' ? '' : '-'}${this.formatCRC(m.monto)}
                   ${m.tipo === 'EGRESO' ? `<button type="button" onclick="app.eliminarEgresoInforme('${this.escAttr(m.id)}')" style="margin-left: 0.35rem; border: none; background: transparent; cursor: pointer; color: #94a3b8;" title="Eliminar egreso">🗑️</button>` : ''}
                 </td>
               </tr>
@@ -14922,8 +15025,7 @@ ${lineasFacturas}
         ordenadas.forEach(v => {
           const valorCRC = Number(v.totalCRC) || 0;
           const idStr = String(v.id || '');
-          const pedStr = String(v.pedidoId || '');
-          const esAbono = Boolean(v.esCobroCredito || idStr.startsWith('ABONO-') || idStr.startsWith('REC-LIQ-') || pedStr.includes('FAC-CRED-'));
+          const esAbono = this._esVentaCobroCredito(v);
 
           if (esAbono) abonosVentasCRC += valorCRC;
           else ingresosRegularesCRC += valorCRC;
@@ -14941,7 +15043,7 @@ ${lineasFacturas}
 
           transacciones.push({
             fecha: this._formatearFechaSlashReporte(v.fechaISO || this.extraerFechaISOLocal(v)),
-            tipo: esAbono ? 'Abonos ventas' : 'Venta',
+            tipo: esAbono ? 'Cobro CxC' : 'Venta',
             vendedor: this._limpiarTextoPlano(v.cobradoPor || v.meseroCobrador || v.mesero || ''),
             descripcion: desc,
             contacto: this._extraerContactoVentaReporte(v, esAbono),
@@ -15150,7 +15252,7 @@ ${lineasFacturas}
 
         const colsResumen = [
           { lbl: 'Ingresos', val: this._formatCRCComprobante(modelo.ingresosRegularesCRC), cx: 120, color: '#475569' },
-          { lbl: 'Abonos ventas', val: this._formatCRCComprobante(modelo.abonosVentasCRC), cx: 300, color: '#475569' },
+          { lbl: 'Ingreso cobro CxC', val: this._formatCRCComprobante(modelo.abonosVentasCRC), cx: 300, color: '#047857' },
           { lbl: 'Costo de ventas', val: this._formatCRCComprobante(modelo.costoVentasCRC), cx: 495, color: '#475569' },
           { lbl: 'Abonos gastos', val: this._formatCRCComprobante(modelo.abonosGastosCRC), cx: 688, color: '#475569' },
           { lbl: 'Gastos', val: this._formatCRCComprobante(modelo.gastosCRC), cx: 872, color: '#475569' },
@@ -15409,7 +15511,7 @@ ${lineasFacturas}
           </tr>
         `).join('') || '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:18px;">Sin transacciones en el período</td></tr>';
 
-        const htmlDoc = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Ventas ${this.esc(modelo.rangoFechaTexto)}</title><style>@page{size:landscape;margin:12mm;}body{font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#0f172a;margin:0;padding:18px;font-size:12px;}.head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}.logo{width:68px;height:68px;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;padding:3px;}.bar{background:#f8fafc;padding:9px 16px;border-radius:4px;display:flex;gap:34px;font-size:12px;margin-bottom:12px;}.sum{border:1px solid #cbd5e1;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;text-align:center;}.sum-lbl{font-size:11px;color:#64748b;margin-bottom:4px;}.sum-val{font-size:16px;font-weight:700;color:#475569;}.op{font-weight:800;font-size:16px;}.sec{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}.pill{background:#f1f5f9;padding:5px 14px;border-radius:5px;font-size:11px;color:#475569;}table{width:100%;border-collapse:collapse;font-size:11.5px;}thead tr{border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}th,td{padding:7px 6px;text-align:left;border-bottom:1px solid #e2e8f0;}</style></head><body><div class="head"><img class="logo" src="${this.escAttr(logoAbs)}" onerror="this.onerror=null;this.src='${FRESH_PARADISE_HOSTED_LOGO_URL}';"><div><div style="font-size:17px;font-weight:700;margin-bottom:4px;">${this.esc(modelo.negocio)}</div><div style="color:#475569;">${this.esc(modelo.responsableHeader)}</div><div style="color:#475569;">${this.esc(modelo.telefonoHeader)}</div></div></div><div class="bar"><span>Fecha de reporte: <strong>${this.esc(modelo.rangoFechaTexto)}</strong></span><span>Generación: <strong>${this.esc(modelo.generacionTexto)}</strong></span><span>Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><div class="sum"><div><div class="sum-lbl">Ingresos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.ingresosRegularesCRC))}</div></div><div class="op">+</div><div><div class="sum-lbl">Abonos ventas</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.abonosVentasCRC))}</div></div><div class="op">-</div><div><div class="sum-lbl">Costo de ventas</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Abonos gastos</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Gastos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.gastosCRC))}</div></div><div class="op">=</div><div><div class="sum-lbl">Utilidad Total</div><div class="sum-val" style="color:${modelo.utilidadTotalCRC >= 0 ? '#16a34a' : '#dc2626'};font-weight:800;">${this.esc(this._formatCRCComprobante(modelo.utilidadTotalCRC))}</div></div></div><div class="sec"><strong style="font-size:15px;">Ventas y abonos a ventas</strong><span class="pill">Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Vendedor</th><th>Descripción</th><th>Contacto</th><th>Estado</th><th>M. de pago</th><th style="text-align:right;">Valor</th><th style="text-align:right;">Costo</th></tr></thead><tbody>${filasHtml}</tbody></table><` + `script>window.onload=function(){window.print();};<` + `/script></body></html>`;
+        const htmlDoc = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Ventas ${this.esc(modelo.rangoFechaTexto)}</title><style>@page{size:landscape;margin:12mm;}body{font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#0f172a;margin:0;padding:18px;font-size:12px;}.head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}.logo{width:68px;height:68px;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;padding:3px;}.bar{background:#f8fafc;padding:9px 16px;border-radius:4px;display:flex;gap:34px;font-size:12px;margin-bottom:12px;}.sum{border:1px solid #cbd5e1;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;text-align:center;}.sum-lbl{font-size:11px;color:#64748b;margin-bottom:4px;}.sum-val{font-size:16px;font-weight:700;color:#475569;}.op{font-weight:800;font-size:16px;}.sec{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}.pill{background:#f1f5f9;padding:5px 14px;border-radius:5px;font-size:11px;color:#475569;}table{width:100%;border-collapse:collapse;font-size:11.5px;}thead tr{border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}th,td{padding:7px 6px;text-align:left;border-bottom:1px solid #e2e8f0;}</style></head><body><div class="head"><img class="logo" src="${this.escAttr(logoAbs)}" onerror="this.onerror=null;this.src='${FRESH_PARADISE_HOSTED_LOGO_URL}';"><div><div style="font-size:17px;font-weight:700;margin-bottom:4px;">${this.esc(modelo.negocio)}</div><div style="color:#475569;">${this.esc(modelo.responsableHeader)}</div><div style="color:#475569;">${this.esc(modelo.telefonoHeader)}</div></div></div><div class="bar"><span>Fecha de reporte: <strong>${this.esc(modelo.rangoFechaTexto)}</strong></span><span>Generación: <strong>${this.esc(modelo.generacionTexto)}</strong></span><span>Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><div class="sum"><div><div class="sum-lbl">Ingresos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.ingresosRegularesCRC))}</div></div><div class="op">+</div><div><div class="sum-lbl">Ingreso cobro CxC</div><div class="sum-val" style="color:#047857;">${this.esc(this._formatCRCComprobante(modelo.abonosVentasCRC))}</div></div><div class="op">-</div><div><div class="sum-lbl">Costo de ventas</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Abonos gastos</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Gastos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.gastosCRC))}</div></div><div class="op">=</div><div><div class="sum-lbl">Utilidad Total</div><div class="sum-val" style="color:${modelo.utilidadTotalCRC >= 0 ? '#16a34a' : '#dc2626'};font-weight:800;">${this.esc(this._formatCRCComprobante(modelo.utilidadTotalCRC))}</div></div></div><div class="sec"><strong style="font-size:15px;">Ventas y abonos a ventas</strong><span class="pill">Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Vendedor</th><th>Descripción</th><th>Contacto</th><th>Estado</th><th>M. de pago</th><th style="text-align:right;">Valor</th><th style="text-align:right;">Costo</th></tr></thead><tbody>${filasHtml}</tbody></table><` + `script>window.onload=function(){window.print();};<` + `/script></body></html>`;
 
         const win = window.open('', '_blank', 'width=1050,height=760');
         if (win) {
