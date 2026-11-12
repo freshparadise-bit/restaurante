@@ -3487,13 +3487,64 @@
           </select>
         </div>
 
-        <!-- CAMPO ESPECÍFICO VENTA A CRÉDITO -->
-        <div class="form-group" id="groupPagoCredito" style="display: none; background: #eef2ff; border: 1.5px solid #4f46e5; border-radius: 10px; padding: 0.85rem; margin-top: 0.5rem;">
-          <div style="font-weight: 800; color: #3730a3; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
-            <span>💳</span> <span>VENTA A CRÉDITO / CUENTA POR COBRAR</span>
+                <!-- CAMPO ESPECÍFICO VENTA A CRÉDITO (CON SELECTOR OBLIGATORIO DE CLIENTE) -->
+        <div class="form-group" id="groupPagoCredito" style="display: none; background: #eef2ff; border: 1.5px solid #4f46e5; border-radius: 12px; padding: 0.9rem; margin-top: 0.5rem;">
+          <div style="font-weight: 800; color: #3730a3; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; margin-bottom: 0.55rem;">
+            <span>💳 VENTA A CRÉDITO / CLIENTE</span>
+            <span style="font-size: 0.72rem; background: #4f46e5; color: white; padding: 0.15rem 0.55rem; border-radius: 999px;">Obligatorio</span>
           </div>
-          <div style="font-size: 0.84rem; color: #4338ca;" id="infoClienteCreditoCobro">
-            Esta factura quedará registrada como pendiente de cobro a nombre del cliente en la hoja <strong>Cuentas_Por_Cobrar</strong>.
+
+          <!-- Caso A: Comanda ya asociada previamente a un cliente (con botón para cambiar si se desea) -->
+          <div id="infoClienteCreditoFijo" style="display: none; background: #ffffff; border: 1.5px solid #c7d2fe; border-radius: 10px; padding: 0.65rem 0.75rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <div id="infoClienteCreditoCobro" style="font-size: 0.84rem; color: #1e1b4b;"></div>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.74rem; padding: 0.25rem 0.55rem;" onclick="app.habilitarCambioClienteCreditoCobro()">
+                🔄 Cambiar cliente
+              </button>
+            </div>
+          </div>
+
+          <!-- Caso B: Selector interactivo de cliente (Existente o Nuevo) -->
+          <div id="selectorClienteCreditoCobroBox">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 0.65rem;">
+              <button type="button" class="btn btn-secondary active" id="tabBtnCobroCredExistente" onclick="app.cambiarSubTabCreditoCobro('existente')" style="font-size: 0.8rem; padding: 0.45rem; font-weight: 800;">
+                👤 Cliente Existente
+              </button>
+              <button type="button" class="btn btn-secondary" id="tabBtnCobroCredNuevo" onclick="app.cambiarSubTabCreditoCobro('nuevo')" style="font-size: 0.8rem; padding: 0.45rem; font-weight: 800;">
+                ➕ Cliente Nuevo
+              </button>
+            </div>
+
+            <!-- Subtab Cliente Existente -->
+            <div id="secCobroCredExistente">
+              <div id="creditoCobroSeleccionadoBanner" style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 8px; padding: 0.45rem 0.65rem; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;">
+                ⚠️ Ningún cliente seleccionado. Toque un cliente de la lista o cree uno nuevo.
+              </div>
+              <input type="search" id="buscarClienteCreditoCobroInput" class="form-control" placeholder="🔍 Buscar por nombre, cédula o teléfono..." oninput="app.renderListaClientesCreditoCobro(this.value)" style="font-size: 0.85rem; padding: 0.45rem 0.65rem; margin-bottom: 0.5rem; background: #ffffff;">
+              <div id="listaClientesCreditoCobro" style="max-height: 185px; overflow-y: auto; border: 1px solid #c7d2fe; border-radius: 8px; padding: 0.35rem; background: #ffffff;">
+                <!-- Renderizado dinámico -->
+              </div>
+            </div>
+
+            <!-- Subtab Cliente Nuevo -->
+            <div id="secCobroCredNuevo" style="display: none; background: #ffffff; border: 1px solid #c7d2fe; border-radius: 10px; padding: 0.65rem;">
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label for="nuevoCreditoCobroNombre" style="font-size: 0.78rem; font-weight: 700; color: #334155;">Nombre Completo: <span style="color: #dc2626;">*</span></label>
+                <input type="text" id="nuevoCreditoCobroNombre" class="form-control" placeholder="Ej: Juan Pérez Mora" style="font-size: 0.85rem; padding: 0.45rem;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label for="nuevoCreditoCobroCedula" style="font-size: 0.78rem; font-weight: 700; color: #334155;">Cédula / Identificación: <span style="color: #dc2626;">*</span></label>
+                <input type="text" id="nuevoCreditoCobroCedula" class="form-control" placeholder="Ej: 1-1234-0567" style="font-size: 0.85rem; padding: 0.45rem;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label for="nuevoCreditoCobroTelefono" style="font-size: 0.78rem; font-weight: 700; color: #334155;">Teléfono / WhatsApp: <span style="color: #dc2626;">*</span></label>
+                <input type="tel" id="nuevoCreditoCobroTelefono" class="form-control" placeholder="Ej: 8888-8888" style="font-size: 0.85rem; padding: 0.45rem;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="nuevoCreditoCobroNotas" style="font-size: 0.78rem; font-weight: 700; color: #334155;">Notas (Opcional):</label>
+                <input type="text" id="nuevoCreditoCobroNotas" class="form-control" placeholder="Observaciones" style="font-size: 0.85rem; padding: 0.45rem;">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -4278,6 +4329,11 @@
         this._ordenesCanceladasRecientes = new Map(); // ordenId -> timestamp (TTL 60s)
         this._estadosKdsLocales = new Map(); // ordenId -> { estado, timestamp } (TTL 45s)
         this._mesasVaciadasRecientes = new Map(); // mesaId -> timestamp (TTL 45s)
+        this._mesasCreadasRecientes = new Map(); // mesaId -> timestamp (TTL 120s)
+        this._ordenesEnviadasRecientes = new Map(); // ordenId -> timestamp (TTL 60s)
+        this._mesaActivaPedidoSnapshot = null;
+        this.clienteCreditoCobroSeleccionado = null;
+        this.subTabCreditoCobro = 'existente';
 
         this.initSync();
         this.initLogoUploader();
@@ -4708,12 +4764,27 @@
                 }
               }
 
+              if (this._mesasCreadasRecientes) {
+                for (const [id, t] of this._mesasCreadasRecientes.entries()) {
+                  if (ahora - t > 120000) this._mesasCreadasRecientes.delete(id);
+                }
+              }
+              if (this._ordenesEnviadasRecientes) {
+                for (const [id, t] of this._ordenesEnviadasRecientes.entries()) {
+                  if (ahora - t > 60000) this._ordenesEnviadasRecientes.delete(id);
+                }
+              }
+
               const remoteIds = new Set(remoteMesas.map(rm => String(rm.id)));
-              // Remover mesas rápidas locales que ya fueron cerradas y retiradas en el servidor o cerradas localmente
+              // Remover mesas rápidas locales cerradas, pero proteger siempre las recién creadas o con modal abierto
               this.data.mesas = this.data.mesas.filter(m => {
                 if (!m.esRapida) return true;
                 const mIdStr = String(m.id);
                 if (this.rapidasCerradasIds && this.rapidasCerradasIds.has(mIdStr)) return false;
+                const creadaReciente = this._mesasCreadasRecientes && this._mesasCreadasRecientes.has(mIdStr);
+                const modalPedidoAbierto = document.getElementById('modalPedido')?.classList.contains('active') && String(this.selectedMesaId) === mIdStr;
+                const modalCobroAbierto = document.getElementById('modalCobro')?.classList.contains('active') && String(this.selectedMesaId) === mIdStr;
+                if (creadaReciente || modalPedidoAbierto || modalCobroAbierto) return true;
                 return remoteIds.has(mIdStr);
               });
 
@@ -4726,14 +4797,17 @@
 
                 let localMesa = this.data.mesas.find(m => String(m.id) === rIdStr);
                 if (!localMesa && remoteMesa.esRapida) {
-                  // Mesa rápida creada por otro dispositivo
+                  // Mesa rápida / crédito creada por otro dispositivo
                   localMesa = {
                     id: remoteMesa.id,
                     nombre: remoteMesa.nombre || `Rápida #${remoteMesa.numeroRapida || 1} (Para Llevar)`,
                     nombreCorto: remoteMesa.nombreCorto || `Rápida #${remoteMesa.numeroRapida || 1}`,
                     numeroRapida: remoteMesa.numeroRapida || 1,
-                    colorHex: remoteMesa.colorHex || '#b45309',
+                    colorHex: remoteMesa.colorHex || (remoteMesa.esCredito ? '#4f46e5' : '#b45309'),
                     esRapida: true,
+                    esCredito: Boolean(remoteMesa.esCredito),
+                    clienteCredito: remoteMesa.clienteCredito || null,
+                    fechaApertura: remoteMesa.fechaApertura || null,
                     pedidoId: null,
                     meseroApertura: null,
                     horaApertura: null,
@@ -4749,6 +4823,15 @@
                 }
 
                 if (localMesa) {
+                  // Preservar atributos de crédito si la mesa es de crédito local o remota
+                  if (remoteMesa.esCredito) localMesa.esCredito = true;
+                  if (remoteMesa.clienteCredito && !localMesa.clienteCredito) {
+                    localMesa.clienteCredito = remoteMesa.clienteCredito;
+                  }
+                  if (remoteMesa.fechaApertura && !localMesa.fechaApertura) {
+                    localMesa.fechaApertura = remoteMesa.fechaApertura;
+                  }
+
                   // Proteger mesa de salón vaciada recientemente contra restauración de órdenes obsoletas
                   const mesaVaciadaReciente = !localMesa.esRapida && this._mesasVaciadasRecientes && this._mesasVaciadasRecientes.has(rIdStr);
                   if (mesaVaciadaReciente && (!localMesa.ordenes || localMesa.ordenes.length === 0)) {
@@ -4761,9 +4844,9 @@
                     localMesa.horaCobro = null;
                     localMesa.pagosParciales = [];
                   } else {
-                    localMesa.pedidoId = remoteMesa.pedidoId || null;
-                    localMesa.meseroApertura = remoteMesa.meseroApertura || null;
-                    localMesa.horaApertura = remoteMesa.horaApertura || null;
+                    localMesa.pedidoId = remoteMesa.pedidoId || localMesa.pedidoId || null;
+                    localMesa.meseroApertura = remoteMesa.meseroApertura || localMesa.meseroApertura || null;
+                    localMesa.horaApertura = remoteMesa.horaApertura || localMesa.horaApertura || null;
 
                     // Filtrar órdenes que hayan sido canceladas localmente y proteger estado KDS
                     const remoteOrdenes = Array.isArray(remoteMesa.ordenes) ? remoteMesa.ordenes : [];
@@ -4782,11 +4865,21 @@
                       return o;
                     });
 
-                    localMesa.ordenes = ordenesFiltradas;
-                    localMesa.pagada = Boolean(remoteMesa.pagada);
-                    localMesa.cobradoPor = remoteMesa.cobradoPor || null;
-                    localMesa.horaCobro = remoteMesa.horaCobro || null;
-                    localMesa.pagosParciales = Array.isArray(remoteMesa.pagosParciales) ? remoteMesa.pagosParciales : [];
+                    // Conservar órdenes recién enviadas localmente que aún no han regresado en el snapshot de Sheets
+                    const remoteOrderIds = new Set(ordenesFiltradas.map(o => String(o.id)));
+                    const ordenesLocalesRecientes = (localMesa.ordenes || []).filter(o =>
+                      this._ordenesEnviadasRecientes &&
+                      this._ordenesEnviadasRecientes.has(String(o.id)) &&
+                      !remoteOrderIds.has(String(o.id))
+                    );
+
+                    localMesa.ordenes = [...ordenesFiltradas, ...ordenesLocalesRecientes];
+                    localMesa.pagada = Boolean(remoteMesa.pagada || localMesa.pagada);
+                    localMesa.cobradoPor = remoteMesa.cobradoPor || localMesa.cobradoPor || null;
+                    localMesa.horaCobro = remoteMesa.horaCobro || localMesa.horaCobro || null;
+                    localMesa.pagosParciales = Array.isArray(remoteMesa.pagosParciales) && remoteMesa.pagosParciales.length >= (localMesa.pagosParciales || []).length
+                      ? remoteMesa.pagosParciales
+                      : (localMesa.pagosParciales || []);
                     localMesa.listoParaRecoger = Boolean(remoteMesa.listoParaRecoger);
                     localMesa.horaListo = remoteMesa.horaListo || null;
                     if (localMesa.ordenes.length > 0 && this.calcularSaldoPendienteMesa(localMesa) <= 0 && this.calcularPagadoMesa(localMesa) > 0) {
@@ -5103,8 +5196,8 @@
           if (tabCaja) tabCaja.style.display = 'flex';
           if (tabCuentas) tabCuentas.style.display = 'flex';
           if (tabClientes) tabClientes.style.display = 'flex';
-          if (tabMaster) tabMaster.style.display = 'flex'; // Visible para Caja para que pueda acceder a Ajustes
-          if (!this.tabActual || this.tabActual === 'cocina') {
+          if (tabMaster) tabMaster.style.display = 'none'; // Oculto para Caja (exclusivo Máster/Admin)
+          if (!this.tabActual || this.tabActual === 'cocina' || this.tabActual === 'master') {
             this.switchTab('caja');
           }
         } else if (rol === 'master') {
@@ -5127,7 +5220,9 @@
           tabId = 'mesero';
         } else if (rol === 'cocina' && tabId !== 'cocina') {
           tabId = 'cocina';
-        } // Rol caja puede navegar entre caja, mesero, cocina, cuentas, clientes y master (ajustes)
+        } else if (rol === 'caja' && tabId === 'master') {
+          tabId = 'caja';
+        } // Rol caja navega entre caja, mesero, cocina, cuentas y clientes (sin acceso a Máster/Admin)
 
         this.tabActual = tabId;
 
@@ -6180,6 +6275,7 @@
         const meserosCobrosMap = {};
 
         (this.data.ventasHistorial || []).forEach(v => {
+          if (v.esCredito || v.metodoPago === 'Crédito') return;
           totalDiaCRC += (v.totalCRC || 0);
           const met = v.metodoPago || 'Efectivo';
           const esUSD = (v.monedaPago === 'USD');
@@ -7103,16 +7199,7 @@
       obtenerMontoACobrar() {
         const mesa = this.data.mesas.find(m => String(m.id) === String(this.selectedMesaId));
         if (!mesa) return 0;
-        // Si la mesa es de crédito en abrirModalCobro, pre-seleccionar automáticamente el método de crédito
-        if (mesa && mesa.esCredito) {
-          setTimeout(() => {
-            this.seleccionarMetodoCobro('Crédito');
-            const infoCli = document.getElementById('infoClienteCreditoCobro');
-            if (infoCli && mesa.clienteCredito) {
-              infoCli.innerHTML = `Factura a crédito para <strong>${this.esc(mesa.clienteCredito.nombre)}</strong> (Cédula: <strong>${this.esc(mesa.clienteCredito.cedula)}</strong> - Tel: <strong>${this.esc(mesa.clienteCredito.telefono)}</strong>). Se guardará en <strong>Cuentas_Por_Cobrar</strong>.`;
-            }
-          }, 60);
-        }
+        // Cálculo puro del monto a cobrar según modalidad seleccionada
 
         const saldoPendiente = this.calcularSaldoPendienteMesa(mesa);
 
@@ -7278,6 +7365,7 @@
           alert('No se encontró la comanda/mesa en el sistema.');
           return;
         }
+        this._mesaActivaPedidoSnapshot = mesa;
 
         const totalColones = this.calcularTotalMesa(mesa);
         const numComandas = (mesa.ordenes || []).length;
@@ -7388,7 +7476,7 @@
               btnCobrarFooter.innerHTML = '<span>📋</span> <span>Entregar y Crear C x C (' + this.formatCRC(totalColones) + ')</span>';
               btnCobrarFooter.style.background = '#4f46e5';
               btnCobrarFooter.style.borderColor = '#4338ca';
-              btnCobrarFooter.onclick = () => app.crearCxCYEntregarMesaCredito(mesa.id);
+              btnCobrarFooter.onclick = () => app.cobrarDesdeModalPedido();
             } else {
               btnCobrarFooter.innerHTML = '<span>💳</span> <span>Cobrar Mesa (<span id="modalPedidoTotalMesaBoton">' + this.formatCRC(totalColones) + '</span>)</span>';
               btnCobrarFooter.style.background = '#15803d';
@@ -7842,6 +7930,13 @@
         if (!mesa) {
           mesa = this.data.mesas.find(m => Number(m.id) === Number(this.selectedMesaId));
         }
+        if (!mesa && this._mesaActivaPedidoSnapshot && String(this._mesaActivaPedidoSnapshot.id) === String(this.selectedMesaId)) {
+          const idStr = String(this._mesaActivaPedidoSnapshot.id);
+          if (!this.rapidasCerradasIds || !this.rapidasCerradasIds.has(idStr)) {
+            mesa = this._mesaActivaPedidoSnapshot;
+            this.data.mesas.push(mesa);
+          }
+        }
         if (!mesa) {
           console.warn('Mesa no encontrada en enviarOrdenCocina:', this.selectedMesaId);
           alert('No se encontró la comanda/mesa activa en el sistema.');
@@ -7877,11 +7972,17 @@
         if (!mesa.ordenes) mesa.ordenes = [];
         mesa.ordenes.push(nuevaOrden);
         mesa.pagada = false;
+        if (!this._ordenesEnviadasRecientes) this._ordenesEnviadasRecientes = new Map();
+        this._ordenesEnviadasRecientes.set(String(nuevaOrden.id), Date.now());
+        if (mesa.esRapida || mesa.esCredito) {
+          if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
+          this._mesasCreadasRecientes.set(String(mesa.id), Date.now());
+        }
         this.cart = [];
         this.saveData();
         this.closeModal('modalPedido');
-        this.bloquearDescargasTemporales(4000);
-        this.programarDescargaSegura(4000);
+        this.bloquearDescargasTemporales(6000);
+        this.programarDescargaSegura(6000);
         this.renderAll();
 
         this.enviarDatosASheets('sync_order', {
@@ -7896,8 +7997,8 @@
           totalCRC: nuevaOrden.items.reduce((acc, i) => acc + (i.precio * i.cant), 0)
         });
 
-        // Sincronizar estado completo de mesas a la nube (GET confiable)
-        this.sincronizarEstadoMesasCloud();
+        // Sincronizar estado completo de mesas a la nube (inmediato para evitar pérdidas entre dispositivos)
+        this.sincronizarEstadoMesasCloud(true);
 
         this.reproducirSonidoAlerta();
       }
@@ -7906,6 +8007,10 @@
         const mesaId = this.selectedMesaId;
         const mesaVerif = this.data.mesas.find(m => String(m.id) === String(mesaId));
         if (mesaVerif && mesaVerif.esCredito) {
+          this.guardarNotasDesdeInputs();
+          if (this.cart.length > 0) {
+            this.enviarOrdenCocina();
+          }
           this.crearCxCYEntregarMesaCredito(mesaId);
           return;
         }
@@ -8075,10 +8180,133 @@
         const inputTarjeta = document.getElementById('cobroTransaccionTarjeta');
         if (inputTarjeta) inputTarjeta.value = '';
 
-        // Método por defecto: EFECTIVO
-        this.seleccionarMetodoCobro('Efectivo');
+        // Inicializar estado del selector de cliente de crédito en modalCobro (sin seleccionar el primero por defecto)
+        this.clienteCreditoCobroSeleccionado = (mesa.esCredito && mesa.clienteCredito) ? mesa.clienteCredito : null;
+        const inpBusqCred = document.getElementById('buscarClienteCreditoCobroInput');
+        if (inpBusqCred) inpBusqCred.value = '';
+        ['nuevoCreditoCobroNombre', 'nuevoCreditoCobroCedula', 'nuevoCreditoCobroTelefono', 'nuevoCreditoCobroNotas'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+
+        const boxFijoCred = document.getElementById('infoClienteCreditoFijo');
+        const boxSelCred = document.getElementById('selectorClienteCreditoCobroBox');
+        const infoCredCobro = document.getElementById('infoClienteCreditoCobro');
+
+        if (mesa.esCredito && mesa.clienteCredito) {
+          if (boxFijoCred) boxFijoCred.style.display = 'block';
+          if (boxSelCred) boxSelCred.style.display = 'none';
+          if (infoCredCobro) {
+            infoCredCobro.innerHTML = `Factura a crédito para <strong>${this.esc(mesa.clienteCredito.nombre)}</strong> (Cédula: <strong>${this.esc(mesa.clienteCredito.cedula || 'N/A')}</strong> &bull; Tel: <strong>${this.esc(mesa.clienteCredito.telefono || 'N/A')}</strong>).`;
+          }
+        } else {
+          if (boxFijoCred) boxFijoCred.style.display = 'none';
+          if (boxSelCred) boxSelCred.style.display = 'block';
+        }
+
+        const tieneClientesCred = Boolean(this.data.clientesCredito && this.data.clientesCredito.length > 0);
+        this.cambiarSubTabCreditoCobro(tieneClientesCred ? 'existente' : 'nuevo');
+
+        // Método por defecto: si es mesa de crédito usar Crédito, si no Efectivo
+        this.seleccionarMetodoCobro(mesa.esCredito ? 'Crédito' : 'Efectivo');
 
         this.openModal('modalCobro');
+      }
+
+      habilitarCambioClienteCreditoCobro() {
+        const boxFijoCred = document.getElementById('infoClienteCreditoFijo');
+        const boxSelCred = document.getElementById('selectorClienteCreditoCobroBox');
+        if (boxFijoCred) boxFijoCred.style.display = 'none';
+        if (boxSelCred) boxSelCred.style.display = 'block';
+        const tieneClientesCred = Boolean(this.data.clientesCredito && this.data.clientesCredito.length > 0);
+        this.cambiarSubTabCreditoCobro(tieneClientesCred ? 'existente' : 'nuevo');
+        this.renderListaClientesCreditoCobro(document.getElementById('buscarClienteCreditoCobroInput')?.value || '');
+      }
+
+      cambiarSubTabCreditoCobro(tab) {
+        this.subTabCreditoCobro = tab || 'existente';
+        const btnEx = document.getElementById('tabBtnCobroCredExistente');
+        const btnNv = document.getElementById('tabBtnCobroCredNuevo');
+        const secEx = document.getElementById('secCobroCredExistente');
+        const secNv = document.getElementById('secCobroCredNuevo');
+
+        if (this.subTabCreditoCobro === 'existente') {
+          if (btnEx) btnEx.classList.add('active');
+          if (btnNv) btnNv.classList.remove('active');
+          if (secEx) secEx.style.display = 'block';
+          if (secNv) secNv.style.display = 'none';
+          this.renderListaClientesCreditoCobro(document.getElementById('buscarClienteCreditoCobroInput')?.value || '');
+        } else {
+          if (btnEx) btnEx.classList.remove('active');
+          if (btnNv) btnNv.classList.add('active');
+          if (secEx) secEx.style.display = 'none';
+          if (secNv) secNv.style.display = 'block';
+        }
+      }
+
+      seleccionarClienteCreditoEnCobro(clienteId) {
+        this.clienteCreditoCobroSeleccionado = (this.data.clientesCredito || []).find(c => String(c.id) === String(clienteId)) || null;
+        this.renderListaClientesCreditoCobro(document.getElementById('buscarClienteCreditoCobroInput')?.value || '');
+      }
+
+      renderListaClientesCreditoCobro(query = '') {
+        const contenedor = document.getElementById('listaClientesCreditoCobro');
+        const banner = document.getElementById('creditoCobroSeleccionadoBanner');
+        if (banner) {
+          if (this.clienteCreditoCobroSeleccionado) {
+            banner.style.background = '#ecfdf5';
+            banner.style.borderColor = '#86efac';
+            banner.style.color = '#166534';
+            banner.innerHTML = `✅ Cliente seleccionado: <strong>${this.esc(this.clienteCreditoCobroSeleccionado.nombre)}</strong> (${this.esc(this.clienteCreditoCobroSeleccionado.cedula || 'S/C')} &bull; Tel: ${this.esc(this.clienteCreditoCobroSeleccionado.telefono || 'S/T')})`;
+          } else {
+            banner.style.background = '#fef2f2';
+            banner.style.borderColor = '#fecaca';
+            banner.style.color = '#991b1b';
+            banner.innerHTML = '⚠️ Ningún cliente seleccionado. Toque un cliente de la lista o cree uno nuevo.';
+          }
+        }
+        if (!contenedor) return;
+
+        const q = (query || '').toLowerCase().trim();
+        const clientes = (this.data.clientesCredito || []).filter(c => {
+          if (!q) return true;
+          return (c.nombre && c.nombre.toLowerCase().includes(q)) ||
+                 (c.cedula && c.cedula.toLowerCase().includes(q)) ||
+                 (c.telefono && c.telefono.toLowerCase().includes(q));
+        });
+
+        if (clientes.length === 0) {
+          contenedor.innerHTML = `
+            <div style="text-align: center; padding: 1rem 0.5rem; color: #64748b; font-size: 0.82rem;">
+              <div>${q ? `No hay clientes con "${this.esc(query)}"` : 'No hay clientes de crédito registrados aún.'}</div>
+              <button type="button" class="btn btn-secondary" style="margin-top: 0.45rem; font-size: 0.76rem; padding: 0.3rem 0.65rem;" onclick="app.cambiarSubTabCreditoCobro('nuevo')">
+                ➕ Registrar Cliente Nuevo
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        contenedor.innerHTML = clientes.map(c => {
+          const isSelected = this.clienteCreditoCobroSeleccionado && String(this.clienteCreditoCobroSeleccionado.id) === String(c.id);
+          const saldo = Number(c.saldoPendienteCRC) || 0;
+          return `
+            <div class="credito-client-item ${isSelected ? 'selected' : ''}" style="padding: 0.5rem 0.65rem; margin-bottom: 0.35rem;" onclick="app.seleccionarClienteCreditoEnCobro('${this.escAttr(c.id)}')">
+              <div>
+                <div style="font-weight: 800; color: #0f172a; font-size: 0.86rem;">
+                  ${isSelected ? '✅ ' : ''}${this.esc(c.nombre)}
+                </div>
+                <div style="font-size: 0.74rem; color: #64748b;">
+                  Céd: <strong>${this.esc(c.cedula || 'N/A')}</strong> &bull; Tel: ${this.esc(c.telefono || 'N/A')}
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 0.68rem; color: #64748b;">Saldo:</div>
+                <div style="font-weight: 800; font-size: 0.82rem; color: ${saldo > 0 ? '#ea580c' : '#15803d'};">${this.formatCRC(saldo)}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
       }
 
       setReceptorCobro(receptor) {
@@ -8364,7 +8592,22 @@
         const noticeTexto = document.getElementById('noticePagoDigitalTexto');
         const inputRecibido = document.getElementById('cobroMontoRecibido');
 
-        if (this.metodoCobroSeleccionado === 'Tarjeta' || this.metodoCobroSeleccionado === 'SINPE') {
+        const groupMonedaCobro = document.getElementById('groupMonedaCobro');
+        const groupMontoRecibido = document.getElementById('groupMontoRecibido');
+
+        if (this.metodoCobroSeleccionado === 'Crédito') {
+          if (groupMonedaCobro) groupMonedaCobro.style.display = 'none';
+          if (groupMontoRecibido) groupMontoRecibido.style.display = 'none';
+          if (sectionVuelto) sectionVuelto.style.display = 'none';
+          if (noticeDigital) noticeDigital.style.display = 'none';
+          if (inputRecibido) {
+            inputRecibido.readOnly = false;
+            inputRecibido.value = '';
+          }
+          this.renderListaClientesCreditoCobro(document.getElementById('buscarClienteCreditoCobroInput')?.value || '');
+        } else if (this.metodoCobroSeleccionado === 'Tarjeta' || this.metodoCobroSeleccionado === 'SINPE') {
+          if (groupMonedaCobro) groupMonedaCobro.style.display = 'block';
+          if (groupMontoRecibido) groupMontoRecibido.style.display = 'block';
           // Pago exacto con tarjeta o SINPE
           const montoExacto = moneda === 'USD' ? montoACobrarUSD.toFixed(2) : montoACobrarCRC;
           if (inputRecibido) {
@@ -8384,6 +8627,8 @@
           document.getElementById('vueltoUSDVal').innerText = '$0.00';
         } else {
           // Efectivo (Por defecto)
+          if (groupMonedaCobro) groupMonedaCobro.style.display = 'block';
+          if (groupMontoRecibido) groupMontoRecibido.style.display = 'block';
           if (inputRecibido) {
             inputRecibido.readOnly = false;
             inputRecibido.value = '';
@@ -8432,7 +8677,170 @@
         document.getElementById('changeBoxUSD').classList.toggle('selected', moneda === 'USD');
       }
 
-            // --- FLUJO DIRECTO DE VENTA A CRÉDITO Y CREACIÓN DE C x C ---
+            // --- HELPERS COMPARTIDOS PARA VENTAS A CRÉDITO (EVITA TOMAR CLIENTE POR DEFECTO) ---
+      _obtenerOValidarClienteCreditoCobro(mesa) {
+        const boxFijoVisible = document.getElementById('infoClienteCreditoFijo')?.style.display !== 'none';
+        if (mesa && mesa.esCredito && mesa.clienteCredito && boxFijoVisible) {
+          return mesa.clienteCredito;
+        }
+
+        if (this.subTabCreditoCobro === 'nuevo') {
+          const nombre = (document.getElementById('nuevoCreditoCobroNombre')?.value || '').trim();
+          const cedula = (document.getElementById('nuevoCreditoCobroCedula')?.value || '').trim();
+          const telefono = (document.getElementById('nuevoCreditoCobroTelefono')?.value || '').trim();
+          const notas = (document.getElementById('nuevoCreditoCobroNotas')?.value || '').trim();
+
+          if (!nombre) {
+            alert('Por favor ingrese el Nombre Completo del cliente de crédito.');
+            document.getElementById('nuevoCreditoCobroNombre')?.focus();
+            return null;
+          }
+          if (!cedula) {
+            alert('Por favor ingrese la Cédula o Identificación del cliente de crédito.');
+            document.getElementById('nuevoCreditoCobroCedula')?.focus();
+            return null;
+          }
+          if (!telefono) {
+            alert('Por favor ingrese el Teléfono o WhatsApp del cliente de crédito.');
+            document.getElementById('nuevoCreditoCobroTelefono')?.focus();
+            return null;
+          }
+
+          let cliente = (this.data.clientesCredito || []).find(c => c.cedula && c.cedula.toLowerCase() === cedula.toLowerCase());
+          const creador = (this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Caja');
+          if (!cliente) {
+            cliente = {
+              id: 'CLI-' + Date.now(),
+              nombre: nombre,
+              cedula: cedula,
+              telefono: telefono,
+              notas: notas,
+              fechaRegistro: new Date().toLocaleDateString('es-CR'),
+              saldoPendienteCRC: 0,
+              totalFacturadoCRC: 0,
+              creadoPor: creador
+            };
+            this.data.clientesCredito = this.data.clientesCredito || [];
+            this.data.clientesCredito.push(cliente);
+          } else {
+            cliente.nombre = nombre;
+            cliente.telefono = telefono;
+            if (notas) cliente.notas = notas;
+          }
+          this.enviarDatosASheets('sync_cliente_credito', cliente);
+          this.clienteCreditoCobroSeleccionado = cliente;
+          return cliente;
+        }
+
+        const elegido = this.clienteCreditoCobroSeleccionado || (mesa && mesa.esCredito ? mesa.clienteCredito : null);
+        if (!elegido) {
+          alert('⚠️ Por favor seleccione el cliente al que se le cargará esta venta a crédito (o regístrelo en "➕ Cliente Nuevo").');
+          document.getElementById('buscarClienteCreditoCobroInput')?.focus();
+          return null;
+        }
+        return elegido;
+      }
+
+      _registrarFacturaCreditoParaMesa(mesa, cliente, montoCRC, opciones = {}) {
+        const totalUSD = montoCRC / (this.data.tipoCambio || 510);
+        const facturaId = 'FAC-CRED-' + Date.now().toString().slice(-6);
+        const prodsArray = opciones.itemsDetalle && opciones.itemsDetalle.length > 0
+          ? opciones.itemsDetalle
+          : (mesa.ordenes || []).flatMap(o => o.items || []);
+        const prodsResumen = prodsArray.map(i => `${i.cant || 1}x ${i.nombre}${i.nota ? ` (${i.nota})` : ''}`).join(', ') || 'Consumo a crédito';
+
+        const hoyIso = new Date().toISOString().slice(0, 10);
+        const horaStr = new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+        const fechaHoraStr = new Date().toLocaleString('es-CR');
+        const cajero = (this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Caja');
+
+        const nuevaCuenta = {
+          id: facturaId,
+          idFactura: facturaId,
+          idCliente: cliente.id || '',
+          clienteNombre: cliente.nombre || '',
+          cedula: cliente.cedula || '',
+          telefono: cliente.telefono || '',
+          detalleProductos: prodsResumen,
+          items: prodsArray,
+          totalCRC: montoCRC,
+          totalUSD: totalUSD,
+          tipoCambio: this.data.tipoCambio || 510,
+          saldoPendienteCRC: montoCRC,
+          estado: 'Pendiente',
+          cajero: cajero,
+          fechaHora: fechaHoraStr,
+          fecha: hoyIso,
+          hora: horaStr,
+          fechaPago: '',
+          metodoLiquidacion: '',
+          referenciaPago: ''
+        };
+
+        this.data.cuentasPorCobrar = this.data.cuentasPorCobrar || [];
+        this.data.cuentasPorCobrar.unshift(nuevaCuenta);
+
+        // Actualizar saldo adeudado del cliente en Clientes_Credito
+        const cli = (this.data.clientesCredito || []).find(c =>
+          (cliente.id && String(c.id) === String(cliente.id)) ||
+          (cliente.cedula && c.cedula && String(c.cedula).toLowerCase() === String(cliente.cedula).toLowerCase())
+        );
+        if (cli) {
+          cli.saldoPendienteCRC = (cli.saldoPendienteCRC || 0) + montoCRC;
+          cli.totalFacturadoCRC = (cli.totalFacturadoCRC || 0) + montoCRC;
+          this.enviarDatosASheets('sync_cliente_credito', cli);
+        }
+
+        const saldoAntes = this.calcularSaldoPendienteMesa(mesa);
+        const nuevoSaldoMesa = Math.max(0, saldoAntes - montoCRC);
+
+        if (nuevoSaldoMesa > 0) {
+          // Abono/división parcial acreditada a un cliente: mantener mesa abierta con saldo restante
+          mesa.pagosParciales = mesa.pagosParciales || [];
+          mesa.pagosParciales.push({
+            id: facturaId,
+            montoCRC: montoCRC,
+            metodoPago: 'Crédito',
+            clienteNombre: cliente.nombre,
+            hora: horaStr
+          });
+        } else if (mesa.esRapida || mesa.esCredito) {
+          // Retirar mesa rápida/crédito completada
+          if (!this.rapidasCerradasIds) this.rapidasCerradasIds = new Set();
+          this.rapidasCerradasIds.add(String(mesa.id));
+          try {
+            localStorage.setItem('jiqui_rapidas_cerradas', JSON.stringify(Array.from(this.rapidasCerradasIds)));
+          } catch(e) {}
+          this.data.mesas = this.data.mesas.filter(m => String(m.id) !== String(mesa.id));
+          this.enviarDatosASheets('cerrar_mesa_rapida', { mesaId: mesa.id });
+        } else {
+          // Mesa de salón convencional acreditada al 100%: marcar pagada para cierre ordenado en Caja
+          mesa.pagada = true;
+          mesa.origenCobro = 'caja';
+          mesa.cobradoPor = `${cajero} [Crédito: ${cliente.nombre}]`;
+          mesa.horaCobro = horaStr;
+        }
+
+        this.bloquearDescargasTemporales(5000);
+        this.programarDescargaSegura(5000);
+        this.enviarDatosASheets('sync_cuenta_credito', nuevaCuenta);
+        this.sincronizarEstadoMesasCloud(true);
+
+        this.clienteCreditoCobroSeleccionado = null;
+        this.closeModal('modalPedido');
+        if (nuevoSaldoMesa <= 0) {
+          this.closeModal('modalCobro');
+        } else {
+          this.actualizarMontosCobro();
+          if (this.modoCobro === 'productos') this.prepararItemsDividirProductos();
+        }
+        this.saveData();
+        this.renderAll();
+
+        alert(`💳 Venta a crédito registrada con éxito a nombre de ${cliente.nombre}.\n\n• Factura N°: ${facturaId}\n• Total a Crédito: ${this.formatCRC(montoCRC)}\n• Saldo registrado en Cuentas por Cobrar y respaldado en Google Sheets.`);
+      }
+
+      // --- FLUJO DIRECTO DE VENTA A CRÉDITO Y CREACIÓN DE C x C ---
       crearCxCYEntregarMesaCredito(mesaId) {
         let mesa = this.data.mesas.find(m => String(m.id) === String(mesaId));
         if (!mesa) {
@@ -8449,109 +8857,15 @@
           return;
         }
 
-        const totalUSD = totalCRC / (this.data.tipoCambio || 510);
-        const facturaId = 'FAC-CRED-' + Date.now().toString().slice(-6);
-        const cliente = mesa.clienteCredito || (this.data.clientesCredito && this.data.clientesCredito[0]) || {
-          id: 'CLI-' + Date.now(),
-          nombre: mesa.nombre.replace(/^Crédito\s*-\s*/i, '').trim() || 'Cliente Crédito',
-          cedula: '',
-          telefono: ''
-        };
-
-        const prodsArray = (mesa.ordenes || []).flatMap(o => o.items || []);
-        const prodsResumen = prodsArray.map(i => `${i.cant || 1}x ${i.nombre}${i.nota ? ` (${i.nota})` : ''}`).join(', ') || 'Consumo a crédito';
-        const hoyIso = new Date().toISOString().slice(0, 10);
-        const horaStr = new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
-        const fechaHoraStr = new Date().toLocaleString('es-CR');
-        const cajero = (this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Caja');
-
-        // 1. Registrar factura en Cuentas por Cobrar
-        const nuevaCuenta = {
-          id: facturaId,
-          idFactura: facturaId,
-          idCliente: cliente.id || '',
-          clienteNombre: cliente.nombre || '',
-          cedula: cliente.cedula || '',
-          telefono: cliente.telefono || '',
-          detalleProductos: prodsResumen,
-          items: prodsArray,
-          totalCRC: totalCRC,
-          totalUSD: totalUSD,
-          tipoCambio: this.data.tipoCambio || 510,
-          saldoPendienteCRC: totalCRC,
-          estado: 'Pendiente',
-          cajero: cajero,
-          fechaHora: fechaHoraStr,
-          fecha: hoyIso,
-          hora: horaStr,
-          fechaPago: '',
-          metodoLiquidacion: '',
-          referenciaPago: ''
-        };
-
-        this.data.cuentasPorCobrar = this.data.cuentasPorCobrar || [];
-        this.data.cuentasPorCobrar.unshift(nuevaCuenta);
-
-        // 2. Actualizar saldo adeudado del cliente en clientesCredito
-        let cli = (this.data.clientesCredito || []).find(c => 
-          (cliente.id && String(c.id) === String(cliente.id)) || 
-          (cliente.cedula && c.cedula && String(c.cedula).toLowerCase() === String(cliente.cedula).toLowerCase())
-        );
-        if (cli) {
-          cli.saldoPendienteCRC = (cli.saldoPendienteCRC || 0) + totalCRC;
-          cli.totalFacturadoCRC = (cli.totalFacturadoCRC || 0) + totalCRC;
-          this.enviarDatosASheets('sync_cliente_credito', cli);
+        const cliente = mesa.clienteCredito;
+        if (!cliente) {
+          // Si no tenía cliente fijado, abrir modal de cobro en método Crédito para que el usuario elija el cliente
+          this.abrirModalCobro(mesaId);
+          this.seleccionarMetodoCobro('Crédito');
+          return;
         }
 
-        // 3. Registrar venta a crédito en ventasHistorial para arqueo y reportes
-        const ventaCreditoRecord = {
-          id: facturaId,
-          pedidoId: mesa.pedidoId || facturaId,
-          mesaId: mesa.id,
-          mesaNombre: mesa.nombre,
-          clienteNombre: cliente.nombre,
-          esCredito: true,
-          origenCobro: 'caja',
-          rolCobrador: 'caja',
-          cajero: cajero,
-          metodoPago: 'Crédito',
-          monedaPago: 'CRC',
-          totalCRC: totalCRC,
-          totalUSD: totalUSD,
-          tipoCambio: this.data.tipoCambio || 510,
-          fecha: hoyIso,
-          hora: horaStr,
-          fechaHora: fechaHoraStr,
-          ordenes: JSON.parse(JSON.stringify(mesa.ordenes || []))
-        };
-
-        this.data.ventasHistorial = this.data.ventasHistorial || [];
-        this.data.ventasHistorial.unshift(ventaCreditoRecord);
-
-        // 4. Retirar comanda de mesas activas
-        if (!this.rapidasCerradasIds) this.rapidasCerradasIds = new Set();
-        this.rapidasCerradasIds.add(String(mesa.id));
-        try {
-          localStorage.setItem('jiqui_rapidas_cerradas', JSON.stringify(Array.from(this.rapidasCerradasIds)));
-        } catch(e) {}
-
-        this.data.mesas = this.data.mesas.filter(m => String(m.id) !== String(mesa.id));
-
-        // 5. Sincronización en la nube con Google Sheets
-        this.bloquearDescargasTemporales(4000);
-        this.programarDescargaSegura(4000);
-        this.enviarDatosASheets('sync_cuenta_credito', nuevaCuenta);
-        this.enviarDatosASheets('sync_sale', ventaCreditoRecord);
-        this.enviarDatosASheets('cerrar_mesa_rapida', { mesaId: mesa.id });
-        this.sincronizarEstadoMesasCloud();
-
-        // 6. Cerrar modales y refrescar pantalla
-        this.closeModal('modalPedido');
-        this.closeModal('modalCobro');
-        this.saveData();
-        this.renderAll();
-
-        alert(`📋 Cuenta por Cobrar Registrada Exitosamente\n\n• Factura N°: ${facturaId}\n• Cliente: ${cliente.nombre}\n• Total Crédito Emitido: ${this.formatCRC(totalCRC)}\n\nLa comanda rápida fue cerrada y la factura está disponible en la pestaña "Cuentas por Cobrar".`);
+        this._registrarFacturaCreditoParaMesa(mesa, cliente, totalCRC);
       }
 
       confirmarPago() {
@@ -8580,66 +8894,24 @@
         let montoRecibido = parseFloat(document.getElementById('cobroMontoRecibido').value) || 0;
 
         if (mesa.esCredito || metodoPago === 'Crédito') {
-          const facturaId = 'FAC-CRED-' + Date.now().toString().slice(-6);
-          const cliente = mesa.clienteCredito || (this.data.clientesCredito && this.data.clientesCredito[0]) || {
-            id: 'CLI-' + Date.now(),
-            nombre: mesa.nombre.replace(/^Crédito\s*-\s*/i, '').trim() || 'Cliente Crédito',
-            cedula: '',
-            telefono: ''
-          };
-          const prodsArray = (mesa.ordenes || []).flatMap(o => o.items || []);
-          const prodsResumen = prodsArray.map(i => `${i.cant || 1}x ${i.nombre}${i.nota ? ` (${i.nota})` : ''}`).join(', ') || 'Consumo a crédito';
+          const cliente = this._obtenerOValidarClienteCreditoCobro(mesa);
+          if (!cliente) return;
 
-          const nuevaCuenta = {
-            id: facturaId,
-            idFactura: facturaId,
-            idCliente: cliente.id || '',
-            clienteNombre: cliente.nombre || '',
-            cedula: cliente.cedula || '',
-            telefono: cliente.telefono || '',
-            detalleProductos: prodsResumen,
-            items: prodsArray,
-            totalCRC: montoACobrarCRC,
-            totalUSD: montoACobrarUSD,
-            tipoCambio: this.data.tipoCambio || 510,
-            saldoPendienteCRC: montoACobrarCRC,
-            estado: 'Pendiente',
-            cajero: (this.data.usuarioActivo ? this.data.usuarioActivo.nombre : 'Caja'),
-            fechaHora: new Date().toLocaleString('es-CR'),
-            fecha: new Date().toISOString().slice(0, 10),
-            hora: new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' }),
-            fechaPago: '',
-            metodoLiquidacion: '',
-            referenciaPago: ''
-          };
-
-          this.data.cuentasPorCobrar = this.data.cuentasPorCobrar || [];
-          this.data.cuentasPorCobrar.unshift(nuevaCuenta);
-
-          // Actualizar saldo adeudado del cliente en Clientes_Credito
-          let cli = (this.data.clientesCredito || []).find(c => 
-            (cliente.id && String(c.id) === String(cliente.id)) || 
-            (cliente.cedula && c.cedula && String(c.cedula).toLowerCase() === String(cliente.cedula).toLowerCase())
-          );
-          if (cli) {
-            cli.saldoPendienteCRC = (cli.saldoPendienteCRC || 0) + montoACobrarCRC;
-            cli.totalFacturadoCRC = (cli.totalFacturadoCRC || 0) + montoACobrarCRC;
-            this.enviarDatosASheets('sync_cliente_credito', cli);
+          let itemsDetalle = [];
+          if (this.modoCobro === 'productos') {
+            for (const key in this.itemsSeleccionadosCobro) {
+              const qty = this.itemsSeleccionadosCobro[key];
+              if (qty > 0 && this.itemsDividirMap && this.itemsDividirMap[key]) {
+                const mapped = this.itemsDividirMap[key];
+                const ord = (mesa.ordenes || []).find(o => String(o.id) === String(mapped.orderId));
+                if (ord && ord.items && ord.items[mapped.itemIdx]) {
+                  ord.items[mapped.itemIdx].cantPagada = (ord.items[mapped.itemIdx].cantPagada || 0) + qty;
+                }
+                itemsDetalle.push({ nombre: mapped.nombre, precio: mapped.precio, cant: qty, nota: mapped.nota || '' });
+              }
+            }
           }
-
-          // Sincronizar cuenta por cobrar con Sheets
-          this.enviarDatosASheets('sync_cuenta_credito', nuevaCuenta);
-
-          // Retirar mesa de crédito de mesas activas
-          this.data.mesas = this.data.mesas.filter(m => String(m.id) !== String(mesa.id));
-          this.saveData();
-          this.closeModal('modalCobro');
-          this.renderAll();
-
-          // Sincronizar mesas activas
-          this.sincronizarEstadoMesasCloud();
-
-          alert(`💳 Venta a crédito registrada con éxito a nombre de ${cliente.nombre}.\n\n• Factura N°: ${facturaId}\n• Total a Crédito: ${this.formatCRC(montoACobrarCRC)}\n• Saldo registrado en Cuentas por Cobrar y respaldado en Google Sheets.`);
+          this._registrarFacturaCreditoParaMesa(mesa, cliente, montoACobrarCRC, { itemsDetalle });
           return;
         }
 
@@ -8968,10 +9240,14 @@
           horaListo: null
         };
 
+        if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
+        this._mesasCreadasRecientes.set(String(rapidaId), Date.now());
+        this.bloquearDescargasTemporales(8000);
         this.data.mesas.push(nuevaRapida);
+        this._mesaActivaPedidoSnapshot = nuevaRapida;
         this.saveData();
         this.renderAll();
-        this.sincronizarEstadoMesasCloud();
+        this.sincronizarEstadoMesasCloud(true);
 
         // Abre directamente el modal para tomar los productos y facturar/comandar
         this.abrirModalPedido(nuevaRapida.id);
@@ -9566,6 +9842,7 @@ const url = this.data.googleSheetsUrl;
           esRapida: Boolean(m.esRapida),
           esCredito: Boolean(m.esCredito),
           clienteCredito: m.clienteCredito || null,
+          fechaApertura: m.fechaApertura || null,
           listoParaRecoger: Boolean(m.listoParaRecoger),
           horaListo: m.horaListo || null,
           pedidoId: m.pedidoId || null,
@@ -9844,6 +10121,7 @@ generarSemicierreModal() {
 
         let totalCRC = 0, efecCRC = 0, efecUSD = 0, tarj = 0, sinpe = 0;
         ventas.forEach(v => {
+          if (v.esCredito || v.metodoPago === 'Crédito') return;
           totalCRC += (v.totalCRC || 0);
           const esUSD = (v.monedaPago === 'USD');
           if (v.metodoPago === 'Tarjeta') {
@@ -9896,6 +10174,9 @@ generarSemicierreModal() {
         } else {
           [...ventas].reverse().forEach(v => {
             let badgeMetodo = '';
+            if (v.esCredito || v.metodoPago === 'Crédito') {
+              badgeMetodo = `<span style="background: #eef2ff; color: #3730a3; padding: 0.2rem 0.5rem; border-radius: 5px; font-weight: 700; border: 1px solid #c7d2fe; white-space: nowrap;">🧾 Crédito (${this.esc(v.clienteNombre || 'C x C')})</span>`;
+            } else
             if (v.metodoPago === 'Tarjeta') {
               const ref = v.transaccionTarjeta || (v.referenciaPago || '').replace('Trans: ', '') || 'S/N';
               badgeMetodo = `<span style="background: #f0f9ff; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 5px; font-weight: 700; border: 1px solid #bae6fd; white-space: nowrap;">💳 Tarjeta (${ref})</span>`;
@@ -9963,6 +10244,7 @@ generarSemicierreModal() {
         const meserosMap = {};
 
         (this.data.ventasHistorial || []).forEach(v => {
+          if (v.esCredito || v.metodoPago === 'Crédito') return;
           totalGeneralCRC += (v.totalCRC || 0);
           const met = v.metodoPago || 'Efectivo';
           const esUSD = (v.monedaPago === 'USD');
@@ -10747,10 +11029,15 @@ generarSemicierreModal() {
           fechaApertura: new Date().toISOString()
         };
 
+        if (!this._mesasCreadasRecientes) this._mesasCreadasRecientes = new Map();
+        this._mesasCreadasRecientes.set(String(mesaId), Date.now());
+        this.bloquearDescargasTemporales(8000);
         this.data.mesas.push(nuevaMesa);
+        this._mesaActivaPedidoSnapshot = nuevaMesa;
         this.saveData();
         this.closeModal('modalVentaCredito');
         this.renderAll();
+        this.sincronizarEstadoMesasCloud(true);
 
         // Abrir inmediatamente la comanda / pedido para este cliente
         this.abrirModalPedido(mesaId);
