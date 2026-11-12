@@ -3560,7 +3560,7 @@
         <!-- PIE DE TARJETA: DESCARGAR REPORTES & VER DETALLE -->
         <div class="informe-balance-footer">
           <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <button type="button" class="informe-link-action informe-link-download" onclick="app.descargarReporteCSV()">
+            <button type="button" id="btnDescargarReportesPDF" class="informe-link-action informe-link-download" onclick="app.descargarReportePDF()">
               <span>Descargar Reportes</span>
             </button>
             <button type="button" class="btn btn-secondary" style="font-size: 0.76rem; padding: 0.25rem 0.6rem; font-weight: 700;" onclick="app.imprimirReporteVentas()">
@@ -3571,6 +3571,7 @@
             Ver detalle ▾
           </button>
         </div>
+        <div id="informeExportStatus" style="display: none; margin-top: 0.5rem; font-size: 0.8rem; font-weight: 700;"></div>
       </div>
 
       <!-- SECCIÓN DE DETALLE COMPLETO (DESPLEGABLE AL PULSAR "VER DETALLE") -->
@@ -4738,7 +4739,7 @@
   </div>
 
   <script>
-    const FRESH_PARADISE_LOGO_DATA_URI = 'data:image/jpeg;base64,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';
+    const FRESH_PARADISE_LOGO_DATA_URI = 'data:image/jpeg;base64,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';
 
     // --- ESTADO INICIAL 100% LIMPIO (SIN DATOS DE PRUEBA) ---
     const CLEAN_EMPTY_DATA = {
@@ -4998,6 +4999,7 @@
 
         this.initSync();
         this.initLogoUploader();
+        this._obtenerLogoEmbebidoDecodificado();
 
         // Renderizado inicial garantizado (Offline-first inmediato)
         this.verificarSesion();
@@ -10037,6 +10039,9 @@
         const host = document.getElementById('comprobantePreviewHost');
         if (!host || !datos) return;
         const cfg = this.getComprobanteHeaderConfig();
+        const logoPreviewSrc = (window.location.protocol === 'file:' && (cfg.logoUrl === 'logo_fresh_paradise.jpg' || cfg.logoUrl === './logo_fresh_paradise.jpg'))
+          ? FRESH_PARADISE_LOGO_DATA_URI
+          : cfg.logoUrl;
         const itemsHtml = (datos.items || []).map(it => `
           <tr>
             <td style="text-align: left; font-weight: 500;">${this.esc(it.nombre)}</td>
@@ -10050,7 +10055,7 @@
           <div class="comprobante-preview-card" id="comprobantePreviewCard">
             <div class="comprobante-header">
               <div class="comprobante-logo-wrap">
-                <img src="${this.escAttr(cfg.logoUrl)}" alt="${this.escAttr(cfg.negocio)}" onerror="this.onerror=null;this.src='logo_fresh_paradise.jpg';">
+                <img src="${this.escAttr(logoPreviewSrc)}" alt="${this.escAttr(cfg.negocio)}" onerror="this.onerror=null;this.src=FRESH_PARADISE_LOGO_DATA_URI;">
               </div>
               <div style="min-width: 0;">
                 <div style="font-size: 1.18rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 0.28rem;">${this.esc(cfg.negocio)}</div>
@@ -10131,20 +10136,35 @@
         }
       }
 
+      _obtenerLogoEmbebidoDecodificado() {
+        if (this._embeddedLogoPromise) return this._embeddedLogoPromise;
+        this._embeddedLogoPromise = new Promise((resolve) => {
+          const imgFb = new Image();
+          imgFb.onload = async () => {
+            try { if (typeof imgFb.decode === 'function') await imgFb.decode(); } catch (_) {}
+            resolve(this._imagenEsAptaParaCanvas(imgFb) ? imgFb : null);
+          };
+          imgFb.onerror = () => {
+            this._embeddedLogoPromise = null;
+            resolve(null);
+          };
+          imgFb.src = FRESH_PARADISE_LOGO_DATA_URI;
+        });
+        return this._embeddedLogoPromise;
+      }
+
       _cargarImagenComprobante(src) {
         return new Promise((resolve) => {
           const rawSrc = (src || '').trim();
+          const normSrc = rawSrc.replace(/^\.\//, '');
           const usarEmbebidaPorDefecto =
-            !rawSrc ||
-            rawSrc === 'logo_fresh_paradise.jpg' ||
-            rawSrc === 'logo_jiqui.jpg' ||
+            !normSrc ||
+            normSrc === 'logo_fresh_paradise.jpg' ||
+            normSrc === 'logo_jiqui.jpg' ||
             (!rawSrc.startsWith('data:') && window.location.protocol === 'file:');
 
           const loadDataUriFallback = () => {
-            const imgFb = new Image();
-            imgFb.onload = () => resolve(this._imagenEsAptaParaCanvas(imgFb) ? imgFb : null);
-            imgFb.onerror = () => resolve(null);
-            imgFb.src = FRESH_PARADISE_LOGO_DATA_URI;
+            this._obtenerLogoEmbebidoDecodificado().then(resolve);
           };
 
           if (usarEmbebidaPorDefecto) {
@@ -10153,7 +10173,11 @@
           }
 
           const img = new Image();
-          img.onload = () => {
+          if (/^https?:\/\//i.test(rawSrc)) {
+            img.crossOrigin = 'anonymous';
+          }
+          img.onload = async () => {
+            try { if (typeof img.decode === 'function') await img.decode(); } catch (_) {}
             if (this._imagenEsAptaParaCanvas(img)) {
               resolve(img);
             } else {
@@ -10374,22 +10398,13 @@
         return canvas;
       }
 
-      _crearPdfDesdeCanvas(canvas) {
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-        const base64 = dataUrl.split(',')[1] || '';
-        const binStr = atob(base64);
-        const jpegBytes = new Uint8Array(binStr.length);
-        for (let i = 0; i < binStr.length; i++) {
-          jpegBytes[i] = binStr.charCodeAt(i);
-        }
+      _crearPdfDesdeCanvases(canvases, opciones = {}) {
+        const lista = Array.isArray(canvases) ? canvases.filter(Boolean) : [canvases].filter(Boolean);
+        if (lista.length === 0) throw new Error('No hay lienzos para generar el PDF.');
 
-        const pageW = 595;
-        const margin = 45;
-        const drawW = pageW - margin * 2;
-        const drawH = Number((drawW * (canvas.height / canvas.width)).toFixed(2));
-        const pageH = Math.max(420, Math.ceil(drawH + margin * 2));
-        const marginY = Number(((pageH - drawH) / 2).toFixed(2));
-
+        const esLandscape = (opciones.orientation === 'landscape');
+        const pageW = esLandscape ? 842 : 595;
+        const margin = esLandscape ? 28 : 45;
         const enc = new TextEncoder();
         const parts = [];
         const offsets = [0];
@@ -10401,36 +10416,82 @@
         };
         const pushStr = (str) => pushBytes(enc.encode(str));
 
+        const decodeJpegBytes = (canvas) => {
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.94);
+          const base64 = dataUrl.split(',')[1] || '';
+          const binStr = atob(base64);
+          const bytes = new Uint8Array(binStr.length);
+          for (let i = 0; i < binStr.length; i++) {
+            bytes[i] = binStr.charCodeAt(i);
+          }
+          return bytes;
+        };
+
         pushStr('%PDF-1.4\n');
         pushBytes(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));
+
+        // Obj 1: Catalog, Obj 2: Pages
+        // Por cada página k (0..N-1): PageObj = 3 + k*3, ImgObj = 4 + k*3, ContentObj = 5 + k*3
+        const pageObjIds = lista.map((_, idx) => 3 + idx * 3);
 
         offsets[1] = currentOffset;
         pushStr('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
 
         offsets[2] = currentOffset;
-        pushStr('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
+        pushStr(`2 0 obj\n<< /Type /Pages /Kids [${pageObjIds.map(id => `${id} 0 R`).join(' ')}] /Count ${lista.length} >>\nendobj\n`);
 
-        offsets[3] = currentOffset;
-        pushStr(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>\nendobj\n`);
+        lista.forEach((canvas, idx) => {
+          const pageObjId = 3 + idx * 3;
+          const imgObjId = 4 + idx * 3;
+          const contentObjId = 5 + idx * 3;
 
-        offsets[4] = currentOffset;
-        pushStr(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`);
-        pushBytes(jpegBytes);
-        pushStr('\nendstream\nendobj\n');
+          const jpegBytes = decodeJpegBytes(canvas);
+          const maxDrawW = pageW - margin * 2;
+          let drawW = maxDrawW;
+          let drawH = Number((drawW * (canvas.height / canvas.width)).toFixed(2));
+          let pageH;
 
-        const contentStream = `q\n${drawW} 0 0 ${drawH} ${margin} ${marginY} cm\n/Im0 Do\nQ\n`;
-        offsets[5] = currentOffset;
-        pushStr(`5 0 obj\n<< /Length ${contentStream.length} >>\nstream\n${contentStream}endstream\nendobj\n`);
+          if (esLandscape) {
+            pageH = 595;
+            const maxDrawH = pageH - margin * 2;
+            if (drawH > maxDrawH) {
+              drawH = maxDrawH;
+              drawW = Number((drawH * (canvas.width / canvas.height)).toFixed(2));
+            }
+          } else {
+            pageH = Math.max(420, Math.ceil(drawH + margin * 2));
+          }
 
+          const marginX = Number(((pageW - drawW) / 2).toFixed(2));
+          const marginY = Number(((pageH - drawH) / 2).toFixed(2));
+
+          offsets[pageObjId] = currentOffset;
+          pushStr(`${pageObjId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im${idx} ${imgObjId} 0 R >> >> /Contents ${contentObjId} 0 R >>\nendobj\n`);
+
+          offsets[imgObjId] = currentOffset;
+          pushStr(`${imgObjId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`);
+          pushBytes(jpegBytes);
+          pushStr('\nendstream\nendobj\n');
+
+          const contentStream = `q\n${drawW} 0 0 ${drawH} ${marginX} ${marginY} cm\n/Im${idx} Do\nQ\n`;
+          offsets[contentObjId] = currentOffset;
+          pushStr(`${contentObjId} 0 obj\n<< /Length ${contentStream.length} >>\nstream\n${contentStream}endstream\nendobj\n`);
+        });
+
+        const totalObjs = 2 + lista.length * 3;
         const xrefOffset = currentOffset;
-        let xref = 'xref\n0 6\n0000000000 65535 f \n';
-        for (let i = 1; i <= 5; i++) {
+        let xref = `xref\n0 ${totalObjs + 1}\n0000000000 65535 f \n`;
+        for (let i = 1; i <= totalObjs; i++) {
           xref += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
         }
-        xref += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+        xref += `trailer\n<< /Size ${totalObjs + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
         pushStr(xref);
 
         return new Blob(parts, { type: 'application/pdf' });
+      }
+
+      _crearPdfDesdeCanvas(canvas) {
+        return this._crearPdfDesdeCanvases([canvas], { orientation: 'portrait' });
       }
 
       _canvasToPngBlob(canvas) {
@@ -10648,7 +10709,10 @@
         const datos = this._comprobanteActual;
         if (!previewEl || !datos) return;
 
-        const logoAbs = new URL(this.getComprobanteHeaderConfig().logoUrl, window.location.href).href;
+        const cfg = this.getComprobanteHeaderConfig();
+        const logoAbs = (window.location.protocol === 'file:' || !cfg.logoUrl || cfg.logoUrl === 'logo_fresh_paradise.jpg' || cfg.logoUrl === './logo_fresh_paradise.jpg')
+          ? FRESH_PARADISE_LOGO_DATA_URI
+          : new URL(cfg.logoUrl, window.location.href).href;
         const htmlBody = previewEl.outerHTML.replace(/src="[^"]*"/, `src="${this.escAttr(logoAbs)}"`);
         const win = window.open('', '_blank', 'width=680,height=780');
         if (win) {
@@ -14304,7 +14368,7 @@ ${lineasFacturas}
         const tc = this.data.tipoCambio || 510;
 
         document.getElementById('informeIngresosCRC').innerText = this.formatCRC(totalIngresosCRC);
-        document.getElementById('informeIngresosSub').innerText = `${ventasPeriodo.length} venta(s) &bull; ${this.formatUSD(totalIngresosCRC / tc)}`;
+        document.getElementById('informeIngresosSub').innerText = `${ventasPeriodo.length} venta(s) • ${this.formatUSD(totalIngresosCRC / tc)}`;
         document.getElementById('informeEgresosCRC').innerText = this.formatCRC(totalEgresosCRC);
         document.getElementById('informeEgresosSub').innerText = `${egresosPeriodo.length} egreso(s) registrado(s)`;
 
@@ -14438,61 +14502,556 @@ ${lineasFacturas}
         }
       }
 
-      descargarReporteCSV() {
-        const { desde, hasta, ventasPeriodo, egresosPeriodo } = this.obtenerDatosPeriodoInforme();
-        const escapeCsv = (val) => '"' + String(val === null || val === undefined ? '' : val).replace(/"/g, '""') + '"';
+      _formatearFechaSlashReporte(isoStr) {
+        if (!isoStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoStr)) {
+          const d = new Date();
+          return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+        const [y, m, d] = isoStr.split('-');
+        return `${d}/${m}/${y}`;
+      }
 
-        const filas = [
-          ['Fecha', 'Hora', 'Tipo', 'Mesa / Concepto', 'Responsable', 'Metodo de Pago', 'Detalle / Productos', 'Monto Colones (CRC)']
+      _formatearFechaGuionHoyReporte() {
+        const d = new Date();
+        return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+      }
+
+      _limpiarTextoPlano(txt) {
+        return String(txt || '')
+          .replace(/<[^>]*>/g, '')
+          .replace(/&bull;/g, '•')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      _extraerContactoVentaReporte(v, esAbono) {
+        if (v.clienteNombre) return this._limpiarTextoPlano(v.clienteNombre);
+        const mn = String(v.mesaNombre || '');
+        if (esAbono || mn.toLowerCase().includes('crédito') || mn.toLowerCase().includes('abono')) {
+          const parMatch = mn.match(/\(([^)]+)\)/);
+          if (parMatch && parMatch[1]) return this._limpiarTextoPlano(parMatch[1]);
+        }
+        return '-';
+      }
+
+      _compilarModeloReportePDF() {
+        const { desde, hasta, ventasPeriodo, egresosPeriodo } = this.obtenerDatosPeriodoInforme();
+        const fechaDesdeSlash = this._formatearFechaSlashReporte(desde);
+        const fechaHastaSlash = this._formatearFechaSlashReporte(hasta);
+
+        let ingresosRegularesCRC = 0;
+        let abonosVentasCRC = 0;
+        const transacciones = [];
+
+        const ordenadas = [...ventasPeriodo].sort((a, b) => {
+          const fa = (a.fechaISO || this.extraerFechaISOLocal(a)) + ' ' + (a.horaCobro || '');
+          const fb = (b.fechaISO || this.extraerFechaISOLocal(b)) + ' ' + (b.horaCobro || '');
+          return fa.localeCompare(fb);
+        });
+
+        ordenadas.forEach(v => {
+          const valorCRC = Number(v.totalCRC) || 0;
+          const idStr = String(v.id || '');
+          const pedStr = String(v.pedidoId || '');
+          const esAbono = Boolean(v.esCobroCredito || idStr.startsWith('ABONO-') || idStr.startsWith('REC-LIQ-') || pedStr.includes('FAC-CRED-'));
+
+          if (esAbono) abonosVentasCRC += valorCRC;
+          else ingresosRegularesCRC += valorCRC;
+
+          let desc = '';
+          if (Array.isArray(v.items) && v.items.length > 0) {
+            desc = v.items.map(it => `${it.cant || 1} ${this._limpiarTextoPlano(it.nombre)}`).join(', ');
+          } else if (v.productosResumen) {
+            desc = this._limpiarTextoPlano(v.productosResumen);
+          } else if (v.mesaNombre) {
+            desc = this._limpiarTextoPlano(v.mesaNombre);
+          } else {
+            desc = `Venta ${idStr}`;
+          }
+
+          transacciones.push({
+            fecha: this._formatearFechaSlashReporte(v.fechaISO || this.extraerFechaISOLocal(v)),
+            tipo: esAbono ? 'Abonos ventas' : 'Venta',
+            vendedor: this._limpiarTextoPlano(v.cobradoPor || v.meseroCobrador || v.mesero || ''),
+            descripcion: desc,
+            contacto: this._extraerContactoVentaReporte(v, esAbono),
+            estado: 'Pagada',
+            metodoPago: this._limpiarTextoPlano(v.metodoPago || 'Efectivo'),
+            valorCRC: valorCRC,
+            costoCRC: 0
+          });
+        });
+
+        const gastosCRC = egresosPeriodo.reduce((s, e) => s + (Number(e.montoCRC) || 0), 0);
+        const costoVentasCRC = 0;
+        const abonosGastosCRC = 0;
+        const utilidadTotalCRC = ingresosRegularesCRC + abonosVentasCRC - costoVentasCRC - abonosGastosCRC - gastosCRC;
+
+        const gastosRows = egresosPeriodo.map(e => ({
+          fecha: this._formatearFechaSlashReporte(e.fechaISO || this.extraerFechaISOLocal(e)),
+          concepto: this._limpiarTextoPlano(e.concepto || 'Gasto registrado'),
+          usuario: this._limpiarTextoPlano(e.usuario || 'Máster'),
+          metodo: this._limpiarTextoPlano(e.metodoPago || 'Efectivo'),
+          montoCRC: Number(e.montoCRC) || 0
+        }));
+
+        return {
+          desdeISO: desde,
+          hastaISO: hasta,
+          rangoFechaTexto: `${fechaDesdeSlash} - ${fechaHastaSlash}`,
+          generacionTexto: this._formatearFechaGuionHoyReporte(),
+          negocio: 'Fresh paradise',
+          responsableHeader: 'Erick mora',
+          telefonoHeader: '70966266',
+          ingresosRegularesCRC,
+          abonosVentasCRC,
+          costoVentasCRC,
+          abonosGastosCRC,
+          gastosCRC,
+          utilidadTotalCRC,
+          transacciones,
+          gastosRows
+        };
+      }
+
+      async _generarCanvasesReportePDF(modelo) {
+        const cfg = this.getComprobanteHeaderConfig();
+        const logoImg = await this._cargarImagenComprobante(cfg.logoUrl);
+
+        const width = 1200;
+        const height = 848;
+        const scale = 2;
+        const padX = 40;
+        const bottomLimitY = 804;
+        const canvases = [];
+
+        const crearPagina = (esPrimera) => {
+          const c = document.createElement('canvas');
+          c.width = width * scale;
+          c.height = height * scale;
+          const ctx = c.getContext('2d');
+          ctx.scale(scale, scale);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+
+          if (!esPrimera) {
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '700 15px "Plus Jakarta Sans", Arial, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${modelo.negocio}  •  Reporte ${modelo.rangoFechaTexto} (Continuación)`, padX, 38);
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padX, 50);
+            ctx.lineTo(width - padX, 50);
+            ctx.stroke();
+          }
+          canvases.push(c);
+          return ctx;
+        };
+
+        const dibujarEncabezadoTabla = (ctx, startY) => {
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(padX, startY);
+          ctx.lineTo(width - padX, startY);
+          ctx.stroke();
+
+          const textY = startY + 21;
+          ctx.fillStyle = '#0f172a';
+          ctx.font = '700 12.5px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText('Fecha', 46, textY);
+          ctx.fillText('Tipo', 136, textY);
+          ctx.fillText('Vendedor', 242, textY);
+          ctx.fillText('Descripción', 360, textY);
+          ctx.fillText('Contacto', 672, textY);
+          ctx.fillText('Estado', 792, textY);
+          ctx.fillText('M. de pago', 868, textY);
+          ctx.textAlign = 'right';
+          ctx.fillText('Valor', 1072, textY);
+          ctx.fillText('Costo', 1152, textY);
+
+          const botY = startY + 32;
+          ctx.beginPath();
+          ctx.moveTo(padX, botY);
+          ctx.lineTo(width - padX, botY);
+          ctx.stroke();
+          return botY;
+        };
+
+        // PÁGINA 1
+        let ctx = crearPagina(true);
+
+        // 1. Logo limpio sin duplicación
+        const logoX = padX;
+        const logoY = 24;
+        const logoSize = 84;
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(logoX, logoY, logoSize, logoSize, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.clip();
+        if (logoImg && logoImg.width > 0 && logoImg.height > 0) {
+          const ratio = Math.min((logoSize - 6) / logoImg.width, (logoSize - 6) / logoImg.height);
+          const dW = logoImg.width * ratio;
+          const dH = logoImg.height * ratio;
+          ctx.drawImage(logoImg, logoX + (logoSize - dW) / 2, logoY + (logoSize - dH) / 2, dW, dH);
+        }
+        ctx.restore();
+
+        // 2. Datos encabezado reporte
+        const infoX = logoX + logoSize + 18;
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 19px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(modelo.negocio, infoX, 44);
+
+        // Ícono persona + Erick mora
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(infoX + 7, 65, 3.5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(infoX + 7, 76, 6, Math.PI, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#475569';
+        ctx.font = '500 13.5px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillText(modelo.responsableHeader, infoX + 22, 73);
+
+        // Ícono teléfono + 70966266
+        const telY = 98;
+        ctx.beginPath();
+        ctx.moveTo(infoX + 2, telY - 9);
+        ctx.quadraticCurveTo(infoX + 2, telY + 1, infoX + 12, telY + 1);
+        ctx.lineTo(infoX + 14, telY - 2);
+        ctx.lineTo(infoX + 10, telY - 4);
+        ctx.lineTo(infoX + 6, telY - 8);
+        ctx.lineTo(infoX + 4, telY - 11);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillText(modelo.telefonoHeader, infoX + 22, telY);
+
+        // 3. Barra gris de metadatos
+        const barY = 124;
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.roundRect(padX, barY, width - padX * 2, 34, 4);
+        ctx.fill();
+
+        const metaBaseY = barY + 21;
+        ctx.font = '500 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('Fecha de reporte:', padX + 22, metaBaseY);
+        ctx.font = '700 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(modelo.rangoFechaTexto, padX + 134, metaBaseY);
+
+        ctx.font = '500 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('Generación:', padX + 345, metaBaseY);
+        ctx.font = '700 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(modelo.generacionTexto, padX + 422, metaBaseY);
+
+        ctx.font = '500 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('Número de transacciones:', padX + 545, metaBaseY);
+        ctx.font = '700 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(String(modelo.transacciones.length), padX + 706, metaBaseY);
+
+        // 4. Cuadro resumen financiero con ecuación horizontal
+        const sumY = 172;
+        const sumH = 72;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(padX, sumY, width - padX * 2, sumH, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        const colsResumen = [
+          { lbl: 'Ingresos', val: this._formatCRCComprobante(modelo.ingresosRegularesCRC), cx: 120, color: '#475569' },
+          { lbl: 'Abonos ventas', val: this._formatCRCComprobante(modelo.abonosVentasCRC), cx: 300, color: '#475569' },
+          { lbl: 'Costo de ventas', val: this._formatCRCComprobante(modelo.costoVentasCRC), cx: 495, color: '#475569' },
+          { lbl: 'Abonos gastos', val: this._formatCRCComprobante(modelo.abonosGastosCRC), cx: 688, color: '#475569' },
+          { lbl: 'Gastos', val: this._formatCRCComprobante(modelo.gastosCRC), cx: 872, color: '#475569' },
+          { lbl: 'Utilidad Total', val: this._formatCRCComprobante(modelo.utilidadTotalCRC), cx: 1068, color: modelo.utilidadTotalCRC >= 0 ? '#16a34a' : '#dc2626', isBold: true }
+        ];
+        const ops = [
+          { sym: '+', cx: 210 },
+          { sym: '-', cx: 398 },
+          { sym: '-', cx: 592 },
+          { sym: '-', cx: 782 },
+          { sym: '=', cx: 970 }
         ];
 
-        let totalIng = 0;
-        ventasPeriodo.forEach(v => {
-          const m = Number(v.totalCRC) || 0;
-          totalIng += m;
-          const det = v.productosResumen || (v.items || []).map(i => `${i.cant || 1}x ${i.nombre}`).join(', ') || '';
-          filas.push([v.fechaISO, v.horaCobro || '', 'INGRESO', v.mesaNombre || '', v.cobradoPor || v.mesero || '', v.metodoPago || 'Efectivo', det, m]);
+        ctx.textAlign = 'center';
+        colsResumen.forEach(c => {
+          ctx.fillStyle = '#64748b';
+          ctx.font = '500 12.5px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.fillText(c.lbl, c.cx, sumY + 25);
+
+          ctx.fillStyle = c.color;
+          ctx.font = `${c.isBold ? '800' : '600'} 19px "Plus Jakarta Sans", Arial, sans-serif`;
+          ctx.fillText(c.val, c.cx, sumY + 54);
+        });
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '800 18px "Plus Jakarta Sans", Arial, sans-serif';
+        ops.forEach(op => {
+          ctx.fillText(op.sym, op.cx, sumY + 46);
         });
 
-        let totalEgr = 0;
-        egresosPeriodo.forEach(e => {
-          const m = Number(e.montoCRC) || 0;
-          totalEgr += m;
-          filas.push([e.fechaISO, e.hora || '', 'EGRESO', e.concepto, e.usuario || '', e.metodoPago || 'Efectivo', 'Gasto registrado', -m]);
+        // 5. Título de sección + Badge de conteo
+        const secY = 278;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 17px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillText('Ventas y abonos a ventas', padX, secY);
+
+        const pillW = 215;
+        const pillH = 28;
+        const pillX = width - padX - pillW - 150;
+        const pillY = secY - 19;
+        ctx.fillStyle = '#f1f5f9';
+        ctx.beginPath();
+        ctx.roundRect(pillX, pillY, pillW, pillH, 5);
+        ctx.fill();
+        ctx.font = '500 12px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Número de transacciones:  ${modelo.transacciones.length}`, pillX + pillW / 2, pillY + 18);
+
+        // 6. Tabla paginada de transacciones
+        let curY = dibujarEncabezadoTabla(ctx, 298);
+
+        const medirFont = '400 12px "Plus Jakarta Sans", Arial, sans-serif';
+        if (modelo.transacciones.length === 0) {
+          ctx.fillStyle = '#64748b';
+          ctx.font = 'italic 13px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('No hay ventas ni abonos registrados en el período seleccionado.', width / 2, curY + 32);
+          curY += 54;
+        } else {
+          modelo.transacciones.forEach(tr => {
+            ctx.font = medirFont;
+            const descLines = this._envolverTextoCanvas(ctx, tr.descripcion, 298);
+            const vendLines = this._envolverTextoCanvas(ctx, tr.vendedor || '-', 108);
+            const contLines = this._envolverTextoCanvas(ctx, tr.contacto || '-', 110);
+            const maxLines = Math.max(descLines.length, vendLines.length, contLines.length, 1);
+            const rowH = Math.max(29, maxLines * 15 + 14);
+
+            if (curY + rowH > bottomLimitY) {
+              ctx = crearPagina(false);
+              curY = dibujarEncabezadoTabla(ctx, 64);
+            }
+
+            const baseLineY = curY + 19;
+            ctx.fillStyle = '#1e293b';
+            ctx.font = medirFont;
+            ctx.textAlign = 'left';
+            ctx.fillText(tr.fecha, 46, baseLineY);
+            ctx.fillText(tr.tipo, 136, baseLineY);
+
+            vendLines.forEach((ln, idx) => ctx.fillText(ln, 242, baseLineY + idx * 15));
+            descLines.forEach((ln, idx) => ctx.fillText(ln, 360, baseLineY + idx * 15));
+            contLines.forEach((ln, idx) => ctx.fillText(ln, 672, baseLineY + idx * 15));
+
+            ctx.fillText(tr.estado, 792, baseLineY);
+            ctx.fillText(tr.metodoPago, 868, baseLineY);
+
+            ctx.textAlign = 'right';
+            ctx.fillText(this._formatCRCComprobante(tr.valorCRC), 1072, baseLineY);
+            ctx.fillText(this._formatCRCComprobante(tr.costoCRC), 1152, baseLineY);
+
+            curY += rowH;
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(padX, curY);
+            ctx.lineTo(width - padX, curY);
+            ctx.stroke();
+          });
+        }
+
+        // 7. Sección adicional compacta si existen egresos/gastos en el período
+        if (modelo.gastosRows.length > 0) {
+          if (curY + 86 > bottomLimitY) {
+            ctx = crearPagina(false);
+            curY = 64;
+          } else {
+            curY += 26;
+          }
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#0f172a';
+          ctx.font = '700 15px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.fillText(`Gastos registrados (${modelo.gastosRows.length})`, padX, curY);
+          curY += 12;
+
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(padX, curY);
+          ctx.lineTo(width - padX, curY);
+          ctx.stroke();
+
+          ctx.font = '700 12px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.fillText('Fecha', 46, curY + 20);
+          ctx.fillText('Concepto', 160, curY + 20);
+          ctx.fillText('Usuario', 672, curY + 20);
+          ctx.fillText('M. de pago', 868, curY + 20);
+          ctx.textAlign = 'right';
+          ctx.fillText('Monto', 1152, curY + 20);
+          curY += 28;
+          ctx.beginPath();
+          ctx.moveTo(padX, curY);
+          ctx.lineTo(width - padX, curY);
+          ctx.stroke();
+
+          modelo.gastosRows.forEach(g => {
+            if (curY + 28 > bottomLimitY) {
+              ctx = crearPagina(false);
+              curY = 64;
+            }
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#1e293b';
+            ctx.font = medirFont;
+            ctx.fillText(g.fecha, 46, curY + 19);
+            ctx.fillText(g.concepto.slice(0, 62), 160, curY + 19);
+            ctx.fillText(g.usuario, 672, curY + 19);
+            ctx.fillText(g.metodo, 868, curY + 19);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#dc2626';
+            ctx.fillText(this._formatCRCComprobante(g.montoCRC), 1152, curY + 19);
+            curY += 28;
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.moveTo(padX, curY);
+            ctx.lineTo(width - padX, curY);
+            ctx.stroke();
+          });
+        }
+
+        // Pie de página con número de página
+        const totalPags = canvases.length;
+        canvases.forEach((c, idx) => {
+          const pCtx = c.getContext('2d');
+          pCtx.textAlign = 'right';
+          pCtx.fillStyle = '#64748b';
+          pCtx.font = '500 11.5px "Plus Jakarta Sans", Arial, sans-serif';
+          pCtx.fillText(`Página ${idx + 1} de ${totalPags}`, width - padX, height - 18);
         });
 
-        filas.push([]);
-        filas.push(['RESUMEN DEL PERIODO', `${desde} a ${hasta}`, 'Total Ingresos:', totalIng, 'Total Egresos:', totalEgr, 'Balance Neto:', totalIng - totalEgr]);
+        return canvases;
+      }
 
-        const csvContent = '\uFEFF' + filas.map(r => r.map(escapeCsv).join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Informe_Ventas_FreshParadise_${desde}_al_${hasta}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      compartirUltimoReportePDF() {
+        const cache = this._ultimoReportePdfCache;
+        if (!cache || !cache.file) return;
+        const statusEl = document.getElementById('informeExportStatus');
+        if (typeof navigator.share === 'function' && (typeof navigator.canShare !== 'function' || navigator.canShare({ files: [cache.file] }))) {
+          navigator.share({ files: [cache.file] }).then(() => {
+            if (statusEl) {
+              statusEl.style.color = '#047857';
+              statusEl.innerText = '✅ Reporte PDF compartido correctamente.';
+            }
+          }).catch(() => {});
+        }
+      }
+
+      async descargarReportePDF() {
+        const statusEl = document.getElementById('informeExportStatus');
+        const btn = document.getElementById('btnDescargarReportesPDF');
+        if (btn) btn.disabled = true;
+        if (statusEl) {
+          statusEl.style.color = '#0369a1';
+          statusEl.innerText = 'Generando reporte en PDF...';
+          statusEl.style.display = 'block';
+        }
+
+        try {
+          const modelo = this._compilarModeloReportePDF();
+          const canvases = await this._generarCanvasesReportePDF(modelo);
+          const pdfBlob = this._crearPdfDesdeCanvases(canvases, { orientation: 'landscape' });
+          const fileName = `Informe_Ventas_FreshParadise_${modelo.desdeISO}_al_${modelo.hastaISO}.pdf`;
+          const pdfFile = this._crearFileSeguro(pdfBlob, fileName, 'application/pdf');
+          this._ultimoReportePdfCache = { file: pdfFile, blob: pdfBlob, fileName };
+
+          this._descargarBlobArchivo(pdfBlob, fileName);
+
+          try {
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank');
+            setTimeout(() => URL.revokeObjectURL(pdfUrl), 15000);
+          } catch (_) {}
+
+          const puedeCompartirNativo =
+            typeof navigator.share === 'function' &&
+            (typeof navigator.canShare !== 'function' || navigator.canShare({ files: [pdfFile] }));
+
+          if (statusEl) {
+            statusEl.style.color = '#047857';
+            statusEl.innerHTML = puedeCompartirNativo
+              ? `✅ Reporte PDF descargado (<strong>${this.esc(fileName)}</strong>). <button type="button" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; margin-left: 0.4rem;" onclick="app.compartirUltimoReportePDF()">📤 Compartir PDF</button>`
+              : `✅ Reporte PDF descargado (<strong>${this.esc(fileName)}</strong>).`;
+          }
+        } catch (err) {
+          console.error('Error al generar reporte PDF:', err);
+          if (statusEl) {
+            statusEl.style.color = '#dc2626';
+            statusEl.innerText = '⚠️ No se pudo generar el reporte PDF. Intente usar el botón Imprimir.';
+          }
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      }
+
+      descargarReporteCSV() {
+        this.descargarReportePDF();
       }
 
       imprimirReporteVentas() {
-        const { desde, hasta, ventasPeriodo, egresosPeriodo } = this.obtenerDatosPeriodoInforme();
-        const totalIng = ventasPeriodo.reduce((s, v) => s + (Number(v.totalCRC) || 0), 0);
-        const totalEgr = egresosPeriodo.reduce((s, e) => s + (Number(e.montoCRC) || 0), 0);
+        const modelo = this._compilarModeloReportePDF();
+        const cfg = this.getComprobanteHeaderConfig();
+        const logoAbs = window.location.protocol === 'file:'
+          ? FRESH_PARADISE_LOGO_DATA_URI
+          : new URL(cfg.logoUrl, window.location.href).href;
 
-        const lineas = ventasPeriodo.map(v =>
-          `• [${v.fechaISO} ${v.horaCobro || ''}] ${v.mesaNombre || ''} (${v.metodoPago || 'Efectivo'}): ${this.formatCRC(v.totalCRC)}`
-        ).join('\n') || '(Sin ventas en este período)';
+        const filasHtml = modelo.transacciones.map(tr => `
+          <tr>
+            <td>${this.esc(tr.fecha)}</td>
+            <td>${this.esc(tr.tipo)}</td>
+            <td>${this.esc(tr.vendedor)}</td>
+            <td>${this.esc(tr.descripcion)}</td>
+            <td>${this.esc(tr.contacto)}</td>
+            <td>${this.esc(tr.estado)}</td>
+            <td>${this.esc(tr.metodoPago)}</td>
+            <td style="text-align:right;white-space:nowrap;">${this.esc(this._formatCRCComprobante(tr.valorCRC))}</td>
+            <td style="text-align:right;white-space:nowrap;">${this.esc(this._formatCRCComprobante(tr.costoCRC))}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:18px;">Sin transacciones en el período</td></tr>';
 
-        const texto = `========================================\n       FRESH PARADISE • COCLES\n     INFORME DE VENTAS POR PERÍODO\n========================================\nDesde: ${desde}    Hasta: ${hasta}\nGenerado: ${new Date().toLocaleString('es-CR')}\n----------------------------------------\n↗ TOTAL INGRESOS:  ${this.formatCRC(totalIng)} (${ventasPeriodo.length} ventas)\n↙ TOTAL EGRESOS:   ${this.formatCRC(totalEgr)} (${egresosPeriodo.length} egresos)\n= BALANCE NETO:    ${this.formatCRC(totalIng - totalEgr)}\n----------------------------------------\nDETALLE DE VENTAS:\n${lineas}\n========================================`;
+        const htmlDoc = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Ventas ${this.esc(modelo.rangoFechaTexto)}</title><style>@page{size:landscape;margin:12mm;}body{font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#0f172a;margin:0;padding:18px;font-size:12px;}.head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}.logo{width:68px;height:68px;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;padding:3px;}.bar{background:#f8fafc;padding:9px 16px;border-radius:4px;display:flex;gap:34px;font-size:12px;margin-bottom:12px;}.sum{border:1px solid #cbd5e1;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;text-align:center;}.sum-lbl{font-size:11px;color:#64748b;margin-bottom:4px;}.sum-val{font-size:16px;font-weight:700;color:#475569;}.op{font-weight:800;font-size:16px;}.sec{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}.pill{background:#f1f5f9;padding:5px 14px;border-radius:5px;font-size:11px;color:#475569;}table{width:100%;border-collapse:collapse;font-size:11.5px;}thead tr{border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}th,td{padding:7px 6px;text-align:left;border-bottom:1px solid #e2e8f0;}</style></head><body><div class="head"><img class="logo" src="${this.escAttr(logoAbs)}"><div><div style="font-size:17px;font-weight:700;margin-bottom:4px;">${this.esc(modelo.negocio)}</div><div style="color:#475569;">${this.esc(modelo.responsableHeader)}</div><div style="color:#475569;">${this.esc(modelo.telefonoHeader)}</div></div></div><div class="bar"><span>Fecha de reporte: <strong>${this.esc(modelo.rangoFechaTexto)}</strong></span><span>Generación: <strong>${this.esc(modelo.generacionTexto)}</strong></span><span>Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><div class="sum"><div><div class="sum-lbl">Ingresos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.ingresosRegularesCRC))}</div></div><div class="op">+</div><div><div class="sum-lbl">Abonos ventas</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.abonosVentasCRC))}</div></div><div class="op">-</div><div><div class="sum-lbl">Costo de ventas</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Abonos gastos</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Gastos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.gastosCRC))}</div></div><div class="op">=</div><div><div class="sum-lbl">Utilidad Total</div><div class="sum-val" style="color:${modelo.utilidadTotalCRC >= 0 ? '#16a34a' : '#dc2626'};font-weight:800;">${this.esc(this._formatCRCComprobante(modelo.utilidadTotalCRC))}</div></div></div><div class="sec"><strong style="font-size:15px;">Ventas y abonos a ventas</strong><span class="pill">Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Vendedor</th><th>Descripción</th><th>Contacto</th><th>Estado</th><th>M. de pago</th><th style="text-align:right;">Valor</th><th style="text-align:right;">Costo</th></tr></thead><tbody>${filasHtml}</tbody></table><` + `script>window.onload=function(){window.print();};<` + `/script></body></html>`;
 
-        const win = window.open('', '_blank', 'width=480,height=640');
+        const win = window.open('', '_blank', 'width=1050,height=760');
         if (win) {
-          win.document.write('<!DOCTYPE html><html><head><title>Informe de Ventas - Fresh Paradise</title><style>body{font-family:monospace;font-size:13px;padding:16px;}pre{white-space:pre-wrap;font-family:inherit;}</style></head><body><pre>' + this.esc(texto) + '</pre><' + 'script>window.onload=function(){window.print();};<' + '/script></body></html>');
+          win.document.write(htmlDoc);
           win.document.close();
         } else {
-          alert(texto);
+          this.descargarReportePDF();
         }
       }
 
