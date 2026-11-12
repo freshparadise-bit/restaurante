@@ -479,6 +479,97 @@
       box-shadow: 0 0 0 2px white inset;
     }
 
+    /* ESTILOS COMPROBANTE DE PAGO (VISTA PREVIA Y COMPARTIR) */
+    .comprobante-share-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.55rem;
+      margin-top: 0.65rem;
+    }
+    .comprobante-preview-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.05rem 1.25rem;
+      color: #0f172a;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .comprobante-header {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-bottom: 0.85rem;
+    }
+    .comprobante-logo-wrap {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px;
+    }
+    .comprobante-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+      display: block;
+    }
+    .comprobante-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 0.24rem 0;
+      font-size: 0.86rem;
+    }
+    .comprobante-meta-label {
+      color: #334155;
+      font-weight: 500;
+    }
+    .comprobante-meta-val {
+      color: #0f172a;
+      font-weight: 700;
+      text-align: right;
+    }
+    .comprobante-items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.85rem;
+      font-size: 0.86rem;
+    }
+    .comprobante-items-table thead tr {
+      border-top: 1px solid #cbd5e1;
+      border-bottom: 1px solid #cbd5e1;
+    }
+    .comprobante-items-table th {
+      padding: 0.55rem 0.25rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .comprobante-items-table td {
+      padding: 0.48rem 0.25rem;
+      color: #1e293b;
+      vertical-align: top;
+    }
+    .comprobante-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #cbd5e1;
+      margin-top: 0.5rem;
+      padding-top: 0.9rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
     .mesa-status-tag {
       font-size: 0.75rem;
       font-weight: 700;
@@ -3469,7 +3560,7 @@
         <!-- PIE DE TARJETA: DESCARGAR REPORTES & VER DETALLE -->
         <div class="informe-balance-footer">
           <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <button type="button" class="informe-link-action informe-link-download" onclick="app.descargarReporteCSV()">
+            <button type="button" id="btnDescargarReportesPDF" class="informe-link-action informe-link-download" onclick="app.descargarReportePDF()">
               <span>Descargar Reportes</span>
             </button>
             <button type="button" class="btn btn-secondary" style="font-size: 0.76rem; padding: 0.25rem 0.6rem; font-weight: 700;" onclick="app.imprimirReporteVentas()">
@@ -3480,6 +3571,7 @@
             Ver detalle ▾
           </button>
         </div>
+        <div id="informeExportStatus" style="display: none; margin-top: 0.5rem; font-size: 0.8rem; font-weight: 700;"></div>
       </div>
 
       <!-- SECCIÓN DE DETALLE COMPLETO (DESPLEGABLE AL PULSAR "VER DETALLE") -->
@@ -4609,7 +4701,46 @@
     </div>
   </div>
 
+  <!-- MODAL: COMPROBANTE DE PAGO Y COMPARTIR (IMAGEN O PDF) -->
+  <div class="modal-backdrop" id="modalComprobanteVenta" role="dialog" aria-modal="true" aria-labelledby="modalComprobanteTitulo" style="z-index: 2200;">
+    <div class="modal-box" style="max-width: 610px;">
+      <div class="modal-header" style="background: #047857; color: white; border-bottom: none;">
+        <h3 id="modalComprobanteTitulo" style="color: white; margin: 0;">✅ ¡Cobro Confirmado!</h3>
+        <button type="button" class="modal-close-btn" aria-label="Cerrar comprobante" style="color: white;" onclick="app.cerrarModalComprobanteVenta()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1rem 1.15rem; background: #f8fafc;">
+        <div id="comprobanteAvisoBanner" style="display: none; border-radius: 10px; padding: 0.65rem 0.85rem; margin-bottom: 0.85rem; font-size: 0.84rem; font-weight: 700;"></div>
+
+        <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1rem;">
+          <div style="font-size: 0.94rem; font-weight: 800; color: #065f46; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🧾</span>
+            <span>¿Desea compartir el comprobante?</span>
+          </div>
+          <div class="comprobante-share-actions">
+            <button type="button" id="btnCompartirComprobanteImagen" class="btn btn-primary" style="font-weight: 800; padding: 0.62rem 0.85rem; justify-content: center; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="app.compartirComprobanteVenta('imagen')">
+              <span>🖼️</span> <span>Por Imagen</span>
+            </button>
+            <button type="button" id="btnCompartirComprobantePdf" class="btn" style="background: #dc2626; color: white; border: 1.5px solid #b91c1c; font-weight: 800; padding: 0.62rem 0.85rem; justify-content: center; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="app.compartirComprobanteVenta('pdf')">
+              <span>📄</span> <span>Por PDF</span>
+            </button>
+          </div>
+          <div id="comprobanteShareStatus" style="display: none; margin-top: 0.55rem; font-size: 0.8rem; font-weight: 700; color: #047857;"></div>
+        </div>
+
+        <div id="comprobanteAccionRapidaBox" style="display: none; margin-bottom: 1rem;"></div>
+
+        <div id="comprobantePreviewHost"></div>
+      </div>
+      <div class="modal-footer" style="background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary" onclick="app.imprimirComprobanteVenta()">🖨️ Imprimir</button>
+        <button type="button" class="btn btn-success" style="font-weight: 800; padding: 0.55rem 1.25rem;" onclick="app.cerrarModalComprobanteVenta()">✓ Listo / Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    const FRESH_PARADISE_LOGO_DATA_URI = 'data:image/jpeg;base64,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';
+
     // --- ESTADO INICIAL 100% LIMPIO (SIN DATOS DE PRUEBA) ---
     const CLEAN_EMPTY_DATA = {
       tipoCambio: 510,
@@ -9428,7 +9559,24 @@
         this.saveData();
         this.renderAll();
 
-        alert(`💳 Venta a crédito registrada con éxito a nombre de ${cliente.nombre}.\n\n• Factura N°: ${facturaId}\n• Total a Crédito: ${this.formatCRC(montoCRC)}\n• Saldo registrado en Cuentas por Cobrar y respaldado en Google Sheets.`);
+        this.abrirModalComprobanteVenta({
+          mesaId: mesa.id,
+          mesaNombre: mesa.nombre,
+          esRapida: Boolean(mesa.esRapida),
+          fechaDate: new Date(),
+          vendedor: cajero,
+          metodoPago: 'Crédito',
+          estado: 'Crédito (Pendiente)',
+          numeroTransaccion: facturaId,
+          items: this._agruparLineasComprobante(prodsArray),
+          totalCRC: montoCRC,
+          vueltoCRC: 0,
+          saldoRestanteCRC: nuevoSaldoMesa,
+          esPagoParcial: nuevoSaldoMesa > 0,
+          clienteNombre: cliente.nombre,
+          origenCobro: 'caja',
+          esMeseroActivo: false
+        });
       }
 
       // --- FLUJO DIRECTO DE VENTA A CRÉDITO Y CREACIÓN DE C x C ---
@@ -9600,22 +9748,36 @@
           productosResumen = `Pago parcial en partes iguales (1 de ${this.partesTotal} personas) - Cobro: ${this.formatCRC(montoACobrarCRC)}`;
         } else {
           // Pago Completo: cobrar todo el saldo pendiente restante
+          const itemsPendientes = [];
           (mesa.ordenes || []).forEach(o => {
             (o.items || []).forEach(it => {
+              const pend = Math.max(0, (Number(it.cant) || 0) - (Number(it.cantPagada) || 0));
+              if (pend > 0) {
+                itemsPendientes.push({
+                  nombre: it.nombre,
+                  precio: it.precio,
+                  cant: pend,
+                  nota: it.nota || ''
+                });
+              }
               it.cantPagada = it.cant;
             });
           });
-          itemsDetalleVenta = (mesa.ordenes || []).flatMap(o => o.items || []);
+          itemsDetalleVenta = itemsPendientes.length > 0 ? itemsPendientes : (mesa.ordenes || []).flatMap(o => o.items || []);
           productosResumen = itemsDetalleVenta.map(i => {
             const nota = (i.nota || '').trim();
             return `${i.cant}x ${this.esc(i.nombre)}${nota ? ` [${this.esc(nota)}]` : ''}`;
           }).join(', ');
         }
 
+        const ahoraCobro = new Date();
+        const ventaId = ahoraCobro.getTime();
+        const numeroTransaccion = String(ventaId).slice(-4);
+
         // Registrar abono en la mesa
         mesa.pagosParciales = mesa.pagosParciales || [];
         const registroAbono = {
-          id: Date.now(),
+          id: ventaId,
           modo: this.modoCobro,
           montoCRC: montoACobrarCRC,
           montoUSD: montoACobrarUSD,
@@ -9629,8 +9791,8 @@
           cobradoPor: cobradoPor,
           rolCobrador: rolCobrador,
           origenCobro: origenCobro,
-          hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          fecha: new Date().toLocaleTimeString(),
+          hora: ahoraCobro.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          fecha: ahoraCobro.toLocaleTimeString(),
           items: itemsDetalleVenta
         };
         mesa.pagosParciales.push(registroAbono);
@@ -9641,7 +9803,8 @@
 
         // Registrar venta en el historial
         const venta = {
-          id: Date.now(),
+          id: ventaId,
+          numeroTransaccion: numeroTransaccion,
           pedidoId: mesa.pedidoId || '',
           mesaId: mesa.id,
           mesaNombre: mesa.nombre + (esPagoParcial ? ' [Pago Parcial]' : ''),
@@ -9663,9 +9826,9 @@
           cobradoPor: cobradoPor,
           rolCobrador: rolCobrador,
           origenCobro: origenCobro,
-          horaCobro: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          horaCobro: ahoraCobro.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           fechaISO: this.getFechaHoyISO(),
-          fechaHora: new Date().toLocaleString('es-CR'),
+          fechaHora: ahoraCobro.toLocaleString('es-CR'),
           fecha: this.getFechaHoyISO(),
           items: itemsDetalleVenta,
           productosResumen: productosResumen,
@@ -9676,7 +9839,6 @@
 
         const refTextoMesa = (referenciaPago && referenciaPago !== 'N/A (Efectivo)') ? ` - ${referenciaPago}` : '';
         const cobradorEtiqueta = (origenCobro === 'mesero') ? `${meseroCobrador} (Mesero)` : `${cobradoPor} (Caja)`;
-        const avisoCobrador = (origenCobro === 'mesero') ? ` [Cobrado por Mesero: ${meseroCobrador}]` : ' [Cobrado directo en Caja]';
 
         if (nuevoSaldoPendiente <= 0) {
           // Cierre automático: saldo llegó a 0 -> Cuenta 100% CANCELADA / COBRADA
@@ -9684,7 +9846,7 @@
           mesa.origenCobro = origenCobro;
           mesa.meseroCobrador = (origenCobro === 'mesero') ? meseroCobrador : '';
           mesa.cobradoPor = `${cobradorEtiqueta} [${metodoPago}${refTextoMesa}]`;
-          mesa.horaCobro = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          mesa.horaCobro = ahoraCobro.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
           this.saveData();
 
@@ -9699,24 +9861,6 @@
 
           this.closeModal('modalCobro');
           this.renderAll();
-
-          if (mesa.esRapida) {
-            const esMeseroActivo = (origenCobro === 'mesero') || (this.data.usuarioActivo && this.data.usuarioActivo.tipo === 'mesero');
-            if (esMeseroActivo) {
-              alert(`¡Cuenta cobrada al 100% para ${mesa.nombre} (${metodoPago}${refTextoMesa ? ': ' + refTextoMesa : ''})!\n\nCobro en poder del mesero: ${meseroCobrador || cobradorEtiqueta}.\nLa mesa rápida queda registrada como COBRADA.\n\n⚠️ Recuerde: El cierre, entrega definitiva y desocupación de la venta rápida debe realizarse exclusivamente desde la CAJA.`);
-            } else {
-              const listo = mesa.listoParaRecoger || (mesa.ordenes && mesa.ordenes.every(o => o.estado === 'verde'));
-              const msg = listo ?
-                `¡Cuenta cancelada al 100% para ${mesa.nombre} (${metodoPago}${refTextoMesa ? ': ' + refTextoMesa : ''})${avisoCobrador}!\n\nEl pedido ya está preparado en cocina.\n\n¿Desea marcar como entregado y FINALIZAR la venta rápida ahora?` :
-                `¡Cuenta cancelada al 100% para ${mesa.nombre} (${metodoPago}${refTextoMesa ? ': ' + refTextoMesa : ''})${avisoCobrador}!\n\n¿Desea marcar como entregado y FINALIZAR esta venta rápida ahora?\n(Si aún está cocinándose en cocina, presione Cancelar para mantenerla visible hasta la entrega).`;
-
-              if (confirm(msg)) {
-                this.entregarYFinalizarMesaRapida(mesa.id);
-              }
-            }
-          } else {
-            alert(`¡Cuenta cancelada al 100% para ${mesa.nombre} (${metodoPago}${refTextoMesa ? ': ' + refTextoMesa : ''})${avisoCobrador}!\n\nLa cuenta ha sido saldada en su totalidad.`);
-          }
         } else {
           // Pago parcial: mantener mesa abierta y actualizar modal con saldo restante
           this.saveData();
@@ -9731,7 +9875,825 @@
 
           this.renderAll();
           this.actualizarVistaModalCobro();
-          alert(`✅ Pago parcial de ${this.formatCRC(montoACobrarCRC)} registrado con éxito (${metodoPago}${refTextoMesa ? ': ' + refTextoMesa : ''})${avisoCobrador}.\n\nSaldo pendiente restante en ${mesa.nombre}: ${this.formatCRC(nuevoSaldoPendiente)}.\nPuede cobrar a la siguiente persona o cerrar la ventana.`);
+        }
+
+        const esMeseroEnTurno = (origenCobro === 'mesero') || (this.data.usuarioActivo && this.data.usuarioActivo.tipo === 'mesero');
+        this.abrirModalComprobanteVenta({
+          mesaId: mesa.id,
+          mesaNombre: mesa.nombre,
+          esRapida: Boolean(mesa.esRapida),
+          fechaDate: ahoraCobro,
+          vendedor: (origenCobro === 'mesero') ? (meseroCobrador || cobradoPor) : cobradoPor,
+          metodoPago: (referenciaPago && referenciaPago !== 'N/A (Efectivo)') ? `${metodoPago} (${referenciaPago})` : metodoPago,
+          estado: esPagoParcial ? 'Pago parcial' : 'Pagada',
+          numeroTransaccion: numeroTransaccion,
+          items: this._agruparLineasComprobante(itemsDetalleVenta),
+          totalCRC: montoACobrarCRC,
+          vueltoCRC: venta.vueltoCRC || 0,
+          monedaVuelto: this.monedaVueltoSeleccionada || 'CRC',
+          saldoRestanteCRC: nuevoSaldoPendiente,
+          esPagoParcial: esPagoParcial,
+          origenCobro: origenCobro,
+          esMeseroActivo: esMeseroEnTurno,
+          meseroCobrador: meseroCobrador,
+          cobradorEtiqueta: cobradorEtiqueta
+        });
+      }
+
+      // --- COMPROBANTE DE PAGO (VISTA PREVIA, IMAGEN PNG Y PDF) ---
+      getComprobanteHeaderConfig() {
+        const logo = (this.data.logoUrl && this.data.logoUrl !== 'logo_jiqui.jpg') ? this.data.logoUrl : 'logo_fresh_paradise.jpg';
+        return {
+          negocio: 'Fresh paradise',
+          ubicacion: 'Cocles',
+          telefono: '70966266',
+          correo: 'erickmora79@gmail.com',
+          logoUrl: logo
+        };
+      }
+
+      _formatCRCComprobante(val) {
+        const n = Math.round(Number(val) || 0);
+        const signo = n < 0 ? '-' : '';
+        return signo + '₡' + Math.abs(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      }
+
+      _formatearFechaComprobante(dateObj) {
+        const d = (dateObj instanceof Date && !isNaN(dateObj)) ? dateObj : new Date();
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()} - ${hh}:${mm}`;
+      }
+
+      _agruparLineasComprobante(items) {
+        const mapa = new Map();
+        (items || []).forEach(it => {
+          const cant = Number(it.cant) || 0;
+          const precio = Number(it.precio) || 0;
+          if (cant <= 0) return;
+          const nombre = (it.nombre || 'Producto').toString().trim();
+          const key = `${nombre.toLowerCase()}__${precio}`;
+          if (mapa.has(key)) {
+            const ex = mapa.get(key);
+            ex.cant += cant;
+            ex.subtotal = ex.cant * ex.precio;
+          } else {
+            mapa.set(key, {
+              nombre,
+              cant,
+              precio,
+              subtotal: cant * precio
+            });
+          }
+        });
+        return Array.from(mapa.values());
+      }
+
+      abrirModalComprobanteVenta(datos) {
+        if (!datos) return;
+        this._comprobanteActual = {
+          ...datos,
+          fechaTexto: datos.fechaTexto || this._formatearFechaComprobante(datos.fechaDate)
+        };
+
+        const tituloEl = document.getElementById('modalComprobanteTitulo');
+        if (tituloEl) {
+          tituloEl.innerText = datos.metodoPago === 'Crédito'
+            ? '💳 ¡Venta a Crédito Registrada!'
+            : (datos.esPagoParcial ? '✅ ¡Pago Parcial Confirmado!' : '✅ ¡Cobro Confirmado!');
+        }
+
+        const banner = document.getElementById('comprobanteAvisoBanner');
+        if (banner) {
+          const partes = [];
+          partes.push(`${this.esc(datos.mesaNombre || 'Mesa')} &bull; ${this.esc(datos.metodoPago)}`);
+          if (datos.vueltoCRC > 0) {
+            const vueltoTxt = datos.monedaVuelto === 'USD'
+              ? `${this.formatUSD(datos.vueltoCRC / (this.data.tipoCambio || 510))} (${this.formatCRC(datos.vueltoCRC)})`
+              : this.formatCRC(datos.vueltoCRC);
+            partes.push(`Vuelto: ${this.esc(vueltoTxt)}`);
+          }
+          if (datos.esPagoParcial && datos.saldoRestanteCRC > 0) {
+            partes.push(`Saldo pendiente restante: ${this.esc(this.formatCRC(datos.saldoRestanteCRC))}`);
+          } else if (datos.esRapida && datos.esMeseroActivo) {
+            partes.push('Cobro en poder del mesero (Cierre exclusivo en Caja)');
+          }
+          banner.innerHTML = partes.join(' &bull; ');
+          banner.style.background = datos.esPagoParcial ? '#fffbeb' : '#dcfce7';
+          banner.style.color = datos.esPagoParcial ? '#92400e' : '#166534';
+          banner.style.border = datos.esPagoParcial ? '1px solid #fde68a' : '1px solid #86efac';
+          banner.style.display = 'block';
+        }
+
+        const rapidaBox = document.getElementById('comprobanteAccionRapidaBox');
+        if (rapidaBox) {
+          if (datos.esRapida && !datos.esMeseroActivo && !datos.esPagoParcial && datos.metodoPago !== 'Crédito') {
+            rapidaBox.innerHTML = `
+              <button type="button" class="btn btn-success" style="width: 100%; padding: 0.65rem 1rem; font-weight: 800; background: #047857; border-color: #047857; display: flex; align-items: center; justify-content: center; gap: 0.45rem;" onclick="app.finalizarRapidaDesdeComprobante()">
+                <span>🚪</span> <span>Marcar como Entregado y Finalizar Venta Rápida</span>
+              </button>
+            `;
+            rapidaBox.style.display = 'block';
+          } else {
+            rapidaBox.innerHTML = '';
+            rapidaBox.style.display = 'none';
+          }
+        }
+
+        const statusEl = document.getElementById('comprobanteShareStatus');
+        if (statusEl) {
+          statusEl.style.display = 'none';
+          statusEl.innerText = '';
+        }
+
+        this._comprobanteFilesCache = {
+          tx: String(this._comprobanteActual.numeroTransaccion || ''),
+          ready: false,
+          pngBlob: null,
+          pngFile: null,
+          pdfBlob: null,
+          pdfFile: null,
+          promise: null
+        };
+        this._prepararArchivosComprobante(this._comprobanteActual);
+
+        this._renderizarVistaPreviaComprobante(this._comprobanteActual);
+        this.openModal('modalComprobanteVenta');
+      }
+
+      cerrarModalComprobanteVenta() {
+        this.closeModal('modalComprobanteVenta');
+      }
+
+      finalizarRapidaDesdeComprobante() {
+        const mesaId = this._comprobanteActual?.mesaId;
+        this.cerrarModalComprobanteVenta();
+        if (mesaId) {
+          this.entregarYFinalizarMesaRapida(mesaId);
+        }
+      }
+
+      _renderizarVistaPreviaComprobante(datos) {
+        const host = document.getElementById('comprobantePreviewHost');
+        if (!host || !datos) return;
+        const cfg = this.getComprobanteHeaderConfig();
+        const itemsHtml = (datos.items || []).map(it => `
+          <tr>
+            <td style="text-align: left; font-weight: 500;">${this.esc(it.nombre)}</td>
+            <td style="text-align: center;">${it.cant}</td>
+            <td style="text-align: right; white-space: nowrap;">${this.esc(this._formatCRCComprobante(it.precio))}</td>
+            <td style="text-align: right; white-space: nowrap;">${this.esc(this._formatCRCComprobante(it.subtotal))}</td>
+          </tr>
+        `).join('');
+
+        host.innerHTML = `
+          <div class="comprobante-preview-card" id="comprobantePreviewCard">
+            <div class="comprobante-header">
+              <div class="comprobante-logo-wrap">
+                <img src="${this.escAttr(cfg.logoUrl)}" alt="${this.escAttr(cfg.negocio)}" onerror="this.onerror=null;this.src='logo_fresh_paradise.jpg';">
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 1.18rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 0.28rem;">${this.esc(cfg.negocio)}</div>
+                <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: #334155; margin-bottom: 0.22rem;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 21s-6-5.33-6-10a6 6 0 1 1 12 0c0 4.67-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg>
+                  <span>${this.esc(cfg.ubicacion)}</span>
+                </div>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; font-size: 0.85rem; color: #334155;">
+                  <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <span>${this.esc(cfg.telefono)}</span>
+                  </span>
+                  <span style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span>${this.esc(cfg.correo)}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 0.35rem;">
+              <div class="comprobante-meta-row">
+                <span class="comprobante-meta-label">Fecha</span>
+                <span class="comprobante-meta-val">${this.esc(datos.fechaTexto)}</span>
+              </div>
+              <div class="comprobante-meta-row">
+                <span class="comprobante-meta-label">Vendedor</span>
+                <span class="comprobante-meta-val">${this.esc(datos.vendedor || 'Caja')}</span>
+              </div>
+              <div class="comprobante-meta-row">
+                <span class="comprobante-meta-label">Método de pago</span>
+                <span class="comprobante-meta-val">${this.esc(datos.metodoPago || 'Efectivo')}</span>
+              </div>
+              <div class="comprobante-meta-row">
+                <span class="comprobante-meta-label">Estado</span>
+                <span class="comprobante-meta-val">${this.esc(datos.estado || 'Pagada')}</span>
+              </div>
+              <div class="comprobante-meta-row">
+                <span class="comprobante-meta-label">Número de transacción</span>
+                <span class="comprobante-meta-val">${this.esc(datos.numeroTransaccion)}</span>
+              </div>
+            </div>
+
+            <table class="comprobante-items-table">
+              <thead>
+                <tr>
+                  <th style="text-align: left;">Productos</th>
+                  <th style="text-align: center;">Cantidad</th>
+                  <th style="text-align: right;">Precio unitario</th>
+                  <th style="text-align: right;">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml || '<tr><td colspan="4" style="text-align:center;color:#64748b;">Sin líneas</td></tr>'}
+              </tbody>
+            </table>
+
+            <div class="comprobante-total-row">
+              <span>Total:</span>
+              <span>${this.esc(this._formatCRCComprobante(datos.totalCRC))}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      _imagenEsAptaParaCanvas(img) {
+        if (!img || img.width <= 0 || img.height <= 0) return false;
+        try {
+          const probe = document.createElement('canvas');
+          probe.width = 4;
+          probe.height = 4;
+          const pCtx = probe.getContext('2d');
+          pCtx.drawImage(img, 0, 0, 4, 4);
+          probe.toDataURL('image/png');
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      _cargarImagenComprobante(src) {
+        return new Promise((resolve) => {
+          const rawSrc = (src || '').trim();
+          const usarEmbebidaPorDefecto =
+            !rawSrc ||
+            rawSrc === 'logo_fresh_paradise.jpg' ||
+            rawSrc === 'logo_jiqui.jpg' ||
+            (!rawSrc.startsWith('data:') && window.location.protocol === 'file:');
+
+          const loadDataUriFallback = () => {
+            const imgFb = new Image();
+            imgFb.onload = () => resolve(this._imagenEsAptaParaCanvas(imgFb) ? imgFb : null);
+            imgFb.onerror = () => resolve(null);
+            imgFb.src = FRESH_PARADISE_LOGO_DATA_URI;
+          };
+
+          if (usarEmbebidaPorDefecto) {
+            loadDataUriFallback();
+            return;
+          }
+
+          const img = new Image();
+          img.onload = () => {
+            if (this._imagenEsAptaParaCanvas(img)) {
+              resolve(img);
+            } else {
+              loadDataUriFallback();
+            }
+          };
+          img.onerror = loadDataUriFallback;
+          img.src = rawSrc;
+        });
+      }
+
+      _envolverTextoCanvas(ctx, text, maxWidth) {
+        const words = String(text || '').split(/\s+/);
+        const lines = [];
+        let line = '';
+        for (const w of words) {
+          const test = line ? `${line} ${w}` : w;
+          if (ctx.measureText(test).width > maxWidth && line) {
+            lines.push(line);
+            line = w;
+          } else {
+            line = test;
+          }
+        }
+        if (line) lines.push(line);
+        return lines.length > 0 ? lines : [''];
+      }
+
+      async _generarCanvasComprobante(datos) {
+        const cfg = this.getComprobanteHeaderConfig();
+        const logoImg = await this._cargarImagenComprobante(cfg.logoUrl);
+
+        const width = 640;
+        const padX = 36;
+        const scale = 2;
+
+        // Pre-medir líneas envueltas de productos para calcular alto exacto
+        const measureCanvas = document.createElement('canvas');
+        const mCtx = measureCanvas.getContext('2d');
+        mCtx.font = '500 15px "Plus Jakarta Sans", Arial, sans-serif';
+        const wrappedItems = (datos.items || []).map(it => {
+          const lines = this._envolverTextoCanvas(mCtx, it.nombre, 238);
+          return {
+            lines,
+            cant: String(it.cant),
+            precio: this._formatCRCComprobante(it.precio),
+            subtotal: this._formatCRCComprobante(it.subtotal),
+            rowHeight: Math.max(34, lines.length * 20 + 14)
+          };
+        });
+
+        const itemsTotalH = wrappedItems.length > 0
+          ? wrappedItems.reduce((acc, r) => acc + r.rowHeight, 0)
+          : 38;
+        const totalHeight = 398 + itemsTotalH + 92;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width * scale;
+        canvas.height = totalHeight * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+
+        // Fondo blanco sólido (crítico para PNG y JPEG en PDF)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, totalHeight);
+
+        // 1. Logo circular limpio sin duplicar
+        const logoCx = padX + 38;
+        const logoCy = 66;
+        const logoR = 38;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(logoCx, logoCy, logoR, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.stroke();
+        ctx.clip();
+        if (logoImg && logoImg.width > 0 && logoImg.height > 0) {
+          const box = (logoR - 3) * 2;
+          const ratio = Math.min(box / logoImg.width, box / logoImg.height);
+          const drawW = logoImg.width * ratio;
+          const drawH = logoImg.height * ratio;
+          ctx.drawImage(logoImg, logoCx - drawW / 2, logoCy - drawH / 2, drawW, drawH);
+        }
+        ctx.restore();
+
+        // 2. Datos de encabezado exactos
+        const headTextX = padX + 96;
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 22px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(cfg.negocio, headTextX, 46);
+
+        // Ícono Pin ubicación + texto Cocles
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(headTextX + 7, 67, 5.2, Math.PI * 0.85, Math.PI * 2.15);
+        ctx.lineTo(headTextX + 7, 76);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(headTextX + 7, 67, 1.8, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#334155';
+        ctx.font = '500 15px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillText(cfg.ubicacion, headTextX + 22, 72);
+
+        // Ícono Teléfono + número
+        const row3Y = 98;
+        ctx.beginPath();
+        ctx.moveTo(headTextX + 2, row3Y - 10);
+        ctx.quadraticCurveTo(headTextX + 2, row3Y + 1, headTextX + 13, row3Y + 1);
+        ctx.lineTo(headTextX + 15, row3Y - 2);
+        ctx.lineTo(headTextX + 11, row3Y - 4);
+        ctx.lineTo(headTextX + 6, row3Y - 9);
+        ctx.lineTo(headTextX + 4, row3Y - 12);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillText(cfg.telefono, headTextX + 22, row3Y);
+
+        // Ícono Correo + dirección
+        const mailX = headTextX + 115;
+        ctx.strokeRect(mailX, row3Y - 11, 16, 11);
+        ctx.beginPath();
+        ctx.moveTo(mailX, row3Y - 11);
+        ctx.lineTo(mailX + 8, row3Y - 4);
+        ctx.lineTo(mailX + 16, row3Y - 11);
+        ctx.stroke();
+        ctx.fillText(cfg.correo, mailX + 23, row3Y);
+
+        // 3. Filas de metadatos
+        const metaRows = [
+          ['Fecha', datos.fechaTexto],
+          ['Vendedor', datos.vendedor || 'Caja'],
+          ['Método de pago', datos.metodoPago || 'Efectivo'],
+          ['Estado', datos.estado || 'Pagada'],
+          ['Número de transacción', String(datos.numeroTransaccion || '')]
+        ];
+        let y = 152;
+        metaRows.forEach(([lbl, val]) => {
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#334155';
+          ctx.font = '500 15px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.fillText(lbl, padX, y);
+
+          ctx.textAlign = 'right';
+          ctx.fillStyle = '#0f172a';
+          ctx.font = '700 15px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.fillText(val, width - padX, y);
+          y += 34;
+        });
+
+        // 4. Encabezado tabla de productos
+        y += 6;
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padX, y);
+        ctx.lineTo(width - padX, y);
+        ctx.stroke();
+
+        y += 24;
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 14.5px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Productos', padX, y);
+        ctx.textAlign = 'center';
+        ctx.fillText('Cantidad', 325, y);
+        ctx.textAlign = 'right';
+        ctx.fillText('Precio unitario', 495, y);
+        ctx.fillText('Valor', width - padX, y);
+
+        y += 12;
+        ctx.beginPath();
+        ctx.moveTo(padX, y);
+        ctx.lineTo(width - padX, y);
+        ctx.stroke();
+
+        // 5. Líneas de la comanda
+        y += 26;
+        wrappedItems.forEach(item => {
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#1e293b';
+          ctx.font = '500 15px "Plus Jakarta Sans", Arial, sans-serif';
+          item.lines.forEach((ln, idx) => {
+            ctx.fillText(ln, padX, y + idx * 20);
+          });
+
+          ctx.textAlign = 'center';
+          ctx.fillText(item.cant, 325, y);
+          ctx.textAlign = 'right';
+          ctx.fillText(item.precio, 495, y);
+          ctx.fillText(item.subtotal, width - padX, y);
+          y += item.rowHeight;
+        });
+
+        // 6. Total final
+        y += 6;
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.beginPath();
+        ctx.moveTo(padX, y);
+        ctx.lineTo(width - padX, y);
+        ctx.stroke();
+
+        y += 40;
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '800 28px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Total:', padX, y);
+        ctx.textAlign = 'right';
+        ctx.fillText(this._formatCRCComprobante(datos.totalCRC), width - padX, y);
+
+        return canvas;
+      }
+
+      _crearPdfDesdeCanvases(canvases, opciones = {}) {
+        const lista = Array.isArray(canvases) ? canvases.filter(Boolean) : [canvases].filter(Boolean);
+        if (lista.length === 0) throw new Error('No hay lienzos para generar el PDF.');
+
+        const esLandscape = (opciones.orientation === 'landscape');
+        const pageW = esLandscape ? 842 : 595;
+        const margin = esLandscape ? 28 : 45;
+        const enc = new TextEncoder();
+        const parts = [];
+        const offsets = [0];
+        let currentOffset = 0;
+
+        const pushBytes = (bytes) => {
+          parts.push(bytes);
+          currentOffset += bytes.length;
+        };
+        const pushStr = (str) => pushBytes(enc.encode(str));
+
+        const decodeJpegBytes = (canvas) => {
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.94);
+          const base64 = dataUrl.split(',')[1] || '';
+          const binStr = atob(base64);
+          const bytes = new Uint8Array(binStr.length);
+          for (let i = 0; i < binStr.length; i++) {
+            bytes[i] = binStr.charCodeAt(i);
+          }
+          return bytes;
+        };
+
+        pushStr('%PDF-1.4\n');
+        pushBytes(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));
+
+        // Obj 1: Catalog, Obj 2: Pages
+        // Por cada página k (0..N-1): PageObj = 3 + k*3, ImgObj = 4 + k*3, ContentObj = 5 + k*3
+        const pageObjIds = lista.map((_, idx) => 3 + idx * 3);
+
+        offsets[1] = currentOffset;
+        pushStr('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+
+        offsets[2] = currentOffset;
+        pushStr(`2 0 obj\n<< /Type /Pages /Kids [${pageObjIds.map(id => `${id} 0 R`).join(' ')}] /Count ${lista.length} >>\nendobj\n`);
+
+        lista.forEach((canvas, idx) => {
+          const pageObjId = 3 + idx * 3;
+          const imgObjId = 4 + idx * 3;
+          const contentObjId = 5 + idx * 3;
+
+          const jpegBytes = decodeJpegBytes(canvas);
+          const maxDrawW = pageW - margin * 2;
+          let drawW = maxDrawW;
+          let drawH = Number((drawW * (canvas.height / canvas.width)).toFixed(2));
+          let pageH;
+
+          if (esLandscape) {
+            pageH = 595;
+            const maxDrawH = pageH - margin * 2;
+            if (drawH > maxDrawH) {
+              drawH = maxDrawH;
+              drawW = Number((drawH * (canvas.width / canvas.height)).toFixed(2));
+            }
+          } else {
+            pageH = Math.max(420, Math.ceil(drawH + margin * 2));
+          }
+
+          const marginX = Number(((pageW - drawW) / 2).toFixed(2));
+          const marginY = Number(((pageH - drawH) / 2).toFixed(2));
+
+          offsets[pageObjId] = currentOffset;
+          pushStr(`${pageObjId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im${idx} ${imgObjId} 0 R >> >> /Contents ${contentObjId} 0 R >>\nendobj\n`);
+
+          offsets[imgObjId] = currentOffset;
+          pushStr(`${imgObjId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`);
+          pushBytes(jpegBytes);
+          pushStr('\nendstream\nendobj\n');
+
+          const contentStream = `q\n${drawW} 0 0 ${drawH} ${marginX} ${marginY} cm\n/Im${idx} Do\nQ\n`;
+          offsets[contentObjId] = currentOffset;
+          pushStr(`${contentObjId} 0 obj\n<< /Length ${contentStream.length} >>\nstream\n${contentStream}endstream\nendobj\n`);
+        });
+
+        const totalObjs = 2 + lista.length * 3;
+        const xrefOffset = currentOffset;
+        let xref = `xref\n0 ${totalObjs + 1}\n0000000000 65535 f \n`;
+        for (let i = 1; i <= totalObjs; i++) {
+          xref += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+        }
+        xref += `trailer\n<< /Size ${totalObjs + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+        pushStr(xref);
+
+        return new Blob(parts, { type: 'application/pdf' });
+      }
+
+      _crearPdfDesdeCanvas(canvas) {
+        return this._crearPdfDesdeCanvases([canvas], { orientation: 'portrait' });
+      }
+
+      _canvasToPngBlob(canvas) {
+        return new Promise((resolve, reject) => {
+          const fallbackDataUrl = () => {
+            try {
+              const dataUrl = canvas.toDataURL('image/png');
+              const base64 = dataUrl.split(',')[1] || '';
+              const binStr = atob(base64);
+              const bytes = new Uint8Array(binStr.length);
+              for (let i = 0; i < binStr.length; i++) {
+                bytes[i] = binStr.charCodeAt(i);
+              }
+              resolve(new Blob([bytes], { type: 'image/png' }));
+            } catch (e) {
+              reject(e);
+            }
+          };
+
+          if (typeof canvas.toBlob === 'function') {
+            try {
+              canvas.toBlob((b) => {
+                if (b && b.size > 0) resolve(b);
+                else fallbackDataUrl();
+              }, 'image/png');
+            } catch (e) {
+              fallbackDataUrl();
+            }
+          } else {
+            fallbackDataUrl();
+          }
+        });
+      }
+
+      _crearFileSeguro(blob, fileName, mime) {
+        try {
+          return new File([blob], fileName, { type: mime });
+        } catch (e) {
+          return blob;
+        }
+      }
+
+      _prepararArchivosComprobante(datos) {
+        if (!datos) return Promise.resolve(null);
+        const key = String(datos.numeroTransaccion || '');
+        if (this._comprobanteFilesCache && this._comprobanteFilesCache.tx === key && this._comprobanteFilesCache.promise) {
+          return this._comprobanteFilesCache.promise;
+        }
+
+        const safeTx = (key || 'recibo').replace(/[^a-zA-Z0-9_-]/g, '');
+        const promise = (async () => {
+          try {
+            const canvas = await this._generarCanvasComprobante(datos);
+            const pngBlob = await this._canvasToPngBlob(canvas);
+            const pdfBlob = this._crearPdfDesdeCanvas(canvas);
+            const pngFile = this._crearFileSeguro(pngBlob, `Comprobante_FreshParadise_${safeTx}.png`, 'image/png');
+            const pdfFile = this._crearFileSeguro(pdfBlob, `Comprobante_FreshParadise_${safeTx}.pdf`, 'application/pdf');
+            if (this._comprobanteFilesCache && this._comprobanteFilesCache.tx === key) {
+              this._comprobanteFilesCache.pngBlob = pngBlob;
+              this._comprobanteFilesCache.pngFile = pngFile;
+              this._comprobanteFilesCache.pdfBlob = pdfBlob;
+              this._comprobanteFilesCache.pdfFile = pdfFile;
+              this._comprobanteFilesCache.ready = true;
+            }
+            return { pngBlob, pngFile, pdfBlob, pdfFile };
+          } catch (err) {
+            console.warn('Error pre-generando archivos del comprobante:', err);
+            return null;
+          }
+        })();
+
+        if (!this._comprobanteFilesCache || this._comprobanteFilesCache.tx !== key) {
+          this._comprobanteFilesCache = { tx: key, ready: false, promise };
+        } else {
+          this._comprobanteFilesCache.promise = promise;
+        }
+        return promise;
+      }
+
+      _descargarBlobArchivo(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      }
+
+      _aplicarFallbackDescargaComprobante(blob, fileName, isPdf) {
+        const statusEl = document.getElementById('comprobanteShareStatus');
+        this._descargarBlobArchivo(blob, fileName);
+
+        if (!isPdf && navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+          try {
+            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).catch(() => {});
+          } catch (_) {}
+        }
+
+        if (isPdf) {
+          try {
+            const pdfUrl = URL.createObjectURL(blob);
+            window.open(pdfUrl, '_blank');
+            setTimeout(() => URL.revokeObjectURL(pdfUrl), 15000);
+          } catch (_) {}
+        }
+
+        if (statusEl) {
+          statusEl.style.color = '#047857';
+          const notaContexto = window.location.protocol === 'file:'
+            ? ' (Para abrir el menú nativo Compartir del celular/iPhone, abra la app desde su enlace web HTTPS)'
+            : '';
+          statusEl.innerHTML = isPdf
+            ? `✅ PDF generado y descargado (<strong>${this.esc(fileName)}</strong>). Ya puede enviarlo o compartirlo.${this.esc(notaContexto)}`
+            : `✅ Imagen generada y descargada (<strong>${this.esc(fileName)}</strong>). Lista para enviar o pegar.${this.esc(notaContexto)}`;
+          statusEl.style.display = 'block';
+        }
+      }
+
+      _ejecutarCompartirODescargarComprobante(file, blob, fileName, isPdf, datos, gestoDirecto) {
+        const statusEl = document.getElementById('comprobanteShareStatus');
+        const puedeCompartirNativo =
+          typeof navigator.share === 'function' &&
+          file &&
+          (typeof navigator.canShare !== 'function' || navigator.canShare({ files: [file] }));
+
+        if (puedeCompartirNativo) {
+          let sharePromise;
+          try {
+            sharePromise = navigator.share({ files: [file] });
+          } catch (syncErr) {
+            sharePromise = Promise.reject(syncErr);
+          }
+
+          sharePromise.then(() => {
+            if (statusEl) {
+              statusEl.style.color = '#047857';
+              statusEl.innerText = `✅ Comprobante compartido como ${isPdf ? 'PDF' : 'imagen'}.`;
+              statusEl.style.display = 'block';
+            }
+          }).catch((err) => {
+            if (err && err.name === 'AbortError') {
+              if (statusEl) {
+                statusEl.style.color = '#475569';
+                statusEl.innerText = 'Compartir cancelado. Puede intentarlo de nuevo cuando desee.';
+                statusEl.style.display = 'block';
+              }
+              return;
+            }
+            if (err && err.name === 'NotAllowedError' && !gestoDirecto && statusEl) {
+              statusEl.style.color = '#0369a1';
+              statusEl.innerHTML = `<button type="button" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="app.compartirComprobanteVenta('${isPdf ? 'pdf' : 'imagen'}')">📤 Tocar aquí para abrir Compartir (${isPdf ? 'PDF' : 'Imagen'})</button>`;
+              statusEl.style.display = 'block';
+              return;
+            }
+            this._aplicarFallbackDescargaComprobante(blob, fileName, isPdf);
+          });
+          return;
+        }
+
+        this._aplicarFallbackDescargaComprobante(blob, fileName, isPdf);
+      }
+
+      compartirComprobanteVenta(formato = 'imagen') {
+        const datos = this._comprobanteActual;
+        if (!datos) return;
+
+        const isPdf = (formato === 'pdf');
+        const txKey = String(datos.numeroTransaccion || '');
+        const safeTx = (txKey || 'recibo').replace(/[^a-zA-Z0-9_-]/g, '');
+        const fileName = `Comprobante_FreshParadise_${safeTx}.${isPdf ? 'pdf' : 'png'}`;
+        const cache = this._comprobanteFilesCache;
+
+        // 1. Ruta síncrona directa cuando el archivo ya fue pre-generado al abrir el modal
+        if (cache && cache.tx === txKey && cache.ready) {
+          const file = isPdf ? cache.pdfFile : cache.pngFile;
+          const blob = isPdf ? cache.pdfBlob : cache.pngBlob;
+          if (blob) {
+            this._ejecutarCompartirODescargarComprobante(file, blob, fileName, isPdf, datos, true);
+            return;
+          }
+        }
+
+        // 2. Ruta asíncrona si el usuario tocó inmediatamente antes de terminar la pre-generación
+        const statusEl = document.getElementById('comprobanteShareStatus');
+        const btnImg = document.getElementById('btnCompartirComprobanteImagen');
+        const btnPdf = document.getElementById('btnCompartirComprobantePdf');
+        if (btnImg) btnImg.disabled = true;
+        if (btnPdf) btnPdf.disabled = true;
+        if (statusEl) {
+          statusEl.style.color = '#0369a1';
+          statusEl.innerText = isPdf ? 'Preparando comprobante en PDF...' : 'Preparando imagen del comprobante...';
+          statusEl.style.display = 'block';
+        }
+
+        this._prepararArchivosComprobante(datos).then((res) => {
+          if (btnImg) btnImg.disabled = false;
+          if (btnPdf) btnPdf.disabled = false;
+          if (!res) {
+            if (statusEl) {
+              statusEl.style.color = '#dc2626';
+              statusEl.innerText = '⚠️ No se pudo generar el comprobante automáticamente. Puede usar el botón Imprimir.';
+            }
+            return;
+          }
+          const file = isPdf ? res.pdfFile : res.pngFile;
+          const blob = isPdf ? res.pdfBlob : res.pngBlob;
+          this._ejecutarCompartirODescargarComprobante(file, blob, fileName, isPdf, datos, false);
+        });
+      }
+
+      imprimirComprobanteVenta() {
+        const previewEl = document.getElementById('comprobantePreviewCard');
+        const datos = this._comprobanteActual;
+        if (!previewEl || !datos) return;
+
+        const logoAbs = new URL(this.getComprobanteHeaderConfig().logoUrl, window.location.href).href;
+        const htmlBody = previewEl.outerHTML.replace(/src="[^"]*"/, `src="${this.escAttr(logoAbs)}"`);
+        const win = window.open('', '_blank', 'width=680,height=780');
+        if (win) {
+          win.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Comprobante #${this.esc(datos.numeroTransaccion)}</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;padding:24px;background:#fff;color:#0f172a;}.comprobante-preview-card{max-width:560px;margin:0 auto;border:none;box-shadow:none;}.comprobante-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}.comprobante-logo-wrap{width:66px;height:66px;border-radius:50%;overflow:hidden;border:1px solid #e2e8f0;padding:3px;display:flex;align-items:center;justify-content:center;}.comprobante-logo-wrap img{width:100%;height:100%;object-fit:contain;border-radius:50%;}.comprobante-meta-row{display:flex;justify-content:space-between;padding:5px 0;font-size:14px;}.comprobante-meta-label{color:#334155;}.comprobante-meta-val{font-weight:700;}.comprobante-items-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;}.comprobante-items-table thead tr{border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}.comprobante-items-table th,.comprobante-items-table td{padding:8px 4px;}.comprobante-total-row{display:flex;justify-content:space-between;border-top:1px solid #cbd5e1;margin-top:8px;padding-top:14px;font-size:24px;font-weight:800;}</style></head><body>${htmlBody}<` + `script>window.onload=function(){window.print();};<` + `/script></body></html>`);
+          win.document.close();
+        } else {
+          this.compartirComprobanteVenta('pdf');
         }
       }
 
@@ -13380,7 +14342,7 @@ ${lineasFacturas}
         const tc = this.data.tipoCambio || 510;
 
         document.getElementById('informeIngresosCRC').innerText = this.formatCRC(totalIngresosCRC);
-        document.getElementById('informeIngresosSub').innerText = `${ventasPeriodo.length} venta(s) &bull; ${this.formatUSD(totalIngresosCRC / tc)}`;
+        document.getElementById('informeIngresosSub').innerText = `${ventasPeriodo.length} venta(s) • ${this.formatUSD(totalIngresosCRC / tc)}`;
         document.getElementById('informeEgresosCRC').innerText = this.formatCRC(totalEgresosCRC);
         document.getElementById('informeEgresosSub').innerText = `${egresosPeriodo.length} egreso(s) registrado(s)`;
 
@@ -13514,61 +14476,556 @@ ${lineasFacturas}
         }
       }
 
-      descargarReporteCSV() {
-        const { desde, hasta, ventasPeriodo, egresosPeriodo } = this.obtenerDatosPeriodoInforme();
-        const escapeCsv = (val) => '"' + String(val === null || val === undefined ? '' : val).replace(/"/g, '""') + '"';
+      _formatearFechaSlashReporte(isoStr) {
+        if (!isoStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoStr)) {
+          const d = new Date();
+          return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+        const [y, m, d] = isoStr.split('-');
+        return `${d}/${m}/${y}`;
+      }
 
-        const filas = [
-          ['Fecha', 'Hora', 'Tipo', 'Mesa / Concepto', 'Responsable', 'Metodo de Pago', 'Detalle / Productos', 'Monto Colones (CRC)']
+      _formatearFechaGuionHoyReporte() {
+        const d = new Date();
+        return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+      }
+
+      _limpiarTextoPlano(txt) {
+        return String(txt || '')
+          .replace(/<[^>]*>/g, '')
+          .replace(/&bull;/g, '•')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      _extraerContactoVentaReporte(v, esAbono) {
+        if (v.clienteNombre) return this._limpiarTextoPlano(v.clienteNombre);
+        const mn = String(v.mesaNombre || '');
+        if (esAbono || mn.toLowerCase().includes('crédito') || mn.toLowerCase().includes('abono')) {
+          const parMatch = mn.match(/\(([^)]+)\)/);
+          if (parMatch && parMatch[1]) return this._limpiarTextoPlano(parMatch[1]);
+        }
+        return '-';
+      }
+
+      _compilarModeloReportePDF() {
+        const { desde, hasta, ventasPeriodo, egresosPeriodo } = this.obtenerDatosPeriodoInforme();
+        const fechaDesdeSlash = this._formatearFechaSlashReporte(desde);
+        const fechaHastaSlash = this._formatearFechaSlashReporte(hasta);
+
+        let ingresosRegularesCRC = 0;
+        let abonosVentasCRC = 0;
+        const transacciones = [];
+
+        const ordenadas = [...ventasPeriodo].sort((a, b) => {
+          const fa = (a.fechaISO || this.extraerFechaISOLocal(a)) + ' ' + (a.horaCobro || '');
+          const fb = (b.fechaISO || this.extraerFechaISOLocal(b)) + ' ' + (b.horaCobro || '');
+          return fa.localeCompare(fb);
+        });
+
+        ordenadas.forEach(v => {
+          const valorCRC = Number(v.totalCRC) || 0;
+          const idStr = String(v.id || '');
+          const pedStr = String(v.pedidoId || '');
+          const esAbono = Boolean(v.esCobroCredito || idStr.startsWith('ABONO-') || idStr.startsWith('REC-LIQ-') || pedStr.includes('FAC-CRED-'));
+
+          if (esAbono) abonosVentasCRC += valorCRC;
+          else ingresosRegularesCRC += valorCRC;
+
+          let desc = '';
+          if (Array.isArray(v.items) && v.items.length > 0) {
+            desc = v.items.map(it => `${it.cant || 1} ${this._limpiarTextoPlano(it.nombre)}`).join(', ');
+          } else if (v.productosResumen) {
+            desc = this._limpiarTextoPlano(v.productosResumen);
+          } else if (v.mesaNombre) {
+            desc = this._limpiarTextoPlano(v.mesaNombre);
+          } else {
+            desc = `Venta ${idStr}`;
+          }
+
+          transacciones.push({
+            fecha: this._formatearFechaSlashReporte(v.fechaISO || this.extraerFechaISOLocal(v)),
+            tipo: esAbono ? 'Abonos ventas' : 'Venta',
+            vendedor: this._limpiarTextoPlano(v.cobradoPor || v.meseroCobrador || v.mesero || ''),
+            descripcion: desc,
+            contacto: this._extraerContactoVentaReporte(v, esAbono),
+            estado: 'Pagada',
+            metodoPago: this._limpiarTextoPlano(v.metodoPago || 'Efectivo'),
+            valorCRC: valorCRC,
+            costoCRC: 0
+          });
+        });
+
+        const gastosCRC = egresosPeriodo.reduce((s, e) => s + (Number(e.montoCRC) || 0), 0);
+        const costoVentasCRC = 0;
+        const abonosGastosCRC = 0;
+        const utilidadTotalCRC = ingresosRegularesCRC + abonosVentasCRC - costoVentasCRC - abonosGastosCRC - gastosCRC;
+
+        const gastosRows = egresosPeriodo.map(e => ({
+          fecha: this._formatearFechaSlashReporte(e.fechaISO || this.extraerFechaISOLocal(e)),
+          concepto: this._limpiarTextoPlano(e.concepto || 'Gasto registrado'),
+          usuario: this._limpiarTextoPlano(e.usuario || 'Máster'),
+          metodo: this._limpiarTextoPlano(e.metodoPago || 'Efectivo'),
+          montoCRC: Number(e.montoCRC) || 0
+        }));
+
+        return {
+          desdeISO: desde,
+          hastaISO: hasta,
+          rangoFechaTexto: `${fechaDesdeSlash} - ${fechaHastaSlash}`,
+          generacionTexto: this._formatearFechaGuionHoyReporte(),
+          negocio: 'Fresh paradise',
+          responsableHeader: 'Erick mora',
+          telefonoHeader: '70966266',
+          ingresosRegularesCRC,
+          abonosVentasCRC,
+          costoVentasCRC,
+          abonosGastosCRC,
+          gastosCRC,
+          utilidadTotalCRC,
+          transacciones,
+          gastosRows
+        };
+      }
+
+      async _generarCanvasesReportePDF(modelo) {
+        const cfg = this.getComprobanteHeaderConfig();
+        const logoImg = await this._cargarImagenComprobante(cfg.logoUrl);
+
+        const width = 1200;
+        const height = 848;
+        const scale = 2;
+        const padX = 40;
+        const bottomLimitY = 804;
+        const canvases = [];
+
+        const crearPagina = (esPrimera) => {
+          const c = document.createElement('canvas');
+          c.width = width * scale;
+          c.height = height * scale;
+          const ctx = c.getContext('2d');
+          ctx.scale(scale, scale);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+
+          if (!esPrimera) {
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '700 15px "Plus Jakarta Sans", Arial, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${modelo.negocio}  •  Reporte ${modelo.rangoFechaTexto} (Continuación)`, padX, 38);
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padX, 50);
+            ctx.lineTo(width - padX, 50);
+            ctx.stroke();
+          }
+          canvases.push(c);
+          return ctx;
+        };
+
+        const dibujarEncabezadoTabla = (ctx, startY) => {
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(padX, startY);
+          ctx.lineTo(width - padX, startY);
+          ctx.stroke();
+
+          const textY = startY + 21;
+          ctx.fillStyle = '#0f172a';
+          ctx.font = '700 12.5px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText('Fecha', 46, textY);
+          ctx.fillText('Tipo', 136, textY);
+          ctx.fillText('Vendedor', 242, textY);
+          ctx.fillText('Descripción', 360, textY);
+          ctx.fillText('Contacto', 672, textY);
+          ctx.fillText('Estado', 792, textY);
+          ctx.fillText('M. de pago', 868, textY);
+          ctx.textAlign = 'right';
+          ctx.fillText('Valor', 1072, textY);
+          ctx.fillText('Costo', 1152, textY);
+
+          const botY = startY + 32;
+          ctx.beginPath();
+          ctx.moveTo(padX, botY);
+          ctx.lineTo(width - padX, botY);
+          ctx.stroke();
+          return botY;
+        };
+
+        // PÁGINA 1
+        let ctx = crearPagina(true);
+
+        // 1. Logo limpio sin duplicación
+        const logoX = padX;
+        const logoY = 24;
+        const logoSize = 84;
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(logoX, logoY, logoSize, logoSize, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.clip();
+        if (logoImg && logoImg.width > 0 && logoImg.height > 0) {
+          const ratio = Math.min((logoSize - 6) / logoImg.width, (logoSize - 6) / logoImg.height);
+          const dW = logoImg.width * ratio;
+          const dH = logoImg.height * ratio;
+          ctx.drawImage(logoImg, logoX + (logoSize - dW) / 2, logoY + (logoSize - dH) / 2, dW, dH);
+        }
+        ctx.restore();
+
+        // 2. Datos encabezado reporte
+        const infoX = logoX + logoSize + 18;
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 19px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(modelo.negocio, infoX, 44);
+
+        // Ícono persona + Erick mora
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(infoX + 7, 65, 3.5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(infoX + 7, 76, 6, Math.PI, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#475569';
+        ctx.font = '500 13.5px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillText(modelo.responsableHeader, infoX + 22, 73);
+
+        // Ícono teléfono + 70966266
+        const telY = 98;
+        ctx.beginPath();
+        ctx.moveTo(infoX + 2, telY - 9);
+        ctx.quadraticCurveTo(infoX + 2, telY + 1, infoX + 12, telY + 1);
+        ctx.lineTo(infoX + 14, telY - 2);
+        ctx.lineTo(infoX + 10, telY - 4);
+        ctx.lineTo(infoX + 6, telY - 8);
+        ctx.lineTo(infoX + 4, telY - 11);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillText(modelo.telefonoHeader, infoX + 22, telY);
+
+        // 3. Barra gris de metadatos
+        const barY = 124;
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.roundRect(padX, barY, width - padX * 2, 34, 4);
+        ctx.fill();
+
+        const metaBaseY = barY + 21;
+        ctx.font = '500 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('Fecha de reporte:', padX + 22, metaBaseY);
+        ctx.font = '700 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(modelo.rangoFechaTexto, padX + 134, metaBaseY);
+
+        ctx.font = '500 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('Generación:', padX + 345, metaBaseY);
+        ctx.font = '700 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(modelo.generacionTexto, padX + 422, metaBaseY);
+
+        ctx.font = '500 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('Número de transacciones:', padX + 545, metaBaseY);
+        ctx.font = '700 13px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(String(modelo.transacciones.length), padX + 706, metaBaseY);
+
+        // 4. Cuadro resumen financiero con ecuación horizontal
+        const sumY = 172;
+        const sumH = 72;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(padX, sumY, width - padX * 2, sumH, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        const colsResumen = [
+          { lbl: 'Ingresos', val: this._formatCRCComprobante(modelo.ingresosRegularesCRC), cx: 120, color: '#475569' },
+          { lbl: 'Abonos ventas', val: this._formatCRCComprobante(modelo.abonosVentasCRC), cx: 300, color: '#475569' },
+          { lbl: 'Costo de ventas', val: this._formatCRCComprobante(modelo.costoVentasCRC), cx: 495, color: '#475569' },
+          { lbl: 'Abonos gastos', val: this._formatCRCComprobante(modelo.abonosGastosCRC), cx: 688, color: '#475569' },
+          { lbl: 'Gastos', val: this._formatCRCComprobante(modelo.gastosCRC), cx: 872, color: '#475569' },
+          { lbl: 'Utilidad Total', val: this._formatCRCComprobante(modelo.utilidadTotalCRC), cx: 1068, color: modelo.utilidadTotalCRC >= 0 ? '#16a34a' : '#dc2626', isBold: true }
+        ];
+        const ops = [
+          { sym: '+', cx: 210 },
+          { sym: '-', cx: 398 },
+          { sym: '-', cx: 592 },
+          { sym: '-', cx: 782 },
+          { sym: '=', cx: 970 }
         ];
 
-        let totalIng = 0;
-        ventasPeriodo.forEach(v => {
-          const m = Number(v.totalCRC) || 0;
-          totalIng += m;
-          const det = v.productosResumen || (v.items || []).map(i => `${i.cant || 1}x ${i.nombre}`).join(', ') || '';
-          filas.push([v.fechaISO, v.horaCobro || '', 'INGRESO', v.mesaNombre || '', v.cobradoPor || v.mesero || '', v.metodoPago || 'Efectivo', det, m]);
+        ctx.textAlign = 'center';
+        colsResumen.forEach(c => {
+          ctx.fillStyle = '#64748b';
+          ctx.font = '500 12.5px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.fillText(c.lbl, c.cx, sumY + 25);
+
+          ctx.fillStyle = c.color;
+          ctx.font = `${c.isBold ? '800' : '600'} 19px "Plus Jakarta Sans", Arial, sans-serif`;
+          ctx.fillText(c.val, c.cx, sumY + 54);
+        });
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '800 18px "Plus Jakarta Sans", Arial, sans-serif';
+        ops.forEach(op => {
+          ctx.fillText(op.sym, op.cx, sumY + 46);
         });
 
-        let totalEgr = 0;
-        egresosPeriodo.forEach(e => {
-          const m = Number(e.montoCRC) || 0;
-          totalEgr += m;
-          filas.push([e.fechaISO, e.hora || '', 'EGRESO', e.concepto, e.usuario || '', e.metodoPago || 'Efectivo', 'Gasto registrado', -m]);
+        // 5. Título de sección + Badge de conteo
+        const secY = 278;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 17px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillText('Ventas y abonos a ventas', padX, secY);
+
+        const pillW = 215;
+        const pillH = 28;
+        const pillX = width - padX - pillW - 150;
+        const pillY = secY - 19;
+        ctx.fillStyle = '#f1f5f9';
+        ctx.beginPath();
+        ctx.roundRect(pillX, pillY, pillW, pillH, 5);
+        ctx.fill();
+        ctx.font = '500 12px "Plus Jakarta Sans", Arial, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Número de transacciones:  ${modelo.transacciones.length}`, pillX + pillW / 2, pillY + 18);
+
+        // 6. Tabla paginada de transacciones
+        let curY = dibujarEncabezadoTabla(ctx, 298);
+
+        const medirFont = '400 12px "Plus Jakarta Sans", Arial, sans-serif';
+        if (modelo.transacciones.length === 0) {
+          ctx.fillStyle = '#64748b';
+          ctx.font = 'italic 13px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('No hay ventas ni abonos registrados en el período seleccionado.', width / 2, curY + 32);
+          curY += 54;
+        } else {
+          modelo.transacciones.forEach(tr => {
+            ctx.font = medirFont;
+            const descLines = this._envolverTextoCanvas(ctx, tr.descripcion, 298);
+            const vendLines = this._envolverTextoCanvas(ctx, tr.vendedor || '-', 108);
+            const contLines = this._envolverTextoCanvas(ctx, tr.contacto || '-', 110);
+            const maxLines = Math.max(descLines.length, vendLines.length, contLines.length, 1);
+            const rowH = Math.max(29, maxLines * 15 + 14);
+
+            if (curY + rowH > bottomLimitY) {
+              ctx = crearPagina(false);
+              curY = dibujarEncabezadoTabla(ctx, 64);
+            }
+
+            const baseLineY = curY + 19;
+            ctx.fillStyle = '#1e293b';
+            ctx.font = medirFont;
+            ctx.textAlign = 'left';
+            ctx.fillText(tr.fecha, 46, baseLineY);
+            ctx.fillText(tr.tipo, 136, baseLineY);
+
+            vendLines.forEach((ln, idx) => ctx.fillText(ln, 242, baseLineY + idx * 15));
+            descLines.forEach((ln, idx) => ctx.fillText(ln, 360, baseLineY + idx * 15));
+            contLines.forEach((ln, idx) => ctx.fillText(ln, 672, baseLineY + idx * 15));
+
+            ctx.fillText(tr.estado, 792, baseLineY);
+            ctx.fillText(tr.metodoPago, 868, baseLineY);
+
+            ctx.textAlign = 'right';
+            ctx.fillText(this._formatCRCComprobante(tr.valorCRC), 1072, baseLineY);
+            ctx.fillText(this._formatCRCComprobante(tr.costoCRC), 1152, baseLineY);
+
+            curY += rowH;
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(padX, curY);
+            ctx.lineTo(width - padX, curY);
+            ctx.stroke();
+          });
+        }
+
+        // 7. Sección adicional compacta si existen egresos/gastos en el período
+        if (modelo.gastosRows.length > 0) {
+          if (curY + 86 > bottomLimitY) {
+            ctx = crearPagina(false);
+            curY = 64;
+          } else {
+            curY += 26;
+          }
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#0f172a';
+          ctx.font = '700 15px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.fillText(`Gastos registrados (${modelo.gastosRows.length})`, padX, curY);
+          curY += 12;
+
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(padX, curY);
+          ctx.lineTo(width - padX, curY);
+          ctx.stroke();
+
+          ctx.font = '700 12px "Plus Jakarta Sans", Arial, sans-serif';
+          ctx.fillText('Fecha', 46, curY + 20);
+          ctx.fillText('Concepto', 160, curY + 20);
+          ctx.fillText('Usuario', 672, curY + 20);
+          ctx.fillText('M. de pago', 868, curY + 20);
+          ctx.textAlign = 'right';
+          ctx.fillText('Monto', 1152, curY + 20);
+          curY += 28;
+          ctx.beginPath();
+          ctx.moveTo(padX, curY);
+          ctx.lineTo(width - padX, curY);
+          ctx.stroke();
+
+          modelo.gastosRows.forEach(g => {
+            if (curY + 28 > bottomLimitY) {
+              ctx = crearPagina(false);
+              curY = 64;
+            }
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#1e293b';
+            ctx.font = medirFont;
+            ctx.fillText(g.fecha, 46, curY + 19);
+            ctx.fillText(g.concepto.slice(0, 62), 160, curY + 19);
+            ctx.fillText(g.usuario, 672, curY + 19);
+            ctx.fillText(g.metodo, 868, curY + 19);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#dc2626';
+            ctx.fillText(this._formatCRCComprobante(g.montoCRC), 1152, curY + 19);
+            curY += 28;
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.moveTo(padX, curY);
+            ctx.lineTo(width - padX, curY);
+            ctx.stroke();
+          });
+        }
+
+        // Pie de página con número de página
+        const totalPags = canvases.length;
+        canvases.forEach((c, idx) => {
+          const pCtx = c.getContext('2d');
+          pCtx.textAlign = 'right';
+          pCtx.fillStyle = '#64748b';
+          pCtx.font = '500 11.5px "Plus Jakarta Sans", Arial, sans-serif';
+          pCtx.fillText(`Página ${idx + 1} de ${totalPags}`, width - padX, height - 18);
         });
 
-        filas.push([]);
-        filas.push(['RESUMEN DEL PERIODO', `${desde} a ${hasta}`, 'Total Ingresos:', totalIng, 'Total Egresos:', totalEgr, 'Balance Neto:', totalIng - totalEgr]);
+        return canvases;
+      }
 
-        const csvContent = '\uFEFF' + filas.map(r => r.map(escapeCsv).join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Informe_Ventas_FreshParadise_${desde}_al_${hasta}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      compartirUltimoReportePDF() {
+        const cache = this._ultimoReportePdfCache;
+        if (!cache || !cache.file) return;
+        const statusEl = document.getElementById('informeExportStatus');
+        if (typeof navigator.share === 'function' && (typeof navigator.canShare !== 'function' || navigator.canShare({ files: [cache.file] }))) {
+          navigator.share({ files: [cache.file] }).then(() => {
+            if (statusEl) {
+              statusEl.style.color = '#047857';
+              statusEl.innerText = '✅ Reporte PDF compartido correctamente.';
+            }
+          }).catch(() => {});
+        }
+      }
+
+      async descargarReportePDF() {
+        const statusEl = document.getElementById('informeExportStatus');
+        const btn = document.getElementById('btnDescargarReportesPDF');
+        if (btn) btn.disabled = true;
+        if (statusEl) {
+          statusEl.style.color = '#0369a1';
+          statusEl.innerText = 'Generando reporte en PDF...';
+          statusEl.style.display = 'block';
+        }
+
+        try {
+          const modelo = this._compilarModeloReportePDF();
+          const canvases = await this._generarCanvasesReportePDF(modelo);
+          const pdfBlob = this._crearPdfDesdeCanvases(canvases, { orientation: 'landscape' });
+          const fileName = `Informe_Ventas_FreshParadise_${modelo.desdeISO}_al_${modelo.hastaISO}.pdf`;
+          const pdfFile = this._crearFileSeguro(pdfBlob, fileName, 'application/pdf');
+          this._ultimoReportePdfCache = { file: pdfFile, blob: pdfBlob, fileName };
+
+          this._descargarBlobArchivo(pdfBlob, fileName);
+
+          try {
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank');
+            setTimeout(() => URL.revokeObjectURL(pdfUrl), 15000);
+          } catch (_) {}
+
+          const puedeCompartirNativo =
+            typeof navigator.share === 'function' &&
+            (typeof navigator.canShare !== 'function' || navigator.canShare({ files: [pdfFile] }));
+
+          if (statusEl) {
+            statusEl.style.color = '#047857';
+            statusEl.innerHTML = puedeCompartirNativo
+              ? `✅ Reporte PDF descargado (<strong>${this.esc(fileName)}</strong>). <button type="button" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; margin-left: 0.4rem;" onclick="app.compartirUltimoReportePDF()">📤 Compartir PDF</button>`
+              : `✅ Reporte PDF descargado (<strong>${this.esc(fileName)}</strong>).`;
+          }
+        } catch (err) {
+          console.error('Error al generar reporte PDF:', err);
+          if (statusEl) {
+            statusEl.style.color = '#dc2626';
+            statusEl.innerText = '⚠️ No se pudo generar el reporte PDF. Intente usar el botón Imprimir.';
+          }
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      }
+
+      descargarReporteCSV() {
+        this.descargarReportePDF();
       }
 
       imprimirReporteVentas() {
-        const { desde, hasta, ventasPeriodo, egresosPeriodo } = this.obtenerDatosPeriodoInforme();
-        const totalIng = ventasPeriodo.reduce((s, v) => s + (Number(v.totalCRC) || 0), 0);
-        const totalEgr = egresosPeriodo.reduce((s, e) => s + (Number(e.montoCRC) || 0), 0);
+        const modelo = this._compilarModeloReportePDF();
+        const cfg = this.getComprobanteHeaderConfig();
+        const logoAbs = window.location.protocol === 'file:'
+          ? FRESH_PARADISE_LOGO_DATA_URI
+          : new URL(cfg.logoUrl, window.location.href).href;
 
-        const lineas = ventasPeriodo.map(v =>
-          `• [${v.fechaISO} ${v.horaCobro || ''}] ${v.mesaNombre || ''} (${v.metodoPago || 'Efectivo'}): ${this.formatCRC(v.totalCRC)}`
-        ).join('\n') || '(Sin ventas en este período)';
+        const filasHtml = modelo.transacciones.map(tr => `
+          <tr>
+            <td>${this.esc(tr.fecha)}</td>
+            <td>${this.esc(tr.tipo)}</td>
+            <td>${this.esc(tr.vendedor)}</td>
+            <td>${this.esc(tr.descripcion)}</td>
+            <td>${this.esc(tr.contacto)}</td>
+            <td>${this.esc(tr.estado)}</td>
+            <td>${this.esc(tr.metodoPago)}</td>
+            <td style="text-align:right;white-space:nowrap;">${this.esc(this._formatCRCComprobante(tr.valorCRC))}</td>
+            <td style="text-align:right;white-space:nowrap;">${this.esc(this._formatCRCComprobante(tr.costoCRC))}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:18px;">Sin transacciones en el período</td></tr>';
 
-        const texto = `========================================\n       FRESH PARADISE • COCLES\n     INFORME DE VENTAS POR PERÍODO\n========================================\nDesde: ${desde}    Hasta: ${hasta}\nGenerado: ${new Date().toLocaleString('es-CR')}\n----------------------------------------\n↗ TOTAL INGRESOS:  ${this.formatCRC(totalIng)} (${ventasPeriodo.length} ventas)\n↙ TOTAL EGRESOS:   ${this.formatCRC(totalEgr)} (${egresosPeriodo.length} egresos)\n= BALANCE NETO:    ${this.formatCRC(totalIng - totalEgr)}\n----------------------------------------\nDETALLE DE VENTAS:\n${lineas}\n========================================`;
+        const htmlDoc = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Ventas ${this.esc(modelo.rangoFechaTexto)}</title><style>@page{size:landscape;margin:12mm;}body{font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#0f172a;margin:0;padding:18px;font-size:12px;}.head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}.logo{width:68px;height:68px;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;padding:3px;}.bar{background:#f8fafc;padding:9px 16px;border-radius:4px;display:flex;gap:34px;font-size:12px;margin-bottom:12px;}.sum{border:1px solid #cbd5e1;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;text-align:center;}.sum-lbl{font-size:11px;color:#64748b;margin-bottom:4px;}.sum-val{font-size:16px;font-weight:700;color:#475569;}.op{font-weight:800;font-size:16px;}.sec{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}.pill{background:#f1f5f9;padding:5px 14px;border-radius:5px;font-size:11px;color:#475569;}table{width:100%;border-collapse:collapse;font-size:11.5px;}thead tr{border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}th,td{padding:7px 6px;text-align:left;border-bottom:1px solid #e2e8f0;}</style></head><body><div class="head"><img class="logo" src="${this.escAttr(logoAbs)}"><div><div style="font-size:17px;font-weight:700;margin-bottom:4px;">${this.esc(modelo.negocio)}</div><div style="color:#475569;">${this.esc(modelo.responsableHeader)}</div><div style="color:#475569;">${this.esc(modelo.telefonoHeader)}</div></div></div><div class="bar"><span>Fecha de reporte: <strong>${this.esc(modelo.rangoFechaTexto)}</strong></span><span>Generación: <strong>${this.esc(modelo.generacionTexto)}</strong></span><span>Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><div class="sum"><div><div class="sum-lbl">Ingresos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.ingresosRegularesCRC))}</div></div><div class="op">+</div><div><div class="sum-lbl">Abonos ventas</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.abonosVentasCRC))}</div></div><div class="op">-</div><div><div class="sum-lbl">Costo de ventas</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Abonos gastos</div><div class="sum-val">₡0</div></div><div class="op">-</div><div><div class="sum-lbl">Gastos</div><div class="sum-val">${this.esc(this._formatCRCComprobante(modelo.gastosCRC))}</div></div><div class="op">=</div><div><div class="sum-lbl">Utilidad Total</div><div class="sum-val" style="color:${modelo.utilidadTotalCRC >= 0 ? '#16a34a' : '#dc2626'};font-weight:800;">${this.esc(this._formatCRCComprobante(modelo.utilidadTotalCRC))}</div></div></div><div class="sec"><strong style="font-size:15px;">Ventas y abonos a ventas</strong><span class="pill">Número de transacciones: <strong>${modelo.transacciones.length}</strong></span></div><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Vendedor</th><th>Descripción</th><th>Contacto</th><th>Estado</th><th>M. de pago</th><th style="text-align:right;">Valor</th><th style="text-align:right;">Costo</th></tr></thead><tbody>${filasHtml}</tbody></table><` + `script>window.onload=function(){window.print();};<` + `/script></body></html>`;
 
-        const win = window.open('', '_blank', 'width=480,height=640');
+        const win = window.open('', '_blank', 'width=1050,height=760');
         if (win) {
-          win.document.write('<!DOCTYPE html><html><head><title>Informe de Ventas - Fresh Paradise</title><style>body{font-family:monospace;font-size:13px;padding:16px;}pre{white-space:pre-wrap;font-family:inherit;}</style></head><body><pre>' + this.esc(texto) + '</pre><' + 'script>window.onload=function(){window.print();};<' + '/script></body></html>');
+          win.document.write(htmlDoc);
           win.document.close();
         } else {
-          alert(texto);
+          this.descargarReportePDF();
         }
       }
 
